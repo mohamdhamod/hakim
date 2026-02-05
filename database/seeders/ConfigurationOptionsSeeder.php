@@ -19,9 +19,7 @@ class ConfigurationOptionsSeeder extends Seeder
                 'name' => [
                     'en' => 'EUR',
                     'ar' => 'يورو',
-                    'de' => 'Euro',
-                    'fr' => 'Euro',
-                    'es' => 'Euro',
+                 
                 ],
             ],
             [
@@ -32,24 +30,10 @@ class ConfigurationOptionsSeeder extends Seeder
                 'name' => [
                     'en' => 'USD',
                     'ar' => 'دولار أمريكي',
-                    'de' => 'US-Dollar',
-                    'fr' => 'Dollar américain',
-                    'es' => 'Dólar estadounidense',
+                 
                 ],
             ],
-            [
-                'id' => 3,
-                'score' => 2,
-                'key' => ConfigurationsTypeEnum::CURRENCIES,
-                'code' => 'GBP',
-                'name' => [
-                    'en' => 'GBP',
-                    'ar' => 'جنيه إسترليني',
-                    'de' => 'Britisches Pfund',
-                    'fr' => 'Livre sterling',
-                    'es' => 'Libra esterlina',
-                ],
-            ],
+           
         ];
 
         // Seed the data into the database
