@@ -1,0 +1,73 @@
+
+
+.touchspin {
+    overflow: hidden;
+    height: calc(.9064rem + var(--ins-font-size-base) * 1.5 + 2px);
+    border: 1px solid var(--ins-border-color);
+    border-radius: var(--ins-border-radius)
+}
+
+.touchspin .form-control, .touchspin [type=search].dt-input {
+    text-align: center
+}
+
+.touchspin .form-control:focus, .touchspin [type=search].dt-input:focus {
+    box-shadow: none;
+    outline: none;
+    z-index: 0
+}
+
+.touchspin .btn-group-vertical .btn {
+    border-radius: 0;
+    height: calc((.9064rem + var(--ins-font-size-base) * 1.5 + 2px) * .5);
+    padding: 2px 6px
+}
+
+.touchspin .btn {
+    border-radius: var(--ins-border-radius);
+    padding: 6px
+}
+
+.touchspin .floating {
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+    margin: 4px !important;
+    border-radius: var(--ins-border-radius) !important
+}
+
+.touchspin .floating.rounded-circle {
+    border-radius: 50% !important
+}
+
+.touchspin.input-group-sm {
+    height: calc(.625rem + (var(--ins-font-size-base) - .05) * 1.5 + 2px)
+}
+
+.touchspin.input-group-sm .btn {
+    padding: 4px
+}
+
+.touchspin.input-group-sm .floating {
+    padding: 2px 3px;
+    margin: 4px;
+    border-radius: var(--ins-border-radius-sm) !important
+}
+
+.touchspin.input-group-sm .btn-group-vertical .btn {
+    height: calc((.625rem + (var(--ins-font-size-base) - .05) * 1.5 + 2px) * .5)
+}
+
+.touchspin.input-group-lg {
+    height: calc(1.1024rem + var(--ins-font-size-base) * 1.5 * 1.5 + 2px)
+}
+
+.touchspin.input-group-lg .floating {
+    padding: 4px 6px;
+    margin: 4px;
+    border-radius: var(--ins-border-radius-lg) !important
+}
+
+.touchspin.input-group-lg .btn-group-vertical .btn {
+    height: calc((1.1024rem + var(--ins-font-size-base) * 1.5 * 1.5 + 2px) * .5)
+}

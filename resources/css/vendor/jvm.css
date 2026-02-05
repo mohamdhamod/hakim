@@ -1,0 +1,30 @@
+
+.jvm-tooltip {
+    font-family: var(--ins-font-sans-serif) !important;
+    background-color: #223058 !important;
+    font-size: var(--ins-font-size-base) !important;
+    padding: 4px 10px !important
+}
+
+.jvm-label {
+    font-family: var(--ins-font-sans-serif) !important;
+    fill: var(--ins-body-color) !important;
+    font-size: var(--ins-font-size-base) !important
+}
+
+.jvm-container text.jvm-marker {
+    fill: var(--ins-body-color) !important;
+    font-family: var(--ins-font-sans-serif) !important
+}
+
+.jvm-zoom-btn {
+    background-color: #2b2c34 !important;
+    height: 20px !important;
+    width: 20px !important;
+    text-align: center !important;
+    line-height: 12px !important
+}
+
+.jvm-zoom-btn.jvm-zoomin {
+    top: 6px !important
+}

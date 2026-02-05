@@ -1,0 +1,153 @@
+.swal2-container .swal2-title {
+    font-size: 20px;
+    font-weight: var(--ins-font-weight-medium);
+    color: var(--ins-heading-color)
+}
+
+.swal2-popup {
+    width: 28em;
+    padding: 2rem;
+    border-radius: var(--ins-border-radius-lg);
+    background-color: var(--ins-secondary-bg);
+    color: var(--ins-body-color)
+}
+
+.swal2-popup .swal2-html-container {
+    font-size: 16px !important;
+    color: var(--ins-body-color)
+}
+
+.swal2-footer {
+    border-top: 1px solid var(--ins-border-color);
+    color: var(--ins-body-color)
+}
+
+.swal2-icon.swal2-question {
+    border-color: var(--ins-info);
+    color: var(--ins-info)
+}
+
+.swal2-icon.swal2-success [class^=swal2-success-line] {
+    background-color: var(--ins-success)
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border-color: var(--ins-success)
+}
+
+.swal2-icon.swal2-warning {
+    border-color: var(--ins-warning);
+    color: var(--ins-warning)
+}
+
+div:where(.swal2-icon) {
+    width: 4em;
+    height: 4em;
+    margin: .5rem auto
+}
+
+div:where(.swal2-icon) .swal2-icon-content {
+    font-size: 3em
+}
+
+div:where(.swal2-icon).swal2-info {
+    border-color: var(--ins-info);
+    color: var(--ins-info)
+}
+
+.swal2-styled:focus {
+    box-shadow: none
+}
+
+.swal2-loader {
+    border-color: var(--ins-primary) transparent var(--ins-primary) transparent
+}
+
+.swal2-timer-progress-bar {
+    background-color: #22c55e66
+}
+
+.swal2-progress-steps .swal2-progress-step, .swal2-progress-steps .swal2-progress-step.swal2-active-progress-step {
+    background: var(--ins-primary)
+}
+
+.swal2-progress-steps .swal2-progress-step.swal2-active-progress-step ~ .swal2-progress-step, .swal2-progress-steps .swal2-progress-step.swal2-active-progress-step ~ .swal2-progress-step-line {
+    background: #1118274d
+}
+
+.swal2-progress-steps .swal2-progress-step-line {
+    background: var(--ins-primary)
+}
+
+.swal2-actions.swal2-loading .swal2-styled.swal2-confirm {
+    border-left-color: var(--ins-primary) !important;
+    border-right-color: var(--ins-primary) !important
+}
+
+.swal2-file, .swal2-input, .swal2-textarea {
+    border: 1px solid var(--ins-border-color)
+}
+
+.swal2-file:focus, .swal2-input:focus, .swal2-textarea:focus {
+    box-shadow: none;
+    border-color: var(--ins-dark-border-subtle)
+}
+
+.swal2-input {
+    height: auto;
+    display: block;
+    padding: .4532rem .77rem;
+    font-size: var(--ins-font-size-base);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ins-body-color);
+    box-shadow: none !important;
+    border-radius: 5px !important;
+    background-color: var(--ins-secondary-bg);
+    background-clip: padding-box;
+    border: var(--ins-border-width) solid var(--ins-border-color) !important
+}
+
+.swal2-close {
+    font-family: var(--ins-font-sans-serif);
+    font-size: 42px;
+    width: 1em;
+    height: 1em;
+    position: absolute;
+    top: 5px;
+    right: 5px
+}
+
+.swal2-close:focus {
+    box-shadow: none
+}
+
+.swal2-close:hover {
+    color: #ef4444
+}
+
+.swal2-validation-message {
+    background-color: transparent
+}
+
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
+    width: 1.9375em;
+    top: 1.95em
+}
+
+div:where(.swal2-icon).swal2-success [class^=swal2-success-line][class$=tip] {
+    top: 2.4em;
+    width: 1em
+}
+
+.swal2-icon.swal2-success [class^=swal2-success-line][class$=long] {
+    top: 1.85em;
+    right: .5em;
+    width: 2.25em
+}
+
+.swal2-backdrop-show {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    background: var(--ins-emphasis-color)
+}

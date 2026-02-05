@@ -1,0 +1,524 @@
+/* RTL overrides - loaded after app.css
+   Scope under [dir="rtl"] to avoid affecting LTR
+*/
+
+/* Base direction */
+html[dir="rtl"],
+html[dir="rtl"] body { direction: rtl; }
+
+/* Choices.js: move dropdown indicator (arrow) to the left in RTL */
+html[dir="rtl"] .choices[data-type*="select-one"]::after {
+   left: 11.5px;
+   right: auto;
+}
+/* Topbar/Header */
+html[dir="rtl"] .app-topbar .topbar-menu { padding-right: 1.25rem; padding-left: 1.25rem; }
+html[dir="rtl"] .app-topbar .topbar-menu .topbar-item .topbar-badge { right: auto; left: -1px; }
+html[dir="rtl"] .nav-user:before { border-left: 0; border-right: 1px solid var(--ins-topbar-item-color); }
+
+/* ===== RTL logical spacing utilities (Bootstrap-like) ===== */
+/* Margin End -> becomes left in RTL */
+html[dir="rtl"] .me-0 { margin-right: 0 !important; margin-left: 0 !important; }
+html[dir="rtl"] .me-1 { margin-right: 0 !important; margin-left: .25rem !important; }
+html[dir="rtl"] .me-2 { margin-right: 0 !important; margin-left: .5rem !important; }
+html[dir="rtl"] .me-3 { margin-right: 0 !important; margin-left: 1rem !important; }
+html[dir="rtl"] .me-4 { margin-right: 0 !important; margin-left: 1.5rem !important; }
+html[dir="rtl"] .me-5 { margin-right: 0 !important; margin-left: 3rem !important; }
+html[dir="rtl"] .me-auto { margin-right: 0 !important; margin-left: auto !important; }
+
+/* Margin Start -> becomes right in RTL */
+html[dir="rtl"] .ms-0 { margin-left: 0 !important; margin-right: 0 !important; }
+html[dir="rtl"] .ms-1 { margin-left: 0 !important; margin-right: .25rem !important; }
+html[dir="rtl"] .ms-2 { margin-left: 0 !important; margin-right: .5rem !important; }
+html[dir="rtl"] .ms-3 { margin-left: 0 !important; margin-right: 1rem !important; }
+html[dir="rtl"] .ms-4 { margin-left: 0 !important; margin-right: 1.5rem !important; }
+html[dir="rtl"] .ms-5 { margin-left: 0 !important; margin-right: 3rem !important; }
+html[dir="rtl"] .ms-auto { margin-left: 0 !important; margin-right: auto !important; }
+
+/* Padding End -> becomes left in RTL */
+html[dir="rtl"] .pe-0 { padding-right: 0 !important; padding-left: 0 !important; }
+html[dir="rtl"] .pe-1 { padding-right: 0 !important; padding-left: .25rem !important; }
+html[dir="rtl"] .pe-2 { padding-right: 0 !important; padding-left: .5rem !important; }
+html[dir="rtl"] .pe-3 { padding-right: 0 !important; padding-left: 1rem !important; }
+html[dir="rtl"] .pe-4 { padding-right: 0 !important; padding-left: 1.5rem !important; }
+html[dir="rtl"] .pe-5 { padding-right: 0 !important; padding-left: 3rem !important; }
+
+/* Padding Start -> becomes right in RTL */
+html[dir="rtl"] .ps-0 { padding-left: 0 !important; padding-right: 0 !important; }
+html[dir="rtl"] .ps-1 { padding-left: 0 !important; padding-right: .25rem !important; }
+html[dir="rtl"] .ps-2 { padding-left: 0 !important; padding-right: .5rem !important; }
+html[dir="rtl"] .ps-3 { padding-left: 0 !important; padding-right: 1rem !important; }
+html[dir="rtl"] .ps-4 { padding-left: 0 !important; padding-right: 1.5rem !important; }
+html[dir="rtl"] .ps-5 { padding-left: 0 !important; padding-right: 3rem !important; }
+
+/* Rounded Start/End utilities */
+html[dir="rtl"] .rounded-start { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; border-top-right-radius: var(--ins-border-radius) !important; border-bottom-right-radius: var(--ins-border-radius) !important; }
+html[dir="rtl"] .rounded-end { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; border-top-left-radius: var(--ins-border-radius) !important; border-bottom-left-radius: var(--ins-border-radius) !important; }
+html[dir="rtl"] .rounded-start-0 { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+html[dir="rtl"] .rounded-end-0 { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; }
+/* Sidebar */
+html[dir="rtl"] .sidenav-menu { border-right: 0; border-left: var(--ins-theme-card-border-width) solid var(--ins-sidenav-border-color); }
+
+/* Content shift next to sidebar */
+html[dir="rtl"] .content-page { margin-left: 0; margin-right: var(--ins-sidenav-width); }
+
+/* Collapsed sidebar state */
+html[dir="rtl"][data-sidenav-size=collapse] .content-page { margin-right: var(--ins-sidenav-width-sm); }
+
+/* Offcanvas sidebar */
+html[dir="rtl"][data-sidenav-size=offcanvas] .sidenav-menu { margin-left: 0; margin-right: calc(var(--ins-sidenav-width) * -1); }
+html[dir="rtl"][data-sidenav-size=offcanvas].sidebar-enable .sidenav-menu { margin-right: 0; }
+
+/* When the sidenav is offcanvas the page/topbar must not be offset on RTL (mirror of LTR rule) */
+html[dir="rtl"][data-sidenav-size=offcanvas] .content-page,
+html[dir="rtl"][data-sidenav-size=offcanvas] .app-topbar {
+   margin-right: 0;
+   margin-left: 0;
+}
+
+/* Logo alignment in collapse/offcanvas */
+html[dir="rtl"][data-sidenav-size=collapse] .sidenav-menu .logo,
+html[dir="rtl"][data-sidenav-size=offcanvas] .sidenav-menu .logo { text-align: right; }
+
+/* Collapsed menu off-screen position (mirror of LTR fixed right: -100%) */
+html[dir="rtl"][data-sidenav-size=collapse] .sidenav-menu:not(:hover) .sidenav-user,
+html[dir="rtl"][data-sidenav-size=collapse] .sidenav-menu:not(:hover) .menu-text {
+   position: fixed;
+   left: -100%;
+}
+
+/* Small helper class to trigger GPU compositing/repaint in RTL when toggling sidebar */
+.ins-rtl-repaint {
+   transform: translateZ(0);
+}
+
+/* Menu arrow and badges alignment */
+html[dir="rtl"] .menu-arrow { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .side-nav .side-nav-item .side-nav-link .badge { margin-left: 0; margin-right: auto; }
+
+/* Submenu indentation */
+html[dir="rtl"] .side-nav .sub-menu { padding-left: 0; padding-right: calc(var(--ins-sidenav-item-icon-size) + var(--ins-sidenav-item-gap)); }
+html[dir="rtl"] .side-nav .sub-menu .sub-menu { padding-left: 0; padding-right: 15px; }
+
+/* Dropdown alignment defaults in header (we mainly use dropdown-menu-end already) */
+html[dir="rtl"] .dropdown-menu { text-align: right; }
+
+/* Header product search suggestions (dashboard + home) */
+html[dir="rtl"] #headerProductSearchMenu {
+   direction: rtl;
+   text-align: right;
+}
+
+html[dir="rtl"] #headerProductSearchMenu .dropdown-item {
+   text-align: right;
+}
+
+/* ===== Base.css semantic fixes (global) ===== */
+/* Lists and captions */
+html[dir="rtl"] ol { padding-right: 2rem; padding-left: 0; }
+html[dir="rtl"] caption { text-align: right; }
+html[dir="rtl"] ul {     padding: 10px;}
+
+/* Inline lists spacing */
+html[dir="rtl"] .list-inline-item:not(:last-child) { margin-left: .5rem; margin-right: 0; }
+
+/* Text and float utilities */
+html[dir="rtl"] .text-start { text-align: right !important; }
+html[dir="rtl"] .text-end { text-align: left !important; }
+
+/* Responsive text utilities (Bootstrap .text-*-start/end) */
+@media (min-width: 576px) {
+   html[dir="rtl"] .text-sm-start { text-align: right !important; }
+   html[dir="rtl"] .text-sm-end { text-align: left !important; }
+}
+@media (min-width: 768px) {
+   html[dir="rtl"] .text-md-start { text-align: right !important; }
+   html[dir="rtl"] .text-md-end { text-align: left !important; }
+}
+@media (min-width: 992px) {
+   html[dir="rtl"] .text-lg-start { text-align: right !important; }
+   html[dir="rtl"] .text-lg-end { text-align: left !important; }
+}
+@media (min-width: 1200px) {
+   html[dir="rtl"] .text-xl-start { text-align: right !important; }
+   html[dir="rtl"] .text-xl-end { text-align: left !important; }
+}
+@media (min-width: 1400px) {
+   html[dir="rtl"] .text-xxl-start { text-align: right !important; }
+   html[dir="rtl"] .text-xxl-end { text-align: left !important; }
+}
+html[dir="rtl"] .float-start { float: right !important; }
+html[dir="rtl"] .float-end { float: left !important; }
+
+/* Logical positioning helpers */
+html[dir="rtl"] .start-0 { right: 0 !important; left: auto !important; }
+html[dir="rtl"] .start-50 { right: 50% !important; left: auto !important; }
+html[dir="rtl"] .start-100 { right: 100% !important; left: auto !important; }
+html[dir="rtl"] .end-0 { left: 0 !important; right: auto !important; }
+html[dir="rtl"] .end-50 { left: 50% !important; right: auto !important; }
+html[dir="rtl"] .end-100 { left: 100% !important; right: auto !important; }
+
+/* Logical borders */
+html[dir="rtl"] .border-start { border-right: var(--ins-border-width) var(--ins-border-style) var(--ins-border-color) !important; border-left: none !important; }
+html[dir="rtl"] .border-start-0 { border-right: 0 !important; }
+html[dir="rtl"] .border-end { border-left: var(--ins-border-width) var(--ins-border-style) var(--ins-border-color) !important; border-right: none !important; }
+html[dir="rtl"] .border-end-0 { border-left: 0 !important; }
+
+/* Utility tweaks for common left/right uses in this theme */
+/* Footer margin to match content-page padding */
+/* No change needed; uses logical margins in media queries */
+
+/* ===== Components.css RTL fixes ===== */
+/* Cards */
+html[dir="rtl"] .card-link + .card-link { margin-right: var(--ins-card-spacer-x); margin-left: 0; }
+html[dir="rtl"] .card.card-bordered { border-right: 3px solid; border-left: none; }
+html[dir="rtl"] .card-action { margin-right: auto; margin-left: 0; }
+
+/* Card groups */
+@media (min-width: 576px) {
+   html[dir="rtl"] .card-group > .card + .card { margin-right: 0; border-right: 0; margin-left: 0; }
+   html[dir="rtl"] .card-group > .card:not(:last-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+   html[dir="rtl"] .card-group > .card:not(:last-child) > .card-img-top,
+   html[dir="rtl"] .card-group > .card:not(:last-child) > .card-header { border-top-left-radius: 0; }
+   html[dir="rtl"] .card-group > .card:not(:last-child) > .card-img-bottom,
+   html[dir="rtl"] .card-group > .card:not(:last-child) > .card-footer { border-bottom-left-radius: 0; }
+   html[dir="rtl"] .card-group > .card:not(:first-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+   html[dir="rtl"] .card-group > .card:not(:first-child) > .card-img-top,
+   html[dir="rtl"] .card-group > .card:not(:first-child) > .card-header { border-top-right-radius: 0; }
+   html[dir="rtl"] .card-group > .card:not(:first-child) > .card-img-bottom,
+   html[dir="rtl"] .card-group > .card:not(:first-child) > .card-footer { border-bottom-right-radius: 0; }
+}
+
+/* Dropdowns */
+html[dir="rtl"] .drop-custom-active:before { left: var(--ins-dropdown-item-padding-x); right: auto; }
+/* Split button overlay seam flips side in RTL */
+html[dir="rtl"] .dropdown-toggle-split:before {
+   right: 0;
+   left: calc(var(--ins-border-width) * -1);
+   border-radius: var(--ins-border-radius) 0 0 var(--ins-border-radius);
+}
+
+/* Button groups: collapse border overlap on RTL */
+html[dir="rtl"] .btn-group > :not(.btn-check:first-child) + .btn,
+html[dir="rtl"] .btn-group > .btn-group:not(:first-child) {
+   margin-right: calc(-1 * var(--ins-border-width));
+   margin-left: 0;
+}
+
+/* Alerts: close button to the left */
+html[dir="rtl"] .alert-dismissible { padding-left: 3rem; padding-right: var(--ins-alert-padding-x); }
+html[dir="rtl"] .alert-dismissible .btn-close { left: 0; right: auto; }
+
+/* Modals: close button to the left */
+html[dir="rtl"] .modal-header .btn-close {
+   margin-left: calc(-.5 * var(--ins-modal-header-padding-x));
+   margin-right: auto;
+}
+
+/* Toast: close button spacing */
+html[dir="rtl"] .toast-header .btn-close { margin-left: calc(-.5 * var(--ins-toast-padding-x)); margin-right: var(--ins-toast-padding-x); }
+
+/* Quill editor: proper RTL typing/reading */
+html[dir="rtl"] .ql-editor{direction:rtl; text-align:right;}
+html[dir="rtl"] .ql-editor ol,
+html[dir="rtl"] .ql-editor ul{padding-right:1.5em; padding-left:0;}
+
+/* Offcanvas: close button to the left */
+html[dir="rtl"] .offcanvas-header .btn-close {
+   margin-left: calc(-.5 * var(--ins-offcanvas-padding-x));
+   margin-right: auto;
+}
+
+/* Tooltips & Popovers: align text to the right */
+html[dir="rtl"] .tooltip,
+html[dir="rtl"] .popover { text-align: right; text-align: end; }
+
+/* ===== Forms.css RTL fixes ===== */
+/* Selects: caret on the left, padding mirrored */
+html[dir="rtl"] .form-select,
+html[dir="rtl"] select.dt-input {
+   padding: .4532rem .77rem .4532rem 2.31rem;
+   background-position: left .77rem center;
+}
+html[dir="rtl"] .form-select[multiple],
+html[dir="rtl"] select[multiple].dt-input,
+html[dir="rtl"] .form-select[size]:not([size="1"]),
+html[dir="rtl"] select[size].dt-input:not([size="1"]) {
+   padding-left: .77rem;
+}
+html[dir="rtl"] .form-select-sm,
+html[dir="rtl"] select.dt-input { padding-right: .7rem; }
+html[dir="rtl"] .form-select-lg { padding-right: 1.5rem; }
+
+/* Input group select paddings */
+html[dir="rtl"] .input-group-lg > .form-select,
+html[dir="rtl"] .input-group-lg > select.dt-input,
+html[dir="rtl"] .input-group-sm > .form-select,
+html[dir="rtl"] .input-group-sm > select.dt-input { padding-left: 3.08rem; }
+
+/* Input group adjacency: collapse and radii on start/end */
+html[dir="rtl"] .input-group:not(.has-validation) > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.dt-button-collection):not(.form-floating),
+html[dir="rtl"] .input-group:not(.has-validation) > .dropdown-toggle:nth-last-child(n+3),
+html[dir="rtl"] .input-group:not(.has-validation) > .form-floating:not(:last-child) > .form-control,
+html[dir="rtl"] .input-group:not(.has-validation) > .form-floating:not(:last-child) > [type=search].dt-input,
+html[dir="rtl"] .input-group:not(.has-validation) > .form-floating:not(:last-child) > .form-select,
+html[dir="rtl"] .input-group:not(.has-validation) > .form-floating:not(:last-child) > select.dt-input {
+   border-top-left-radius: 0;
+   border-bottom-left-radius: 0;
+}
+html[dir="rtl"] .input-group.has-validation > :nth-last-child(n+3):not(.dropdown-toggle):not(.dropdown-menu):not(.dt-button-collection):not(.form-floating),
+html[dir="rtl"] .input-group.has-validation > .dropdown-toggle:nth-last-child(n+4),
+html[dir="rtl"] .input-group.has-validation > .form-floating:nth-last-child(n+3) > .form-control,
+html[dir="rtl"] .input-group.has-validation > .form-floating:nth-last-child(n+3) > [type=search].dt-input,
+html[dir="rtl"] .input-group.has-validation > .form-floating:nth-last-child(n+3) > .form-select,
+html[dir="rtl"] .input-group.has-validation > .form-floating:nth-last-child(n+3) > select.dt-input {
+   border-top-left-radius: 0;
+   border-bottom-left-radius: 0;
+}
+html[dir="rtl"] .input-group > :not(:first-child):not(.dropdown-menu):not(.dt-button-collection):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+   margin-right: calc(-1 * var(--ins-border-width));
+   margin-left: 0;
+   border-top-right-radius: 0;
+   border-bottom-right-radius: 0;
+}
+html[dir="rtl"] .input-group > .form-floating:not(:first-child) > .form-control,
+html[dir="rtl"] .input-group > .form-floating:not(:first-child) > [type=search].dt-input,
+html[dir="rtl"] .input-group > .form-floating:not(:first-child) > .form-select,
+html[dir="rtl"] .input-group > .form-floating:not(:first-child) > select.dt-input {
+   border-top-right-radius: 0;
+   border-bottom-right-radius: 0;
+}
+
+/* Checkboxes and radios alignment */
+html[dir="rtl"] .form-check { padding-right: 1.75em; padding-left: 0; }
+html[dir="rtl"] .form-check .form-check-input { float: right; margin-right: -1.75em; margin-left: 0; }
+html[dir="rtl"] .form-check-inline { margin-left: 1rem; margin-right: 0; }
+
+/* Switches */
+html[dir="rtl"] .form-switch { padding-right: 2.5em; padding-left: 0; }
+html[dir="rtl"] .form-switch .form-check-input { margin-right: -2.5em; margin-left: 0; background-position: right center; }
+html[dir="rtl"] .form-switch .form-check-input:checked { background-position: left center; }
+
+/* Floating labels */
+html[dir="rtl"] .form-floating > label { left: auto; right: 0; text-align: right; transform-origin: 100% 0; }
+html[dir="rtl"] .form-floating > .form-select,
+html[dir="rtl"] .form-floating > select.dt-input { padding-right: .77rem; }
+html[dir="rtl"] .form-floating > .form-control:focus ~ label,
+html[dir="rtl"] .form-floating > [type=search].dt-input:focus ~ label,
+html[dir="rtl"] .form-floating > .form-control:not(:placeholder-shown) ~ label,
+html[dir="rtl"] .form-floating > [type=search].dt-input:not(:placeholder-shown) ~ label,
+html[dir="rtl"] .form-floating > .form-control-plaintext ~ label,
+html[dir="rtl"] .form-floating > .form-select ~ label,
+html[dir="rtl"] .form-floating > select.dt-input ~ label { transform: scale(.85) translateY(-.5rem) translate(-.15rem); }
+html[dir="rtl"] .form-floating > .form-control:-webkit-autofill ~ label,
+html[dir="rtl"] .form-floating > [type=search].dt-input:-webkit-autofill ~ label { transform: scale(.85) translateY(-.5rem) translate(-.15rem); }
+
+/* Validation icons/paddings mirrored */
+html[dir="rtl"] .was-validated .form-control:valid,
+html[dir="rtl"] .form-control.is-valid { padding-left: calc(1.5em + .9064rem); background-position: left calc(.375em + .2266rem) center; }
+html[dir="rtl"] textarea.form-control.is-valid,
+html[dir="rtl"] .was-validated textarea.form-control:valid { padding-left: calc(1.5em + .9064rem); background-position: top calc(.375em + .2266rem) left calc(.375em + .2266rem); }
+html[dir="rtl"] .was-validated .form-select:valid:not([multiple]):not([size]),
+html[dir="rtl"] .was-validated select.dt-input:valid:not([multiple]):not([size]),
+html[dir="rtl"] .was-validated .form-select:valid:not([multiple])[size="1"],
+html[dir="rtl"] .was-validated select.dt-input:valid:not([multiple])[size="1"],
+html[dir="rtl"] .form-select.is-valid:not([multiple]):not([size]),
+html[dir="rtl"] select.is-valid.dt-input:not([multiple]):not([size]),
+html[dir="rtl"] .form-select.is-valid:not([multiple])[size="1"],
+html[dir="rtl"] select.is-valid.dt-input:not([multiple])[size="1"] {
+   padding-left: 4.235rem;
+   background-position: left .77rem center, center left 2.31rem;
+}
+html[dir="rtl"] .was-validated .form-control:invalid,
+html[dir="rtl"] .form-control.is-invalid { padding-left: calc(1.5em + .9064rem); background-position: left calc(.375em + .2266rem) center; }
+html[dir="rtl"] textarea.form-control.is-invalid,
+html[dir="rtl"] .was-validated textarea.form-control:invalid { padding-left: calc(1.5em + .9064rem); background-position: top calc(.375em + .2266rem) left calc(.375em + .2266rem); }
+html[dir="rtl"] .was-validated .form-select:invalid:not([multiple]):not([size]),
+html[dir="rtl"] .was-validated select.dt-input:invalid:not([multiple]):not([size]),
+html[dir="rtl"] .was-validated .form-select:invalid:not([multiple])[size="1"],
+html[dir="rtl"] .was-validated select.dt-input:invalid:not([multiple])[size="1"],
+html[dir="rtl"] .form-select.is-invalid:not([multiple]):not([size]),
+html[dir="rtl"] select.is-invalid.dt-input:not([multiple]):not([size]),
+html[dir="rtl"] .form-select.is-invalid:not([multiple])[size="1"],
+html[dir="rtl"] select.is-invalid.dt-input:not([multiple])[size="1"] {
+   padding-left: 4.235rem;
+   background-position: left .77rem center, center left 2.31rem;
+}
+html[dir="rtl"] .form-check-inline .form-check-input ~ .valid-feedback { margin-right: .5em; margin-left: 0; }
+html[dir="rtl"] .form-check-inline .form-check-input ~ .invalid-feedback { margin-right: .5em; margin-left: 0; }
+
+/* Wizard border orientation */
+html[dir="rtl"] .wizard-tabs.wizard-bordered .nav-link { border-right: 3px solid transparent !important; border-left: 0 !important; }
+
+/* Card radio tick position */
+html[dir="rtl"] .card-radio .form-check-input:checked + .form-check-label:before { left: -10px; right: auto; }
+
+/* ===== Navigation.css RTL fixes ===== */
+/* Dropdown alignment: flip start/end and text alignment */
+html[dir="rtl"] .dropdown-menu,
+html[dir="rtl"] .dt-button-collection { text-align: right; }
+
+/* Base start/end */
+html[dir="rtl"] .dropdown-menu-start[data-bs-popper] { right: 0; left: auto; }
+html[dir="rtl"] .dropdown-menu-end[data-bs-popper],
+html[dir="rtl"] [data-bs-popper].dt-button-collection { left: 0; right: auto; }
+
+/* Responsive start/end */
+@media (min-width: 576px) {
+   html[dir="rtl"] .dropdown-menu-sm-start[data-bs-popper] { right: 0; left: auto; }
+   html[dir="rtl"] .dropdown-menu-sm-end[data-bs-popper] { left: 0; right: auto; }
+}
+@media (min-width: 768px) {
+   html[dir="rtl"] .dropdown-menu-md-start[data-bs-popper] { right: 0; left: auto; }
+   html[dir="rtl"] .dropdown-menu-md-end[data-bs-popper] { left: 0; right: auto; }
+}
+@media (min-width: 992px) {
+   html[dir="rtl"] .dropdown-menu-lg-start[data-bs-popper] { right: 0; left: auto; }
+   html[dir="rtl"] .dropdown-menu-lg-end[data-bs-popper] { left: 0; right: auto; }
+}
+@media (min-width: 1200px) {
+   html[dir="rtl"] .dropdown-menu-xl-start[data-bs-popper] { right: 0; left: auto; }
+   html[dir="rtl"] .dropdown-menu-xl-end[data-bs-popper] { left: 0; right: auto; }
+}
+@media (min-width: 1400px) {
+   html[dir="rtl"] .dropdown-menu-xxl-start[data-bs-popper] { right: 0; left: auto; }
+   html[dir="rtl"] .dropdown-menu-xxl-end[data-bs-popper] { left: 0; right: auto; }
+}
+
+/* Drop directions */
+html[dir="rtl"] .dropend .dropdown-menu[data-bs-popper],
+html[dir="rtl"] .dropend [data-bs-popper].dt-button-collection { right: 100%; left: auto; margin-right: var(--ins-dropdown-spacer); margin-left: 0; }
+html[dir="rtl"] .dropstart .dropdown-menu[data-bs-popper],
+html[dir="rtl"] .dropstart [data-bs-popper].dt-button-collection { left: 100%; right: auto; margin-left: var(--ins-dropdown-spacer); margin-right: 0; }
+
+/* Navbar brand spacing */
+html[dir="rtl"] .navbar-brand { margin-left: var(--ins-navbar-brand-margin-end); margin-right: 0; }
+
+/* Breadcrumbs */
+html[dir="rtl"] .breadcrumb-item + .breadcrumb-item { padding-right: var(--ins-breadcrumb-item-padding-x); padding-left: 0; }
+html[dir="rtl"] .breadcrumb-item + .breadcrumb-item:before { float: right; padding-left: var(--ins-breadcrumb-item-padding-x); padding-right: 0; }
+html[dir="rtl"] .breadcrumb { --ins-breadcrumb-divider: "\2039"; /* ‹ for RTL */ }
+
+/* Pagination */
+html[dir="rtl"] .page-item:not(:first-child) .page-link,
+html[dir="rtl"] .page-item:not(:first-child) .dt-paging .dt-paging-button,
+html[dir="rtl"] .dt-paging .dt-paging-button:not(:first-child) { margin-right: calc(-1 * var(--ins-border-width)); margin-left: 0; }
+html[dir="rtl"] .page-item:first-child .page-link,
+html[dir="rtl"] .page-item:first-child .dt-paging .dt-paging-button { border-top-right-radius: var(--ins-pagination-border-radius); border-bottom-right-radius: var(--ins-pagination-border-radius); border-top-left-radius: 0; border-bottom-left-radius: 0; }
+html[dir="rtl"] .page-item:last-child .page-link,
+html[dir="rtl"] .page-item:last-child .dt-paging .dt-paging-button { border-top-left-radius: var(--ins-pagination-border-radius); border-bottom-left-radius: var(--ins-pagination-border-radius); border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+/* Accordion */
+html[dir="rtl"] .accordion-button { text-align: right; }
+html[dir="rtl"] .accordion-button:after { margin-right: auto; margin-left: 0; }
+
+/* List group horizontal adjacency */
+html[dir="rtl"] .list-group-horizontal > .list-group-item + .list-group-item { border-right-width: 0; border-left-width: var(--ins-list-group-border-width); }
+html[dir="rtl"] .list-group-horizontal > .list-group-item + .list-group-item.active { margin-right: calc(-1 * var(--ins-list-group-border-width)); margin-left: 0; border-right-width: var(--ins-list-group-border-width); border-left-width: 0; }
+@media (min-width: 576px) {
+   html[dir="rtl"] .list-group-horizontal-sm > .list-group-item + .list-group-item { border-right-width: 0; border-left-width: var(--ins-list-group-border-width); }
+   html[dir="rtl"] .list-group-horizontal-sm > .list-group-item + .list-group-item.active { margin-right: calc(-1 * var(--ins-list-group-border-width)); margin-left: 0; border-right-width: var(--ins-list-group-border-width); border-left-width: 0; }
+}
+@media (min-width: 768px) {
+   html[dir="rtl"] .list-group-horizontal-md > .list-group-item + .list-group-item { border-right-width: 0; border-left-width: var(--ins-list-group-border-width); }
+   html[dir="rtl"] .list-group-horizontal-md > .list-group-item + .list-group-item.active { margin-right: calc(-1 * var(--ins-list-group-border-width)); margin-left: 0; border-right-width: var(--ins-list-group-border-width); border-left-width: 0; }
+}
+@media (min-width: 992px) {
+   html[dir="rtl"] .list-group-horizontal-lg > .list-group-item + .list-group-item { border-right-width: 0; border-left-width: var(--ins-list-group-border-width); }
+   html[dir="rtl"] .list-group-horizontal-lg > .list-group-item + .list-group-item.active { margin-right: calc(-1 * var(--ins-list-group-border-width)); margin-left: 0; border-right-width: var(--ins-list-group-border-width); border-left-width: 0; }
+}
+@media (min-width: 1200px) {
+   html[dir="rtl"] .list-group-horizontal-xl > .list-group-item + .list-group-item { border-right-width: 0; border-left-width: var(--ins-list-group-border-width); }
+   html[dir="rtl"] .list-group-horizontal-xl > .list-group-item + .list-group-item.active { margin-right: calc(-1 * var(--ins-list-group-border-width)); margin-left: 0; border-right-width: var(--ins-list-group-border-width); border-left-width: 0; }
+}
+@media (min-width: 1400px) {
+   html[dir="rtl"] .list-group-horizontal-xxl > .list-group-item + .list-group-item { border-right-width: 0; border-left-width: var(--ins-list-group-border-width); }
+   html[dir="rtl"] .list-group-horizontal-xxl > .list-group-item + .list-group-item.active { margin-right: calc(-1 * var(--ins-list-group-border-width)); margin-left: 0; border-right-width: var(--ins-list-group-border-width); border-left-width: 0; }
+}
+
+/* App search paddings and pill radii */
+html[dir="rtl"] .app-search .form-control,
+html[dir="rtl"] .app-search [type=search].dt-input { padding-right: 40px; padding-left: .77rem; }
+html[dir="rtl"] .app-search.app-search-sm .form-control,
+html[dir="rtl"] .app-search.app-search-sm [type=search].dt-input { padding-right: 30px; padding-left: .7rem; }
+html[dir="rtl"] .app-search.app-search-lg .form-control,
+html[dir="rtl"] .app-search.app-search-lg [type=search].dt-input { padding-right: 50px; padding-left: 1rem; }
+html[dir="rtl"] .app-search.app-search-pill .form-control,
+html[dir="rtl"] .app-search.app-search-pill [type=search].dt-input { border-top-right-radius: 50rem; border-bottom-right-radius: 50rem; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+html[dir="rtl"] .app-search.app-search-pill .btn { border-top-left-radius: 50rem; border-bottom-left-radius: 50rem; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+/* ===== Tables.css RTL fixes ===== */
+/* Table custom cell paddings */
+html[dir="rtl"] .table-custom tfoot > tr > th:first-child,
+html[dir="rtl"] .table-custom thead > tr > th:first-child,
+html[dir="rtl"] .table-custom tr th:first-child,
+html[dir="rtl"] .table-custom tr td:first-child { padding-right: 1.125rem !important; padding-left: 0 !important; }
+html[dir="rtl"] .table-custom tfoot > tr > th:last-child,
+html[dir="rtl"] .table-custom thead > tr > th:last-child,
+html[dir="rtl"] .table-custom tr th:last-child,
+html[dir="rtl"] .table-custom tr td:last-child { padding-left: 1.125rem !important; padding-right: 0 !important; }
+
+/* DataTables header sort icon position */
+html[dir="rtl"] table.dataTable thead th:after { left: .6rem; right: auto; }
+
+/* ===== Footer RTL fixes ===== */
+/* Reverse column order so the visual left/right placement matches RTL expectations */
+html[dir="rtl"] .footer .row { flex-direction: row-reverse; }
+
+/* Swap start/end text alignment inside footer on medium+ screens */
+html[dir="rtl"] .footer .text-md-start { text-align: right !important; }
+html[dir="rtl"] .footer .text-md-end { text-align: left !important; }
+
+/* Ensure center alignment remains centered */
+html[dir="rtl"] .footer .text-center { text-align: center !important; }
+
+/* Column header padding for DT */
+html[dir="rtl"] .dt-column-header,
+html[dir="rtl"] .dt-column-title { padding-left: 30px; padding-right: 0; }
+html[dir="rtl"] .dt-child-rows-btn .dt-column-header { padding-left: 0; padding-right: 0; }
+html[dir="rtl"] .checkbox-select-datatable .dt-column-header,
+html[dir="rtl"] .checkbox-select-datatable .dt-column-title { padding-left: 0; }
+
+/* DataTables toolbar alignment & spacing */
+html[dir="rtl"] div.dt-container div.dt-length select { margin-left: .5em; margin-right: 0; }
+html[dir="rtl"] div.dt-container div.dt-search { text-align: left; }
+html[dir="rtl"] div.dt-container div.dt-search input { margin-right: .5em; margin-left: 0; }
+html[dir="rtl"] div.dt-container span.select-info,
+html[dir="rtl"] div.dt-container span.select-item { margin-right: .5em; margin-left: 0; }
+@media screen and (max-width: 640px) {
+   html[dir="rtl"] div.dt-container span.select-info,
+   html[dir="rtl"] div.dt-container span.select-item { margin-right: 0; }
+}
+
+/* DataTables details control (responsive) paddings/position */
+html[dir="rtl"] table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > td:first-child { padding-right: 30px; padding-left: inherit; }
+html[dir="rtl"] table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > td:first-child:before { right: 4px; left: auto; }
+html[dir="rtl"] table.dataTable.dtr-inline.collapsed.compact > tbody > tr > td.dtr-control { padding-right: .333em; padding-left: 0; }
+
+/* DataTables child rows toggle arrow spacing */
+html[dir="rtl"] table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+html[dir="rtl"] table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before { margin-left: .5em; margin-right: 0; }
+
+/* Bordered table hidden control next cell border (mirror) */
+html[dir="rtl"] table.dataTable.table-bordered th.dtr-control.dtr-hidden + *,
+html[dir="rtl"] table.dataTable.table-bordered td.dtr-control.dtr-hidden + * { border-right-width: 1px; border-left-width: 0; }
+
+/* Buttons collection checkmark alignment */
+html[dir="rtl"] div.dt-button-collection .dt-button-active { padding-left: 3em; padding-right: 0; }
+html[dir="rtl"] div.dt-button-collection .dt-button-active:after { left: 1em; right: auto; }
+html[dir="rtl"] div.dt-button-collection .dt-button-active.dt-button-split > *:first-child { padding-left: 3em; padding-right: 0; }
+html[dir="rtl"] div.dt-button-collection .dt-button-active.dt-button-split > *:first-child:after { left: 1em; right: auto; }
+html[dir="rtl"] div.dt-button-collection .dt-button-active-a a { padding-left: 3em; padding-right: 0; }
+html[dir="rtl"] div.dt-button-collection .dt-button-active-a a:after { left: 1em; right: auto; }
+
+/* Buttons collection dropdown caret position */
+html[dir="rtl"] div.dropdown-menu.dt-button-collection .dt-button.dropdown-toggle:after { left: 12px; right: auto; }
+
+/* Button spacer bar orientation */
+html[dir="rtl"] span.dt-button-spacer.bar { border-right: 1px solid rgba(0, 0, 0, .3); border-left: none; padding-right: .5em; padding-left: 0; }
+html[dir="rtl"] span.dt-button-spacer.bar:empty { padding-right: 0; }
+
+/* DataTables modal/close buttons */
+html[dir="rtl"] div.dtr-modal div.dtr-modal-close { left: 6px; right: auto; }
+html[dir="rtl"] div.dtb-popover-close { left: 6px; right: auto; }
+

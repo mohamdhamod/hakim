@@ -1,0 +1,475 @@
+/* ================================================
+   CSS Variables - Modern Teal Green Theme
+   تصميم إبداعي باستخدام الألوان الرئيسية فقط
+   Bootstrap 5.3 Compatible
+   ================================================ */
+
+/* 
+   Primary Color Palette:
+   --ins-primary: #428177 (Main - Teal Green)
+   --ins-secondary: #054239 (Darker Teal)
+   --ins-dark: #002623 (Darkest - Near Black)
+*/
+
+/* Light Theme Variables */
+:root, [data-bs-theme=light] {
+    /* === Core Brand Colors === */
+    --ins-primary: #428177;
+    --ins-secondary: #054239;
+    --ins-dark: #002623;
+    
+    /* RGB versions for alpha transparency */
+    --ins-primary-rgb: 66, 129, 119;
+    --ins-secondary-rgb: 5, 66, 57;
+    --ins-dark-rgb: 0, 38, 35;
+    
+    /* === Extended Primary Palette (derived from primary) === */
+    --ins-primary-50: #eef6f5;
+    --ins-primary-100: #d5ebe8;
+    --ins-primary-200: #a8d6d0;
+    --ins-primary-300: #7abfb6;
+    --ins-primary-400: #5ca69c;
+    --ins-primary-500: #428177;
+    --ins-primary-600: #356962;
+    --ins-primary-700: #2a544e;
+    --ins-primary-800: #1f3f3a;
+    --ins-primary-900: #142a27;
+    
+    /* === Semantic Colors (using primary palette) === */
+    --ins-success: #428177;
+    --ins-info: #5ca69c;
+    --ins-warning: #7abfb6;
+    --ins-danger: #054239;
+    --ins-light: #eef6f5;
+    
+    --ins-success-rgb: 66, 129, 119;
+    --ins-info-rgb: 92, 166, 156;
+    --ins-warning-rgb: 122, 191, 182;
+    --ins-danger-rgb: 5, 66, 57;
+    --ins-light-rgb: 238, 246, 245;
+    
+    /* === Gray Scale (tinted with primary) === */
+    --ins-black: #002623;
+    --ins-white: #fff;
+    --ins-gray: #5f7a76;
+    --ins-gray-dark: #1f3f3a;
+    --ins-gray-100: #f5f8f8;
+    --ins-gray-200: #e5edec;
+    --ins-gray-300: #d0dcd9;
+    --ins-gray-400: #a0b5b1;
+    --ins-gray-500: #7a9691;
+    --ins-gray-600: #5f7a76;
+    --ins-gray-700: #4a5f5c;
+    --ins-gray-800: #354543;
+    --ins-gray-900: #202b2a;
+    
+    /* Unused Bootstrap colors - remapped to primary palette */
+    --ins-blue: #428177;
+    --ins-indigo: #356962;
+    --ins-purple: #054239;
+    --ins-pink: #7abfb6;
+    --ins-red: #054239;
+    --ins-orange: #5ca69c;
+    --ins-yellow: #a8d6d0;
+    --ins-green: #428177;
+    --ins-teal: #428177;
+    --ins-cyan: #5ca69c;
+    
+    /* === Text Emphasis Colors === */
+    --ins-primary-text-emphasis: #2a544e;
+    --ins-secondary-text-emphasis: #002623;
+    --ins-success-text-emphasis: #2a544e;
+    --ins-info-text-emphasis: #356962;
+    --ins-warning-text-emphasis: #4a5f5c;
+    --ins-danger-text-emphasis: #002623;
+    --ins-light-text-emphasis: #5f7a76;
+    --ins-dark-text-emphasis: #1f3f3a;
+    
+    /* === Background Subtle Colors === */
+    --ins-primary-bg-subtle: rgba(66, 129, 119, 0.08);
+    --ins-secondary-bg-subtle: rgba(5, 66, 57, 0.08);
+    --ins-success-bg-subtle: rgba(66, 129, 119, 0.08);
+    --ins-info-bg-subtle: rgba(92, 166, 156, 0.08);
+    --ins-warning-bg-subtle: rgba(122, 191, 182, 0.15);
+    --ins-danger-bg-subtle: rgba(5, 66, 57, 0.08);
+    --ins-light-bg-subtle: #f9fbfb;
+    --ins-dark-bg-subtle: #a0b5b1;
+    
+    /* === Border Subtle Colors === */
+    --ins-primary-border-subtle: rgba(66, 129, 119, 0.25);
+    --ins-secondary-border-subtle: rgba(5, 66, 57, 0.25);
+    --ins-success-border-subtle: rgba(66, 129, 119, 0.25);
+    --ins-info-border-subtle: rgba(92, 166, 156, 0.25);
+    --ins-warning-border-subtle: rgba(122, 191, 182, 0.3);
+    --ins-danger-border-subtle: rgba(5, 66, 57, 0.25);
+    --ins-light-border-subtle: #e5edec;
+    --ins-dark-border-subtle: #7a9691;
+    
+    /* === Typography === */
+    --ins-white-rgb: 255, 255, 255;
+    --ins-black-rgb: 0, 38, 35;
+    --ins-font-sans-serif: "Inter", "Geist", system-ui, -apple-system, sans-serif;
+    --ins-font-monospace: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --ins-gradient: linear-gradient(135deg, var(--ins-primary) 0%, var(--ins-secondary) 50%, var(--ins-dark) 100%);
+    
+    /* === Body Styles === */
+    --ins-body-font-family: var(--ins-font-sans-serif);
+    --ins-body-font-size: var(--ins-font-size-base);
+    --ins-body-font-weight: 400;
+    --ins-body-line-height: 1.65;
+    --ins-body-color: #354543;
+    --ins-body-color-rgb: 53, 69, 67;
+    --ins-body-bg: #f5f8f8;
+    --ins-body-bg-rgb: 245, 248, 248;
+    
+    /* === Emphasis & Secondary Colors === */
+    --ins-emphasis-color: rgba(53, 69, 67, 0.85);
+    --ins-emphasis-color-rgb: 53, 69, 67;
+    --ins-secondary-color: #7a9691;
+    --ins-secondary-color-rgb: 122, 150, 145;
+    --ins-secondary-bg: #fff;
+    --ins-secondary-bg-rgb: 255, 255, 255;
+    --ins-tertiary-color: rgba(53, 69, 67, 0.5);
+    --ins-tertiary-color-rgb: 53, 69, 67;
+    --ins-tertiary-bg: #eef6f5;
+    --ins-tertiary-bg-rgb: 238, 246, 245;
+    
+    /* === Breadcrumb === */
+    --ins-breadcrumb-divider: "\203A";
+    
+    /* === Headings & Links === */
+    --ins-heading-color: #002623;
+    --ins-link-color: #428177;
+    --ins-link-color-rgb: 66, 129, 119;
+    --ins-link-decoration: none;
+    --ins-link-hover-color: #054239;
+    --ins-link-hover-color-rgb: 5, 66, 57;
+    
+    /* === Code & Highlights === */
+    --ins-code-color: #054239;
+    --ins-highlight-color: #354543;
+    --ins-highlight-bg: rgba(66, 129, 119, 0.15);
+    
+    /* === Borders === */
+    --ins-border-width: 1px;
+    --ins-border-style: solid;
+    --ins-border-color: #e5edec;
+    --ins-border-color-translucent: #d0dcd9;
+    
+    /* === Border Radius === */
+    --ins-border-radius: 0.5rem;
+    --ins-border-radius-sm: 0.375rem;
+    --ins-border-radius-lg: 0.75rem;
+    --ins-border-radius-xl: 1rem;
+    --ins-border-radius-xxl: 1.5rem;
+    --ins-border-radius-2xl: var(--ins-border-radius-xxl);
+    --ins-border-radius-pill: 50rem;
+    
+    /* === Shadows === */
+    --ins-box-shadow: 0 1px 3px rgba(0, 38, 35, 0.06), 0 1px 2px rgba(0, 38, 35, 0.04);
+    --ins-box-shadow-sm: 0 1px 2px rgba(0, 38, 35, 0.04);
+    --ins-box-shadow-lg: 0 10px 25px rgba(0, 38, 35, 0.08), 0 4px 10px rgba(0, 38, 35, 0.04);
+    --ins-box-shadow-inset: inset 0 1px 2px rgba(0, 38, 35, 0.05);
+    --ins-box-shadow-hover: 0 4px 12px rgba(66, 129, 119, 0.15);
+    --ins-box-shadow-focus: 0 0 0 3px rgba(66, 129, 119, 0.2);
+    
+    /* === Focus Ring === */
+    --ins-focus-ring-width: 0.2rem;
+    --ins-focus-ring-opacity: 0.2;
+    --ins-focus-ring-color: rgba(66, 129, 119, 0.2);
+    
+    /* === Form Colors === */
+    --ins-form-valid-color: #428177;
+    --ins-form-valid-border-color: #428177;
+    --ins-form-invalid-color: #054239;
+    --ins-form-invalid-border-color: #054239;
+    
+    /* === Calendar/Fullcalendar === */
+    --fc-border-color: var(--ins-border-color);
+    --fc-neutral-bg-color: var(--ins-light);
+}
+
+/* ================================================
+   Dark Theme Variables
+   ================================================ */
+[data-bs-theme=dark] {
+    color-scheme: dark;
+    
+    /* === Core Brand Colors (lighter for dark mode) === */
+    --ins-primary: #5ca69c;
+    --ins-secondary: #428177;
+    --ins-dark: #1a3330;
+    
+    --ins-primary-rgb: 92, 166, 156;
+    --ins-secondary-rgb: 66, 129, 119;
+    --ins-dark-rgb: 26, 51, 48;
+    
+    /* === Semantic Colors === */
+    --ins-success: #5ca69c;
+    --ins-info: #7abfb6;
+    --ins-warning: #a8d6d0;
+    --ins-danger: #428177;
+    --ins-light: #2a3b39;
+    
+    --ins-success-rgb: 92, 166, 156;
+    --ins-info-rgb: 122, 191, 182;
+    --ins-warning-rgb: 168, 214, 208;
+    --ins-danger-rgb: 66, 129, 119;
+    --ins-light-rgb: 42, 59, 57;
+    
+    /* === Body Styles === */
+    --ins-body-color: #d0dcd9;
+    --ins-body-color-rgb: 208, 220, 217;
+    --ins-body-bg: #0d1816;
+    --ins-body-bg-rgb: 13, 24, 22;
+    
+    /* === Emphasis & Secondary Colors === */
+    --ins-emphasis-color: #e5edec;
+    --ins-emphasis-color-rgb: 229, 237, 236;
+    --ins-secondary-color: #a0b5b1;
+    --ins-secondary-color-rgb: 160, 181, 177;
+    --ins-secondary-bg: #14211f;
+    --ins-secondary-bg-rgb: 20, 33, 31;
+    --ins-tertiary-color: #d0dcd9;
+    --ins-tertiary-color-rgb: 208, 220, 217;
+    --ins-tertiary-bg: #1a2c29;
+    --ins-tertiary-bg-rgb: 26, 44, 41;
+    
+    /* === Text Emphasis Colors === */
+    --ins-primary-text-emphasis: #a8d6d0;
+    --ins-secondary-text-emphasis: #7abfb6;
+    --ins-success-text-emphasis: #a8d6d0;
+    --ins-info-text-emphasis: #d5ebe8;
+    --ins-warning-text-emphasis: #eef6f5;
+    --ins-danger-text-emphasis: #7abfb6;
+    --ins-light-text-emphasis: #eef6f5;
+    --ins-dark-text-emphasis: #d0dcd9;
+    
+    /* === Background Subtle Colors === */
+    --ins-primary-bg-subtle: rgba(92, 166, 156, 0.12);
+    --ins-secondary-bg-subtle: rgba(66, 129, 119, 0.12);
+    --ins-success-bg-subtle: rgba(92, 166, 156, 0.12);
+    --ins-info-bg-subtle: rgba(122, 191, 182, 0.12);
+    --ins-warning-bg-subtle: rgba(168, 214, 208, 0.12);
+    --ins-danger-bg-subtle: rgba(66, 129, 119, 0.12);
+    --ins-light-bg-subtle: #1a2c29;
+    --ins-dark-bg-subtle: #0d1816;
+    
+    /* === Border Subtle Colors === */
+    --ins-primary-border-subtle: rgba(92, 166, 156, 0.3);
+    --ins-secondary-border-subtle: rgba(66, 129, 119, 0.3);
+    --ins-success-border-subtle: rgba(92, 166, 156, 0.3);
+    --ins-info-border-subtle: rgba(122, 191, 182, 0.3);
+    --ins-warning-border-subtle: rgba(168, 214, 208, 0.3);
+    --ins-danger-border-subtle: rgba(66, 129, 119, 0.3);
+    --ins-light-border-subtle: #2a3b39;
+    --ins-dark-border-subtle: #2a3b39;
+    
+    /* === Headings & Links === */
+    --ins-heading-color: #e5edec;
+    --ins-link-color: #7abfb6;
+    --ins-link-hover-color: #a8d6d0;
+    --ins-link-color-rgb: 122, 191, 182;
+    --ins-link-hover-color-rgb: 168, 214, 208;
+    
+    /* === Code & Highlights === */
+    --ins-code-color: #a8d6d0;
+    --ins-highlight-color: #e5edec;
+    --ins-highlight-bg: rgba(92, 166, 156, 0.2);
+    
+    /* === Borders === */
+    --ins-border-color: #2a3b39;
+    --ins-border-color-translucent: #3a4d4a;
+    
+    /* === Shadows === */
+    --ins-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12);
+    --ins-box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
+    --ins-box-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.25), 0 4px 10px rgba(0, 0, 0, 0.15);
+    --ins-box-shadow-hover: 0 4px 12px rgba(92, 166, 156, 0.2);
+    --ins-box-shadow-focus: 0 0 0 3px rgba(92, 166, 156, 0.25);
+    
+    /* === Focus Ring === */
+    --ins-focus-ring-color: rgba(92, 166, 156, 0.25);
+    
+    /* === Form Colors === */
+    --ins-form-valid-color: #7abfb6;
+    --ins-form-valid-border-color: #7abfb6;
+    --ins-form-invalid-color: #5ca69c;
+    --ins-form-invalid-border-color: #5ca69c;
+    
+    /* === Calendar === */
+    --fc-border-color: var(--ins-border-color);
+    --fc-neutral-bg-color: var(--ins-light);
+}
+
+/* ================================================
+   Button Close Filter
+   ================================================ */
+:root, [data-bs-theme=light] {
+    --ins-btn-close-filter: none;
+}
+
+[data-bs-theme=dark] {
+    --ins-btn-close-filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* ================================================
+   Carousel Variables
+   ================================================ */
+:root, [data-bs-theme=light] {
+    --ins-carousel-indicator-active-bg: #fff;
+    --ins-carousel-caption-color: #fff;
+    --ins-carousel-control-icon-filter: none;
+}
+
+[data-bs-theme=dark] {
+    --ins-carousel-indicator-active-bg: #000;
+    --ins-carousel-caption-color: #000;
+    --ins-carousel-control-icon-filter: invert(1) grayscale(100);
+}
+
+/* ================================================
+   Layout Variables
+   ================================================ */
+:root {
+    --ins-logo-lg-height: 28px;
+    --ins-logo-sm-height: 28px;
+    --ins-sidenav-width: 240px;
+    --ins-sidenav-width-md: 180px;
+    --ins-sidenav-width-sm: 80px;
+    --ins-topbar-height: 64px;
+    --ins-sidenav-item-icon-size: 18px;
+    --ins-sidenav-item-gap: 10px;
+    --ins-sidenav-item-padding-x: 16px;
+    --ins-sidenav-item-padding-y: 10px;
+    --ins-sidenav-item-font-size: 0.875rem;
+    --ins-sidenav-item-font-weight: 500;
+    --ins-sidenav-sub-item-font-size: 0.8125rem;
+    --ins-sidenav-sub-item-font-weight: 400;
+    --ins-sidenav-sub-item-gap: 6px;
+    --ins-sidenav-sub-item-padding-x: 12px;
+    --ins-sidenav-sub-item-padding-y: 8px;
+    
+    /* === Card Theme === */
+    --ins-theme-card-border-width: 0;
+    --ins-theme-card-box-shadow: 0 1px 3px rgba(0, 38, 35, 0.05), 0 1px 2px rgba(0, 38, 35, 0.03);
+    --ins-theme-card-border-color: transparent;
+    
+    /* === Font Weights === */
+    --ins-font-weight-medium: 500;
+    --ins-font-weight-semibold: 600;
+    --ins-font-weight-bold: 700;
+    
+    /* === Font Sizes === */
+    --ins-font-size-xxs: 0.75rem;
+    --ins-font-size-xs: 0.8125rem;
+    --ins-font-size-base: 0.9375rem;
+    --ins-font-size-sm: 1rem;
+    --ins-font-size-md: 1.0625rem;
+    --ins-font-size-lg: 1.125rem;
+    --ins-font-size-xl: 1.25rem;
+    --ins-font-size-xxl: 1.375rem;
+    
+    /* === Chart Colors (Primary Palette) === */
+    --ins-chart-primary: #428177;
+    --ins-chart-primary-rgb: 66, 129, 119;
+    --ins-chart-secondary: #054239;
+    --ins-chart-secondary-rgb: 5, 66, 57;
+    --ins-chart-gray: #e5edec;
+    --ins-chart-gray-rgb: 229, 237, 236;
+    --ins-chart-dark: #002623;
+    --ins-chart-dark-rgb: 0, 38, 35;
+    --ins-chart-border-color: #d0dcd9;
+    --ins-chart-title-color: #5f7a76;
+    
+    /* === Transition Timing === */
+    --ins-transition-fast: 150ms;
+    --ins-transition-base: 200ms;
+    --ins-transition-slow: 300ms;
+    --ins-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-bs-theme=dark] {
+    --ins-theme-card-border-width: 1px;
+    --ins-theme-card-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    --ins-theme-card-border-color: var(--ins-border-color);
+    
+    /* === Chart Colors (Dark Mode) === */
+    --ins-chart-primary: #5ca69c;
+    --ins-chart-primary-rgb: 92, 166, 156;
+    --ins-chart-secondary: #7abfb6;
+    --ins-chart-secondary-rgb: 122, 191, 182;
+    --ins-chart-gray: #2a3b39;
+    --ins-chart-gray-rgb: 42, 59, 57;
+    --ins-chart-dark: #e5edec;
+    --ins-chart-dark-rgb: 229, 237, 236;
+    --ins-chart-border-color: #3a4d4a;
+}
+
+/* ================================================
+   Sidenav Light Theme
+   ================================================ */
+html[data-sidenav-color=light] {
+    --ins-sidenav-bg: #ffffff;
+    --ins-sidenav-border-color: #e5edec;
+    --ins-sidenav-item-color: #5f7a76;
+    --ins-sidenav-item-hover-color: #002623;
+    --ins-sidenav-item-hover-bg: rgba(66, 129, 119, 0.06);
+    --ins-sidenav-item-active-color: #428177;
+    --ins-sidenav-item-active-bg: rgba(66, 129, 119, 0.1);
+}
+
+/* ================================================
+   Sidenav Dark Theme
+   ================================================ */
+html[data-sidenav-color=dark] {
+    --ins-sidenav-bg: #0d1816;
+    --ins-sidenav-border-color: #1a2c29;
+    --ins-sidenav-item-color: #a0b5b1;
+    --ins-sidenav-item-hover-color: #e5edec;
+    --ins-sidenav-item-hover-bg: rgba(92, 166, 156, 0.08);
+    --ins-sidenav-item-active-color: #7abfb6;
+    --ins-sidenav-item-active-bg: rgba(92, 166, 156, 0.12);
+}
+
+html[data-bs-theme=dark][data-sidenav-color=dark],
+html[data-bs-theme=dark][data-sidenav-color=light] {
+    --ins-sidenav-bg: #14211f;
+    --ins-sidenav-border-color: #2a3b39;
+    --ins-sidenav-item-color: #a0b5b1;
+    --ins-sidenav-item-hover-color: #e5edec;
+    --ins-sidenav-item-hover-bg: rgba(92, 166, 156, 0.08);
+    --ins-sidenav-item-active-color: #7abfb6;
+    --ins-sidenav-item-active-bg: rgba(92, 166, 156, 0.12);
+}
+
+/* ================================================
+   Topbar Light Theme
+   ================================================ */
+html[data-topbar-color=light] {
+    --ins-topbar-bg: #ffffff;
+    --ins-topbar-item-color: #5f7a76;
+    --ins-topbar-item-hover-color: #002623;
+    --ins-topbar-search-bg: #f5f8f8;
+    --ins-topbar-search-border: #e5edec;
+}
+
+/* ================================================
+   Topbar Dark Theme
+   ================================================ */
+html[data-topbar-color=dark],
+html[data-bs-theme=dark][data-topbar-color=light],
+html[data-bs-theme=dark][data-topbar-color=dark] {
+    --ins-topbar-bg: #14211f;
+    --ins-topbar-item-color: #a0b5b1;
+    --ins-topbar-item-hover-color: #e5edec;
+    --ins-topbar-search-bg: #1a2c29;
+    --ins-topbar-search-border: #2a3b39;
+}
+
+/* ================================================
+   Logo Text Colors
+   ================================================ */
+html[data-bs-theme="dark"] .logo-topbar .logo-light .logo-text {
+    color: #fff !important;
+}

@@ -1,0 +1,196 @@
+/**
+ * Custom styles for intl-tel-input integration with Bootstrap
+ */
+
+/* Make the intl-tel-input container full width */
+.iti {
+    width: 100% !important;
+    display: block;
+}
+
+/* Style the input to match Bootstrap form-control */
+.iti__tel-input {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: 1px solid var(--bs-border-color);
+    appearance: none;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Match Bootstrap focus styles */
+.iti__tel-input:focus {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Error state - match Bootstrap's is-invalid */
+.iti__tel-input.is-invalid {
+    border-color: var(--bs-danger);
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.iti__tel-input.is-invalid:focus {
+    border-color: var(--bs-danger);
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Style the country dropdown */
+.iti__country-list {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    margin-top: 4px;
+    max-height: 200px;
+    z-index: 1050;
+}
+
+/* Country list items */
+.iti__country {
+    padding: 8px 12px;
+    color: var(--bs-body-color);
+}
+
+.iti__country:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.iti__country.iti__highlight {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.iti__country.iti__active {
+    background-color: rgba(13, 110, 253, 0.15);
+    font-weight: 500;
+}
+
+/* Selected flag */
+.iti__selected-flag {
+    padding: 0 0 0 12px;
+}
+
+/* Flag container */
+.iti__flag-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: auto;
+    left: 0;
+}
+
+/* Adjust input padding for RTL languages */
+[dir="rtl"] .iti__tel-input {
+    padding-left: 52px;
+    padding-right: 0.75rem;
+    text-align: right;
+}
+
+[dir="rtl"] .iti__flag-container {
+    left: auto;
+    right: 0;
+}
+
+[dir="rtl"] .iti__selected-flag {
+    padding: 0 12px 0 0;
+}
+
+/* Match disabled state */
+.iti__tel-input:disabled,
+.iti__tel-input[readonly] {
+    background-color: var(--bs-secondary-bg);
+    opacity: 1;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .iti__country-list {
+        background-color: #212529;
+        border-color: #495057;
+    }
+    
+    .iti__country {
+        color: #dee2e6;
+    }
+    
+    .iti__search-input {
+        background-color: #2b3035;
+        border-color: #495057;
+        color: #dee2e6;
+    }
+}
+
+/* Dropdown arrow */
+.iti__arrow {
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #999;
+    margin-left: 4px;
+}
+
+/* Search input in dropdown */
+.iti__search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.iti__search-input:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Dial code styling */
+.iti__selected-dial-code {
+    font-weight: 500;
+    color: var(--bs-body-color);
+}
+
+/* Mobile responsive */
+@media (max-width: 576px) {
+    .iti__country-list {
+        max-height: 150px;
+    }
+}
+
+/* Form validation feedback positioning */
+.iti + .invalid-feedback,
+.iti + .valid-feedback {
+    display: block;
+    margin-top: 0.25rem;
+}
+/* ==========================================
+   Custom Flag Override for Syria (SY)
+   Use local flag instead of library default
+   ========================================== */
+
+/* Override Syria flag to use local file */
+.iti__flag.iti__sy {
+    background-image: url('/images/flags/1x1/sy.svg') !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Ensure it works in country list as well */
+.iti__country-list .iti__flag.iti__sy {
+    background-image: url('/images/flags/1x1/sy.svg') !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}

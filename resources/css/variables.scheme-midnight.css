@@ -1,0 +1,34 @@
+/*
+Theme: Midnight Slate (Dark Admin)
+Use: Dark admin UI with high contrast accents — good for power users and low-light environments.
+*/
+:root{
+  --brand-primary: #08A0C1; /* cyan-teal neon */
+  --brand-primary-600: #0690B0;
+  --brand-accent: #FFD166; /* soft gold accent */
+
+  --bg-page: #0B1220; /* page background */
+  --bg-surface: #0F1724; /* cards and panels */
+  --bg-muted: #0A0F16;
+
+  --text-primary: #E6EEF6;
+  --text-secondary: #B8CAD6;
+  --text-muted: #91A7B7;
+
+  --success: #22C55E;
+  --danger: #F87171;
+  --warning: #F59E0B;
+  --info: #60A5FA;
+
+  --border: #172233;
+  --shadow: 0 10px 30px rgba(2,6,23,0.6);
+
+  --sidebar-bg: #071224;
+  --sidebar-text: #DFF6FF;
+  --card-bg: var(--bg-surface);
+  --btn-text-on-primary: #02121A;
+
+  --focus-ring: 2px solid rgba(8,160,193,0.22);
+
+  --gradient-primary: linear-gradient(90deg, #08A0C1 0%, #60A5FA 100%);
+}

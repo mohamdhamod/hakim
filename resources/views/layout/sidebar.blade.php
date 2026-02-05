@@ -1,0 +1,127 @@
+<!-- Sidebar -->
+<div class="sidenav-menu" id="sidenavMenu">
+    <div class="scrollbar" style="height: calc(100% - 41px); overflow-y: auto;">
+        <!-- User Profile -->
+        <div class="sidenav-user text-nowrap border border-dashed rounded-3">
+            <a href="#" class="sidenav-user-name d-flex align-items-center text-decoration-none">
+                @if(auth()->user()->hasRole(\App\Enums\RoleEnum::ADMIN))
+                    <img src="{{auth()->user()->full_path}}"
+                         width="36" alt="{{ __('translation.layout.sidebar.user_image_alt') }}"
+                         class="rounded-circle me-2 d-flex">
+                @endif
+                <div>
+                    <h5 class="my-0 fw-semibold text-body text-capitalize">
+                        {{ auth()->user()->first_name }}
+                    </h5>
+                    <h6 class="my-0 text-muted">
+                        {{ implode(', ', auth()->user()->getRoleNames()->toArray()) }}
+                    </h6>
+                </div>
+            </a>
+        </div>
+
+
+        <!-- Navigation Menu -->
+        <ul class="side-nav">
+            @canany([
+                \App\Enums\PermissionEnum::MANAGE_SPECIALTIES_VIEW,
+            ])
+                <li class="side-nav-title mt-3">{{ __('translation.sidebar.specialties') ?? 'Specialties' }}</li>
+
+                <li class="side-nav-item">
+                    <a href="{{ route('specialties.index') }}" class="side-nav-link {{ request()->routeIs('specialties.*') ? 'active' : '' }}">
+                        <i class="menu-icon bi bi-hospital"></i>
+                        <span class="menu-text">{{ __('translation.sidebar.manage_specialties') ?? 'Manage Specialties' }}</span>
+                    </a>
+                </li>
+            @endcanany
+
+            @canany([
+                \App\Enums\PermissionEnum::SETTING_VIEW,
+                \App\Enums\PermissionEnum::MANAGE_ROLES,
+                \App\Enums\PermissionEnum::USERS_VIEW,
+            ])
+                <li class="side-nav-title mt-3">{{ __('translation.sidebar.settings') }}</li>
+
+                <li class="side-nav-item">
+                    <button class="side-nav-link" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#configurationsMenu" aria-expanded="false">
+                        <i class="menu-icon bi bi-sliders2"></i>
+                        <span class="menu-text">{{ __('translation.sidebar.configurations') }}</span>
+                        <span class="menu-arrow">
+                            <i class="bi bi-chevron-down"></i>
+                        </span>
+                    </button>
+                    <div class="collapse" id="configurationsMenu">
+                        <ul class="sub-menu">
+                            <li class="side-nav-item">
+                                <a href="{{ route('config_titles.index') }}"
+                                   class="side-nav-link {{ request()->routeIs('config_titles.index') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-tags"></i>
+                                    <span class="menu-text">{{ __('translation.sidebar.titles') }}</span>
+                                </a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="{{ route('config_images.index') }}"
+                                   class="side-nav-link {{ request()->routeIs('config_images.index') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-image"></i>
+                                    <span class="menu-text">{{ __('translation.sidebar.images') }}</span>
+                                </a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="{{ route('config_email_links.index') }}"
+                                   class="side-nav-link {{ request()->routeIs('config_email_links.index') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-envelope"></i>
+                                    <span class="menu-text"> {{ __('translation.sidebar.emails_links_phone') }}</span>
+                                </a>
+                            </li>
+                            @can(\App\Enums\PermissionEnum::USERS_VIEW)
+                                <li class="side-nav-item">
+                                    <a class="side-nav-link" href="{{ route('users.index') }}">
+                                        <i class="menu-icon bi bi-people"></i>
+                                        <span class="menu-text">{{ __('translation.sidebar.users') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can(\App\Enums\PermissionEnum::MANAGE_ROLES)
+                                <li class="side-nav-item">
+                                    <a class="side-nav-link" href="{{ route('roles.index') }}">
+                                        <i class="menu-icon bi bi-shield-lock"></i>
+                                        <span class="menu-text">{{ __('translation.sidebar.roles') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can(\App\Enums\PermissionEnum::SETTING_VIEW)
+                                <li class="side-nav-item">
+                                    <a class="side-nav-link" href="{{ route('configurations.index') }}">
+                                        <i class="menu-icon bi bi-gear"></i>
+                                        <span class="menu-text">{{ __('translation.sidebar.configurations') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can(\App\Enums\PermissionEnum::SETTING_VIEW)
+                                <li class="side-nav-item">
+                                    <a class="side-nav-link" href="{{ route('countries.index') }}">
+                                        <i class="menu-icon bi bi-globe"></i>
+                                        <span class="menu-text">{{ __('translation.sidebar.countries') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </div>
+                </li>
+            @endcanany
+        </ul>
+    </div>
+
+    <!-- Collapse Toggle -->
+    <div class="menu-collapse-box d-none d-xl-block border-top">
+        <button class="button-collapse-toggle w-100 text-start"
+                onclick="toggleSidebar()"
+                data-text-collapse="{{ __('translation.layout.sidebar.collapse_menu') }}"
+                data-text-expand="{{ __('translation.layout.sidebar.expand_menu') }}">
+            <i class="bi bi-chevron-double-left"></i>
+            <span>{{ __('translation.layout.sidebar.collapse_menu') }}</span>
+        </button>
+    </div>
+</div>

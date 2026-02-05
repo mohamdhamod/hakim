@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الأعلام - Country Flags Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">🏴 اختبار عرض أعلام الدول</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>الأعلام المباشرة من CDN:</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-3 text-center mb-3">
+                                <img src="https://flagcdn.com/w40/us.png" alt="USA" class="border">
+                                <p class="mt-2">🇺🇸 USA</p>
+                            </div>
+                            <div class="col-md-3 text-center mb-3">
+                                <img src="https://flagcdn.com/w40/gb.png" alt="UK" class="border">
+                                <p class="mt-2">🇬🇧 UK</p>
+                            </div>
+                            <div class="col-md-3 text-center mb-3">
+                                <img src="https://flagcdn.com/w40/de.png" alt="Germany" class="border">
+                                <p class="mt-2">🇩🇪 Germany</p>
+                            </div>
+                            <div class="col-md-3 text-center mb-3">
+                                <img src="https://flagcdn.com/w40/sa.png" alt="Saudi Arabia" class="border">
+                                <p class="mt-2">🇸🇦 Saudi Arabia</p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mt-4">اختبار Select2 مع الأعلام:</h5>
+                        <form>
+                            <div class="mb-3">
+                                <label for="country_test" class="form-label">اختر دولة:</label>
+                                <select id="country_test" class="form-select" required>
+                                    <option value="">-- اختر الدولة --</option>
+                                    <option value="1" data-flag="https://flagcdn.com/w20/us.png">🇺🇸 United States</option>
+                                    <option value="2" data-flag="https://flagcdn.com/w20/gb.png">🇬🇧 United Kingdom</option>
+                                    <option value="3" data-flag="https://flagcdn.com/w20/de.png">🇩🇪 Germany</option>
+                                    <option value="4" data-flag="https://flagcdn.com/w20/fr.png">🇫🇷 France</option>
+                                    <option value="5" data-flag="https://flagcdn.com/w20/es.png">🇪🇸 Spain</option>
+                                    <option value="6" data-flag="https://flagcdn.com/w20/sa.png">🇸🇦 Saudi Arabia</option>
+                                    <option value="7" data-flag="https://flagcdn.com/w20/eg.png">🇪🇬 Egypt</option>
+                                    <option value="8" data-flag="https://flagcdn.com/w20/ae.png">🇦🇪 UAE</option>
+                                </select>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <strong>ملاحظة:</strong> إذا ظهرت الأعلام هنا ولم تظهر في التطبيق، فالمشكلة في:
+                                <ul class="mb-0 mt-2">
+                                    <li>Select2 غير محمل بشكل صحيح</li>
+                                    <li>jQuery غير محمل</li>
+                                    <li>JavaScript لا يعمل</li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">✅ التحقق من المتطلبات</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="jquery-check" class="alert alert-secondary">
+                            <strong>jQuery:</strong> <span id="jquery-status">جاري الفحص...</span>
+                        </div>
+                        <div id="select2-check" class="alert alert-secondary">
+                            <strong>Select2:</strong> <span id="select2-status">جاري الفحص...</span>
+                        </div>
+                        <div id="flag-check" class="alert alert-secondary">
+                            <strong>CDN الأعلام:</strong> <span id="flag-status">جاري الفحص...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Check jQuery
+            if (typeof jQuery !== 'undefined') {
+                $('#jquery-status').text('✅ محمل (الإصدار: ' + jQuery.fn.jquery + ')').parent().removeClass('alert-secondary').addClass('alert-success');
+            } else {
+                $('#jquery-status').text('❌ غير محمل').parent().removeClass('alert-secondary').addClass('alert-danger');
+            }
+
+            // Check Select2
+            if (typeof $.fn.select2 !== 'undefined') {
+                $('#select2-status').text('✅ محمل').parent().removeClass('alert-secondary').addClass('alert-success');
+                
+                // Initialize Select2 with flags
+                $('#country_test').select2({
+                    placeholder: 'اختر الدولة',
+                    allowClear: true,
+                    width: '100%',
+                    templateResult: formatCountryOption,
+                    templateSelection: formatCountryOption
+                });
+            } else {
+                $('#select2-status').text('❌ غير محمل').parent().removeClass('alert-secondary').addClass('alert-danger');
+            }
+
+            // Check flag CDN
+            var testImg = new Image();
+            testImg.onload = function() {
+                $('#flag-status').text('✅ يعمل بشكل صحيح').parent().removeClass('alert-secondary').addClass('alert-success');
+            };
+            testImg.onerror = function() {
+                $('#flag-status').text('❌ لا يعمل - تحقق من الاتصال بالإنترنت').parent().removeClass('alert-secondary').addClass('alert-danger');
+            };
+            testImg.src = 'https://flagcdn.com/w20/us.png';
+        });
+
+        function formatCountryOption(country) {
+            if (!country.id) {
+                return country.text;
+            }
+            
+            var flagUrl = $(country.element).data('flag');
+            if (!flagUrl) {
+                return country.text;
+            }
+            
+            var $country = $(
+                '<span style="display: flex; align-items: center;">' +
+                '<img src="' + flagUrl + '" style="width: 20px; height: 15px; margin-right: 8px; object-fit: cover; border: 1px solid #ddd;" onerror="this.style.display=\'none\'" /> ' +
+                '<span>' + country.text + '</span>' +
+                '</span>'
+            );
+            return $country;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+/*
+Theme: Emerald & Teal (Modern Finance)
+Use: Fresh, optimistic palette for fintech panels — emphasizes growth, success and clarity.
+*/
+:root{
+  --brand-primary: #047857; /* emerald green */
+  --brand-primary-600: #036854;
+  --brand-accent: #06B6D4; /* teal accent */
+
+  --bg-page: #F8FAF9;
+  --bg-surface: #FFFFFF;
+  --bg-muted: #F0FDF4;
+
+  --text-primary: #05261A;
+  --text-secondary: #14532D;
+  --text-muted: #4B5563;
+
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --info: #06B6D4;
+
+  --border: #E6F3EE;
+  --shadow: 0 8px 24px rgba(4,120,87,0.06);
+
+  /* components */
+  --sidebar-bg: #F0FFF9; /* light sidebar */
+  --sidebar-text: #014737;
+  --card-bg: var(--bg-surface);
+  --btn-text-on-primary: #FFFFFF;
+
+  --focus-ring: 2px solid rgba(4,120,87,0.16);
+
+  --gradient-primary: linear-gradient(90deg, #059669 0%, #06B6D4 100%);
+}

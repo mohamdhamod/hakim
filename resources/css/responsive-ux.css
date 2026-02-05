@@ -1,0 +1,1663 @@
+/* ================================================
+   Responsive UX - Mobile-First Design System
+   High-Quality User Experience Enhancements
+   ================================================ */
+
+/* ===========================================
+   CSS Variables for Responsive Breakpoints
+   =========================================== */
+:root {
+    /* Touch-friendly sizing */
+    --ux-touch-target-min: 44px;
+    --ux-touch-target-comfortable: 48px;
+    
+    /* Spacing scale for mobile */
+    --ux-space-xs: 0.25rem;
+    --ux-space-sm: 0.5rem;
+    --ux-space-md: 1rem;
+    --ux-space-lg: 1.5rem;
+    --ux-space-xl: 2rem;
+    --ux-space-2xl: 3rem;
+    
+    /* Mobile-first font sizes */
+    --ux-text-xs: 0.75rem;
+    --ux-text-sm: 0.875rem;
+    --ux-text-base: 1rem;
+    --ux-text-lg: 1.125rem;
+    --ux-text-xl: 1.25rem;
+    --ux-text-2xl: 1.5rem;
+    --ux-text-3xl: 1.875rem;
+    
+    /* Safe area insets for notched devices */
+    --ux-safe-top: env(safe-area-inset-top, 0px);
+    --ux-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --ux-safe-left: env(safe-area-inset-left, 0px);
+    --ux-safe-right: env(safe-area-inset-right, 0px);
+    
+    /* Transition timing */
+    --ux-transition-fast: 150ms;
+    --ux-transition-normal: 250ms;
+    --ux-transition-slow: 350ms;
+    --ux-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+    --ux-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ===========================================
+   Global UX Improvements
+   =========================================== */
+
+/* Smooth scrolling with reduced motion support */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Better text rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Prevent text selection on interactive elements */
+button, .btn, .nav-link, .dropdown-toggle {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Better focus styles for accessibility */
+:focus-visible {
+    outline: 2px solid var(--ins-primary);
+    outline-offset: 2px;
+}
+
+/* Remove default focus outline and use custom */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ===========================================
+   Touch-Friendly Targets (Mobile UX)
+   =========================================== */
+
+/* Ensure minimum touch target size */
+@media (pointer: coarse) {
+    button:not(.qty-btn),
+    .btn:not(.qty-btn),
+    .nav-link,
+    .dropdown-item,
+    .list-group-item-action,
+    input[type="checkbox"],
+    input[type="radio"],
+    .form-check-input,
+    a.clickable,
+    [role="button"]:not(.qty-btn) {
+        min-height: var(--ux-touch-target-min);
+        min-width: var(--ux-touch-target-min);
+    }
+    
+    /* Keep quantity buttons compact */
+    .qty-btn {
+        min-height: 26px !important;
+        min-width: 26px !important;
+        max-height: 26px !important;
+        max-width: 26px !important;
+    }
+    
+    /* Larger tap targets for checkboxes and radios */
+    .form-check {
+        padding-left: 2rem;
+        min-height: var(--ux-touch-target-min);
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: 0;
+    }
+    
+    /* Increase spacing between clickable items */
+    .list-group-item-action + .list-group-item-action {
+        margin-top: 2px;
+    }
+    
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ===========================================
+   Mobile-First Typography
+   =========================================== */
+
+/* Fluid typography that scales smoothly */
+html {
+    font-size: clamp(14px, 3.5vw, 16px);
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* Responsive headings */
+h1, .h1 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1.2;
+}
+
+h2, .h2 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.25;
+}
+
+h3, .h3 {
+    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+    line-height: 1.3;
+}
+
+h4, .h4 {
+    font-size: clamp(1.125rem, 3vw, 1.5rem);
+    line-height: 1.35;
+}
+
+/* Better paragraph readability on mobile */
+p {
+    max-width: 70ch;
+    line-height: 1.6;
+}
+
+@media (max-width: 575.98px) {
+    p {
+        line-height: 1.7;
+    }
+}
+
+/* ===========================================
+   Mobile Navigation Enhancements
+   =========================================== */
+
+/* Bottom safe area for fixed elements */
+.fixed-bottom,
+.sticky-bottom {
+    padding-bottom: var(--ux-safe-bottom);
+}
+
+/* Mobile-optimized navbar */
+@media (max-width: 991.98px) {
+    .app-topbar {
+        padding-top: var(--ux-safe-top);
+    }
+    
+    .app-topbar .topbar-menu {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    /* Larger touch targets for topbar buttons */
+    .topbar-link {
+        padding: 0.75rem;
+    }
+}
+
+/* Mobile menu improvements */
+@media (max-width: 767.98px) {
+    .navbar-nav {
+        padding: var(--ux-space-md) 0;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: var(--ux-space-md) var(--ux-space-lg);
+        border-radius: var(--ins-border-radius);
+    }
+    
+    .navbar-nav .nav-link:active {
+        background-color: var(--ins-primary-bg-subtle);
+    }
+}
+
+/* ===========================================
+   Mobile-First Cards & Containers
+   =========================================== */
+
+/* Cards maintain their normal styling on mobile */
+@media (max-width: 575.98px) {
+    .container-fluid > .card:first-child,
+    .container > .card:first-child {
+        margin-top: 0;
+    }
+    
+    .card-header,
+    .card-footer {
+        padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+}
+
+/* Restore card styling when inside specific containers */
+@media (max-width: 575.98px) {
+    .modal .card,
+    .offcanvas .card {
+        border-radius: var(--ins-border-radius);
+        border: var(--ins-card-border-width) solid var(--ins-card-border-color);
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+}
+
+/* ===========================================
+   Mobile-First Forms
+   =========================================== */
+
+/* Larger form controls on mobile */
+@media (max-width: 767.98px) {
+    .form-control,
+    .form-select {
+        font-size: 16px !important; /* Prevent iOS zoom on focus */
+        padding: 0.75rem 1rem;
+        min-height: var(--ux-touch-target-comfortable);
+    }
+    
+    .form-control-sm,
+    .form-select-sm {
+        font-size: 16px !important;
+        padding: 0.5rem 0.75rem;
+        min-height: var(--ux-touch-target-min);
+    }
+    
+    .input-group-text {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Stack form labels on mobile */
+    .form-label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    /* Better spacing between form groups */
+    .mb-3 {
+        margin-bottom: 1.25rem !important;
+    }
+}
+
+/* Better textarea handling */
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+@media (max-width: 575.98px) {
+    textarea.form-control {
+        min-height: 120px;
+    }
+}
+
+/* ===========================================
+   Mobile-First Buttons
+   =========================================== */
+
+/* Touch-friendly button sizing */
+@media (max-width: 767.98px) {
+    .btn {
+        padding: 0.625rem 1.25rem;
+        min-height: var(--ux-touch-target-min);
+        font-size: var(--ux-text-base);
+    }
+    
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        min-height: 36px;
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 1.5rem;
+        min-height: 52px;
+    }
+    
+    /* Full-width buttons on very small screens */
+    .btn-mobile-full {
+        width: 100%;
+        display: block;
+    }
+    
+    /* Stack button groups vertically on mobile */
+    .btn-group-mobile-stack {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group-mobile-stack .btn {
+        width: 100%;
+        border-radius: var(--ins-border-radius) !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group-mobile-stack .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Active state feedback for touch */
+@media (pointer: coarse) {
+    .btn:active {
+        transform: scale(0.98);
+        transition: transform var(--ux-transition-fast) var(--ux-ease-out);
+    }
+}
+
+/* ===========================================
+   Mobile-First Tables
+   =========================================== */
+
+/* Responsive table wrapper */
+.table-responsive-mobile {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Card-style tables on mobile */
+@media (max-width: 767.98px) {
+    .table-mobile-cards {
+        display: block;
+    }
+    
+    .table-mobile-cards thead {
+        display: none;
+    }
+    
+    .table-mobile-cards tbody {
+        display: block;
+    }
+    
+    .table-mobile-cards tr {
+        display: block;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--ins-secondary-bg);
+        border-radius: var(--ins-border-radius);
+        box-shadow: var(--ins-theme-card-box-shadow);
+    }
+    
+    .table-mobile-cards td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border: none;
+        border-bottom: 1px solid var(--ins-border-color);
+    }
+    
+    .table-mobile-cards td:last-child {
+        border-bottom: none;
+    }
+    
+    .table-mobile-cards td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+}
+
+/* ===========================================
+   Mobile-First Modals & Dialogs
+   =========================================== */
+
+@media (max-width: 575.98px) {
+    /* Full-screen modals on mobile */
+    .modal-dialog {
+        margin: 0;
+        max-width: 100%;
+        height: 100%;
+    }
+    
+    .modal-content {
+        height: 100%;
+        border: none;
+        border-radius: 0;
+    }
+    
+    .modal-header {
+        padding: var(--ux-space-md);
+        padding-top: calc(var(--ux-space-md) + var(--ux-safe-top));
+    }
+    
+    .modal-body {
+        padding: var(--ux-space-md);
+        overflow-y: auto;
+    }
+    
+    .modal-footer {
+        padding: var(--ux-space-md);
+        padding-bottom: calc(var(--ux-space-md) + var(--ux-safe-bottom));
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        margin: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .modal-footer .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Smaller modal variant keeps original behavior */
+    .modal-sm .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+        height: auto;
+    }
+    
+    .modal-sm .modal-content {
+        height: auto;
+        border-radius: var(--ins-border-radius-lg);
+    }
+}
+
+/* Bottom sheet style modal for mobile */
+.modal-bottom-sheet {
+    --bs-modal-margin: 0;
+}
+
+@media (max-width: 575.98px) {
+    .modal-bottom-sheet .modal-dialog {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        height: auto;
+        max-height: 90vh;
+        transform: translateY(100%);
+        transition: transform var(--ux-transition-normal) var(--ux-ease-out);
+    }
+    
+    .modal-bottom-sheet.show .modal-dialog {
+        transform: translateY(0);
+    }
+    
+    .modal-bottom-sheet .modal-content {
+        height: auto;
+        border-radius: var(--ins-border-radius-xl) var(--ins-border-radius-xl) 0 0;
+        max-height: 90vh;
+    }
+    
+    .modal-bottom-sheet .modal-header::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: var(--ins-border-color);
+        border-radius: 2px;
+    }
+}
+
+/* ===========================================
+   Mobile-First Offcanvas
+   =========================================== */
+
+@media (max-width: 575.98px) {
+    .offcanvas {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    .offcanvas-header {
+        padding-top: calc(var(--ux-space-md) + var(--ux-safe-top));
+    }
+    
+    .offcanvas-body {
+        padding-bottom: calc(var(--ux-space-md) + var(--ux-safe-bottom));
+    }
+}
+
+/* ===========================================
+   Mobile-First Pagination
+   =========================================== */
+
+@media (max-width: 575.98px) {
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .page-link {
+        min-width: var(--ux-touch-target-min);
+        min-height: var(--ux-touch-target-min);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem;
+    }
+    
+    /* Hide some page numbers on very small screens */
+    .pagination-mobile-compact .page-item:not(:first-child):not(:last-child):not(.active):not(.page-prev):not(.page-next) {
+        display: none;
+    }
+    
+    .pagination-mobile-compact .page-item.active {
+        display: flex;
+    }
+    
+    .pagination-mobile-compact .page-item.active::before {
+        content: '...';
+        display: flex;
+        align-items: center;
+        padding: 0 0.5rem;
+        color: var(--ins-secondary-color);
+    }
+    
+    .pagination-mobile-compact .page-item.active::after {
+        content: '...';
+        display: flex;
+        align-items: center;
+        padding: 0 0.5rem;
+        color: var(--ins-secondary-color);
+    }
+}
+
+/* ===========================================
+   Mobile-First Lists
+   =========================================== */
+
+@media (max-width: 575.98px) {
+    .list-group-item {
+        padding: 1rem;
+    }
+    
+    .list-group-item-action {
+        min-height: var(--ux-touch-target-comfortable);
+    }
+}
+
+/* Swipeable list items */
+.list-swipeable {
+    overflow: hidden;
+}
+
+.list-swipeable .list-group-item {
+    position: relative;
+    transition: transform var(--ux-transition-normal) var(--ux-ease-out);
+}
+
+/* ===========================================
+   Mobile-First Alerts & Toasts
+   =========================================== */
+
+@media (max-width: 575.98px) {
+    .alert {
+        border-radius: 0;
+        margin-left: calc(-1 * var(--ux-space-md));
+        margin-right: calc(-1 * var(--ux-space-md));
+        padding: var(--ux-space-md);
+    }
+    
+    /* Toast positioning for mobile */
+    .toast-container {
+        position: fixed;
+        bottom: calc(var(--ux-space-md) + var(--ux-safe-bottom));
+        left: var(--ux-space-md);
+        right: var(--ux-space-md);
+        top: auto;
+        z-index: 1100;
+    }
+    
+    .toast {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* ===========================================
+   Scroll & Overflow Improvements
+   =========================================== */
+
+/* Smooth momentum scrolling */
+.scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+/* Custom thin scrollbar */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ins-border-color) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--ins-border-color);
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--ins-secondary-color);
+}
+
+/* ===========================================
+   Loading States & Skeleton Screens
+   =========================================== */
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ins-tertiary-bg) 25%,
+        var(--ins-secondary-bg) 50%,
+        var(--ins-tertiary-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: var(--ins-border-radius);
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-text {
+    height: 1em;
+    margin-bottom: 0.5em;
+}
+
+.skeleton-text:last-child {
+    width: 80%;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: 16/9;
+}
+
+.skeleton-button {
+    height: 40px;
+    width: 120px;
+}
+
+/* ===========================================
+   Pull-to-Refresh Indicator
+   =========================================== */
+
+.pull-to-refresh {
+    position: relative;
+    overflow: hidden;
+}
+
+.pull-to-refresh-indicator {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: top var(--ux-transition-normal) var(--ux-ease-out);
+}
+
+.pull-to-refresh.refreshing .pull-to-refresh-indicator {
+    top: 10px;
+}
+
+/* ===========================================
+   Empty States
+   =========================================== */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ux-space-2xl) var(--ux-space-lg);
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: var(--ins-secondary-color);
+    margin-bottom: var(--ux-space-lg);
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: var(--ux-text-xl);
+    font-weight: 600;
+    margin-bottom: var(--ux-space-sm);
+    color: var(--ins-heading-color);
+}
+
+.empty-state-description {
+    color: var(--ins-secondary-color);
+    margin-bottom: var(--ux-space-lg);
+    max-width: 300px;
+}
+
+/* ===========================================
+   Floating Action Button (FAB)
+   =========================================== */
+
+.fab {
+    position: fixed;
+    bottom: calc(var(--ux-space-lg) + var(--ux-safe-bottom));
+    right: var(--ux-space-lg);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transition: transform var(--ux-transition-fast) var(--ux-ease-out),
+                box-shadow var(--ux-transition-fast) var(--ux-ease-out);
+}
+
+.fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+[dir="rtl"] .fab {
+    right: auto;
+    left: var(--ux-space-lg);
+}
+
+/* FAB with menu */
+.fab-menu {
+    position: fixed;
+    bottom: calc(var(--ux-space-lg) + var(--ux-safe-bottom));
+    right: var(--ux-space-lg);
+    z-index: 1000;
+}
+
+.fab-menu-items {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all var(--ux-transition-normal) var(--ux-ease-out);
+}
+
+.fab-menu.open .fab-menu-items {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.fab-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fab-menu-item .fab-mini {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fab-menu-item .fab-label {
+    background: var(--ins-body-bg);
+    padding: 6px 12px;
+    border-radius: var(--ins-border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: var(--ux-text-sm);
+    white-space: nowrap;
+}
+
+[dir="rtl"] .fab-menu {
+    right: auto;
+    left: var(--ux-space-lg);
+}
+
+[dir="rtl"] .fab-menu-items {
+    align-items: flex-start;
+}
+
+/* ===========================================
+   Mobile Image Handling
+   =========================================== */
+
+/* Responsive images */
+.img-responsive {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Lazy loading placeholder */
+.img-lazy {
+    background: var(--ins-tertiary-bg);
+    transition: opacity var(--ux-transition-normal) var(--ux-ease-out);
+}
+
+.img-lazy.loaded {
+    background: transparent;
+}
+
+/* Image gallery on mobile */
+@media (max-width: 575.98px) {
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+    }
+    
+    .gallery-grid .gallery-item:first-child {
+        grid-column: span 2;
+    }
+}
+
+/* ===========================================
+   Mobile-Specific Utility Classes
+   =========================================== */
+
+/* Show/hide based on screen size */
+@media (max-width: 575.98px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 576px) {
+    .show-mobile-only {
+        display: none !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hide-mobile-tablet {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .show-mobile-tablet-only {
+        display: none !important;
+    }
+}
+
+/* Mobile-specific spacing */
+@media (max-width: 575.98px) {
+    .px-mobile-0 { padding-left: 0 !important; padding-right: 0 !important; }
+    .py-mobile-0 { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .px-mobile-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+    .py-mobile-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+    .px-mobile-3 { padding-left: 1rem !important; padding-right: 1rem !important; }
+    .py-mobile-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+    
+    .mx-mobile-0 { margin-left: 0 !important; margin-right: 0 !important; }
+    .my-mobile-0 { margin-top: 0 !important; margin-bottom: 0 !important; }
+    .mx-mobile-auto { margin-left: auto !important; margin-right: auto !important; }
+    
+    .text-mobile-center { text-align: center !important; }
+    .text-mobile-start { text-align: start !important; }
+    
+    .d-mobile-block { display: block !important; }
+    .d-mobile-flex { display: flex !important; }
+    .d-mobile-none { display: none !important; }
+    
+    .flex-mobile-column { flex-direction: column !important; }
+    .flex-mobile-wrap { flex-wrap: wrap !important; }
+    
+    .w-mobile-100 { width: 100% !important; }
+    .w-mobile-auto { width: auto !important; }
+    
+    .gap-mobile-2 { gap: 0.5rem !important; }
+    .gap-mobile-3 { gap: 1rem !important; }
+}
+
+/* ===========================================
+   Performance Optimizations
+   =========================================== */
+
+/* GPU acceleration for animations */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Reduce repaints for fixed elements */
+.fixed-top,
+.fixed-bottom,
+.sticky-top,
+.sticky-bottom {
+    transform: translateZ(0);
+}
+
+/* Content visibility for performance */
+@supports (content-visibility: auto) {
+    .content-lazy {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 500px;
+    }
+}
+
+/* ===========================================
+   Print Styles
+   =========================================== */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+    
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #666;
+    }
+}
+
+/* ===========================================
+   Accessibility Enhancements
+   =========================================== */
+
+/* Skip to content link */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    background: var(--ins-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 0 0 var(--ins-border-radius) var(--ins-border-radius);
+    z-index: 9999;
+    transition: top var(--ux-transition-fast) var(--ux-ease-out);
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn {
+        border-width: 2px;
+    }
+    
+    .form-control,
+    .form-select {
+        border-width: 2px;
+    }
+    
+    a {
+        text-decoration: underline;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .skeleton {
+        animation: none;
+        background: var(--ins-tertiary-bg);
+    }
+}
+
+/* ===========================================
+   Dark Mode Specific Adjustments
+   =========================================== */
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-bs-theme="light"]) {
+        color-scheme: dark;
+    }
+}
+
+html[data-bs-theme="dark"] {
+    color-scheme: dark;
+}
+
+html[data-bs-theme="dark"] .skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ins-tertiary-bg) 25%,
+        rgba(255, 255, 255, 0.05) 50%,
+        var(--ins-tertiary-bg) 75%
+    );
+    background-size: 200% 100%;
+}
+
+/* ===========================================
+   Container Query Support (Modern Browsers)
+   =========================================== */
+
+@supports (container-type: inline-size) {
+    .container-query {
+        container-type: inline-size;
+    }
+    
+    @container (max-width: 400px) {
+        .cq-stack {
+            flex-direction: column;
+        }
+        
+        .cq-full-width {
+            width: 100%;
+        }
+    }
+}
+
+/* ===========================================
+   Home Page & Store Page Mobile Enhancements
+   =========================================== */
+
+/* Better spacing for store page on mobile */
+@media (max-width: 575.98px) {
+    .store-page {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+    
+    /* Hero section mobile */
+    .store-hero {
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .store-hero h1 {
+        font-size: 1.5rem;
+        line-height: 1.3;
+    }
+    
+    .store-hero p {
+        font-size: 0.9rem;
+    }
+    
+    .store-hero-actions {
+        gap: 0.5rem !important;
+    }
+    
+    .store-hero-actions .btn {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Keep icons visible - they're important for UX */
+    .store-hero-actions .btn i,
+    .store-hero-actions .btn .bi {
+        display: inline-block;
+        flex-shrink: 0;
+    }
+}
+
+/* Category & Store Cards Grid - Mobile Spacing */
+/* Using p-2 class on .col for guaranteed spacing */
+.category-cards-container {
+    margin: 0 -0.5rem;
+}
+
+.category-cards-container > .col {
+    padding: 0.5rem !important;
+}
+
+@media (max-width: 767.98px) {
+    .category-cards-container {
+        margin: 0 -0.375rem;
+    }
+    
+    .category-cards-container > .col {
+        padding: 0.375rem !important;
+    }
+    
+    /* Category cards mobile */
+    .store-category-card {
+        border-radius: 0.75rem !important;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .store-category-card .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .store-category-card .card-title {
+        font-size: 0.875rem;
+        line-height: 1.3;
+    }
+    
+    .store-category-card .card-text {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .store-category-card .badge {
+        font-size: 0.625rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    /* Section titles mobile */
+    .store-page h5,
+    .store-page .h5 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .category-cards-container {
+        margin: 0 -0.25rem;
+    }
+    
+    .category-cards-container > .col {
+        padding: 0.25rem !important;
+    }
+    
+    /* Category card */
+    .store-category-card {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .store-category-card .ratio-4x3 {
+        aspect-ratio: 4/3;
+    }
+    
+    .store-category-card .card-body {
+        padding: 0.5rem !important;
+    }
+    
+    .store-category-card .card-title {
+        font-size: 0.8125rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .store-category-card .card-text {
+        -webkit-line-clamp: 1;
+        margin-top: 0.25rem !important;
+    }
+    
+    /* Section margins */
+    .mt-4 {
+        margin-top: 1.5rem !important;
+    }
+    
+    .mb-2 {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+/* Store Carousel Mobile */
+@media (max-width: 767.98px) {
+    .store-carousel {
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .store-carousel .card {
+        border-radius: 0.75rem !important;
+    }
+    
+    .store-carousel .card-body,
+    .store-carousel .p-2,
+    .store-carousel .p-md-3 {
+        padding: 0.75rem !important;
+    }
+    
+    .store-carousel h5 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .store-carousel p {
+        font-size: 0.8125rem;
+        line-height: 1.5;
+    }
+    
+    .store-carousel .badge {
+        font-size: 0.6875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .store-carousel .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .store-carousel .row.g-0 {
+        flex-direction: column;
+    }
+    
+    .store-carousel .col-12.col-sm-5,
+    .store-carousel .col-12.col-sm-7 {
+        width: 100%;
+    }
+    
+    .store-carousel .ratio-4x3 {
+        aspect-ratio: 16/9;
+    }
+}
+
+/* Featured Products Section Mobile */
+@media (max-width: 991.98px) {
+    .store-hero .d-none.d-lg-block {
+        display: none !important;
+    }
+}
+
+/* Product Cards Mobile */
+@media (max-width: 767.98px) {
+    .card.card-hovered {
+        border-radius: 0.75rem;
+    }
+    
+    .card.card-hovered .card-body {
+        padding: 0.625rem;
+    }
+    
+    .card.card-hovered .fw-semibold {
+        font-size: 0.8125rem;
+    }
+    
+    .card.card-hovered .badge {
+        font-size: 0.625rem;
+    }
+    
+    .card.card-hovered .text-muted.small {
+        font-size: 0.6875rem;
+    }
+}
+
+/* Stores Section Mobile */
+@media (max-width: 575.98px) {
+    .store-page .d-flex.align-items-center.justify-content-between {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .store-page .d-flex.align-items-center.justify-content-between h5 {
+        font-size: 1rem;
+    }
+}
+
+/* Pagination Mobile */
+@media (max-width: 575.98px) {
+    .store-page .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .store-page .page-link {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Badges & Tags Mobile */
+@media (max-width: 575.98px) {
+    .badge {
+        font-size: 0.6875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .badge.bg-primary-subtle,
+    .badge.bg-success-subtle,
+    .badge.bg-secondary-subtle,
+    .badge.bg-info-subtle {
+        font-weight: 500;
+    }
+}
+
+/* Buttons Mobile - Better Touch Targets */
+@media (max-width: 575.98px) {
+    .store-page .btn-sm {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+        min-height: 38px;
+    }
+    
+    .store-page .btn-outline-secondary,
+    .store-page .btn-outline-primary,
+    .store-page .btn-outline-success {
+        border-width: 1.5px;
+    }
+}
+
+/* Gap utilities for mobile */
+@media (max-width: 575.98px) {
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    .gap-3 {
+        gap: 1rem !important;
+    }
+    
+    .g-3 {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 1rem;
+    }
+    
+    .g-4 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1.25rem;
+    }
+}
+
+/* Modal improvements for mobile (partnership, delivery driver modals) */
+@media (max-width: 575.98px) {
+    .modal-dialog-centered {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        border-radius: 1rem;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .modal-lg {
+        max-width: calc(100% - 1rem);
+    }
+}
+
+/* Alert improvements for mobile */
+@media (max-width: 575.98px) {
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 0.5rem;
+    }
+    
+    .alert i {
+        font-size: 1rem;
+    }
+}
+
+/* Image aspect ratios mobile optimization */
+@media (max-width: 575.98px) {
+    .ratio-4x3 {
+        aspect-ratio: 4/3;
+    }
+    
+    .ratio-16x9 {
+        aspect-ratio: 16/9;
+    }
+    
+    /* Full width auto height images for mobile */
+    .store-category-card .card-img-wrapper img,
+    .card-hovered .card-img-wrapper img {
+        width: 100%;
+        height: auto;
+        max-height: 150px;
+        object-fit: contain;
+        object-position: center;
+        background: var(--bs-tertiary-bg, #f8f9fa);
+    }
+    
+    .store-category-card .card-img-wrapper,
+    .card-hovered .card-img-wrapper {
+        background: var(--bs-tertiary-bg, #f8f9fa);
+    }
+}
+
+/* Touch feedback for cards */
+@media (pointer: coarse) {
+    .store-category-card,
+    .card-hovered {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .store-category-card:active,
+    .card-hovered:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Smooth scrolling for horizontal sections */
+.scroll-x-mobile {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+}
+
+.scroll-x-mobile::-webkit-scrollbar {
+    display: none;
+}
+
+.scroll-x-mobile > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+}
+
+/* Pull-down refresh visual indicator */
+@media (max-width: 767.98px) {
+    .store-page {
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Container padding adjustments */
+@media (max-width: 575.98px) {
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .py-3 {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+/* ===========================================
+   Password Toggle & Search Icon Fixes for Mobile
+   =========================================== */
+
+/* Fix password toggle button on small screens */
+@media (max-width: 767.98px) {
+    /* Ensure input-group doesn't overflow */
+    .input-group {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    
+    /* Make password toggle button more compact on mobile */
+    .input-group .btn.togglePassword,
+    .input-group .btn-icon.togglePassword {
+        padding: 0.4rem 0.6rem;
+        min-width: 38px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .input-group .btn.togglePassword i,
+    .input-group .btn-icon.togglePassword i {
+        font-size: 1rem;
+        line-height: 1;
+    }
+    
+    /* Ensure password input doesn't overflow */
+    .input-group .form-control[type="password"],
+    .input-group .form-control[type="text"] {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+    }
+    
+    /* Fix search icon in input-group */
+    .input-group .input-group-text {
+        padding: 0.4rem 0.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .input-group .input-group-text i {
+        font-size: 1rem;
+        line-height: 1;
+    }
+    
+    /* Fix input-group-text with search icon */
+    .input-group-text.bg-body {
+        background-color: var(--ins-secondary-bg) !important;
+        border-right: 0;
+    }
+    
+    /* Adjust input padding when it has prefix icon */
+    .input-group > .input-group-text + .form-control {
+        border-left: 0;
+    }
+}
+
+/* Extra small screens - even more compact */
+@media (max-width: 575.98px) {
+    .input-group .btn.togglePassword,
+    .input-group .btn-icon.togglePassword {
+        padding: 0.35rem 0.5rem;
+        min-width: 36px;
+    }
+    
+    .input-group .btn.togglePassword i,
+    .input-group .btn-icon.togglePassword i {
+        font-size: 0.95rem;
+    }
+    
+    .input-group .input-group-text {
+        padding: 0.35rem 0.5rem;
+    }
+    
+    .input-group .input-group-text i {
+        font-size: 0.95rem;
+    }
+    
+    /* Slightly reduce form control padding on very small screens */
+    .input-group .form-control {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Fix for home header search specifically */
+@media (max-width: 767.98px) {
+    #headerProductSearchInput {
+        font-size: 0.95rem;
+        padding: 0.4rem 0.65rem;
+    }
+    
+    /* Ensure search form doesn't overflow */
+    .d-flex.position-relative > .input-group,
+    form.d-flex > .input-group {
+        width: 100%;
+        max-width: 100%;
+    }
+}

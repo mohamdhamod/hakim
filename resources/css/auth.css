@@ -1,0 +1,52 @@
+
+.auth-box {
+    padding: 50px;
+    min-height: 100vh
+}
+
+.auth-box .card-body {
+    padding: 40px
+}
+
+.auth-brand {
+    margin-bottom: 2rem
+}
+
+.auth-brand .logo-dark {
+    display: block
+}
+
+.auth-brand .logo-light {
+    display: none
+}
+.auth-overlay {
+    background: linear-gradient(to top, var(--ins-dark), rgba(var(--ins-dark-rgb),.8), rgba(var(--ins-dark-rgb),.5))
+}
+html[data-bs-theme=dark] .auth-brand .logo-light {
+    display: block
+}
+
+html[data-bs-theme=dark] .auth-brand .logo-dark {
+    display: none
+}
+
+
+@media (min-width: 768px) {
+    .auth-box-form {
+        max-width: 405px
+    }
+
+    .auth-sub-text {
+        max-width: 300px
+    }
+}
+html[data-bs-theme=dark] .top-alert {
+    background-color: var(--ins-primary)
+}
+.auth-box .card-body {
+    padding: 15px;
+}
+.auth-box {
+    padding: 40px 12px;
+    min-height: 100vh;
+}
