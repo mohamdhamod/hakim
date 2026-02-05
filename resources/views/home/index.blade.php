@@ -10,12 +10,12 @@
             <div class="col-lg-6">
                 <div class="hero-content">
                     @auth
-                        <span class="badge bg-success-soft mb-2">
+                        <span class="badge bg-success mb-2">
                             <i class="bi bi-check-circle-fill me-1"></i>
                             {{ __('translation.home.welcome_back') }}, {{ auth()->user()->name }}
                         </span>
                     @else
-                        <span class="badge bg-primary-soft mb-2">
+                        <span class="badge bg-primary mb-2">
                             <i class="bi bi-heart-pulse-fill me-1"></i>
                             {{ __('translation.home.your_health_partner') }}
                         </span>
