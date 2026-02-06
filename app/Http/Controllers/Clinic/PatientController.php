@@ -41,7 +41,9 @@ class PatientController extends Controller
         }
 
         if ($request->ajax()) {
-            $patients = Patient::where('clinic_id', $clinic->id)
+            $patients = Patient::with(['latestExamination'])
+                ->withCount('examinations')
+                ->where('clinic_id', $clinic->id)
                 ->select('patients.*');
 
             return DataTables::of($patients)
@@ -56,7 +58,7 @@ class PatientController extends Controller
                     return $lastExam ? $lastExam->examination_date->format('Y-m-d') : '-';
                 })
                 ->addColumn('examinations_count', function ($patient) {
-                    return $patient->examinations()->count();
+                    return $patient->examinations_count ?? 0;
                 })
                 ->addColumn('actions', function ($patient) {
                     return '

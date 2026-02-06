@@ -201,11 +201,25 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-12">
+                                <div class="col-md-8">
                                     <label class="form-label">{{ __('translation.examination.diagnosis') }}</label>
                                     <textarea name="diagnosis" class="form-control @error('diagnosis') is-invalid @enderror" rows="3" 
                                         placeholder="{{ __('translation.examination.diagnosis_placeholder') }}">{{ old('diagnosis', $examination->diagnosis) }}</textarea>
                                     @error('diagnosis')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        {{ __('translation.examination.icd_code') }}
+                                        <a href="https://icd.who.int/browse/2025-01/mms/en" target="_blank" class="text-info ms-1" title="{{ __('translation.examination.browse_icd_codes') }}">
+                                            <i class="bi bi-box-arrow-up-right small"></i>
+                                        </a>
+                                    </label>
+                                    <input type="text" name="icd_code" class="form-control @error('icd_code') is-invalid @enderror" 
+                                        value="{{ old('icd_code', $examination->icd_code) }}" 
+                                        placeholder="{{ __('translation.examination.icd_code_placeholder') }}">
+                                    @error('icd_code')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

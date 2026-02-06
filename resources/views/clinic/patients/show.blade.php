@@ -519,9 +519,19 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-12">
+                                        <div class="col-md-8">
                                             <label class="form-label">{{ __('translation.examination.diagnosis') }}</label>
                                             <textarea name="diagnosis" class="form-control" rows="2" placeholder="{{ __('translation.examination.diagnosis_placeholder') }}"></textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">
+                                                {{ __('translation.examination.icd_code') }}
+                                                <a href="https://icd.who.int/browse/2025-01/mms/en" target="_blank" class="text-info ms-1" title="{{ __('translation.examination.browse_icd_codes') }}">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </a>
+                                            </label>
+                                            <input type="text" name="icd_code" class="form-control" placeholder="{{ __('translation.examination.icd_code_placeholder') }}" maxlength="20">
+                                            <small class="text-muted">{{ __('translation.examination.icd_code_help') }}</small>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">{{ __('translation.examination.treatment_plan') }}</label>

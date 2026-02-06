@@ -40,7 +40,7 @@ class OtpLoginController extends Controller
             'attempts' => 0,
         ], self::OTP_TTL_SECONDS);
 
-        Mail::to($email)->send(new LoginOtpMail($otp));
+        Mail::to($email)->queue(new LoginOtpMail($otp));
 
         $request->session()->put('otp_login_email', $email);
 

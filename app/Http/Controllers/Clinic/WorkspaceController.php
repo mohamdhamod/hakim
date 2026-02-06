@@ -57,7 +57,8 @@ class WorkspaceController extends Controller
             ->get();
 
         // Get pending appointments (limit to 5)
-        $pendingAppointments = Appointment::where('clinic_id', $clinic->id)
+        $pendingAppointments = Appointment::with('patient')
+            ->where('clinic_id', $clinic->id)
             ->where('status', 'pending')
             ->limit(5)
             ->get();

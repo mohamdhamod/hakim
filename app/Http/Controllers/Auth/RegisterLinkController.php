@@ -61,7 +61,7 @@ class RegisterLinkController extends Controller
             ['email' => $email, 'token' => $rawToken]
         );
 
-        Mail::to($email)->send(new RegisterContinueMail($continueUrl));
+        Mail::to($email)->queue(new RegisterContinueMail($continueUrl));
 
         $message = __('translation.auth.continue_registration_link_sent');
 

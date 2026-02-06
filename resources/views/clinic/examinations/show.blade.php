@@ -182,7 +182,7 @@
                 @endif
 
                 {{-- Diagnosis & Treatment --}}
-                @if($examination->diagnosis || $examination->treatment_plan || $examination->prescriptions)
+                @if($examination->diagnosis || $examination->icd_code || $examination->treatment_plan || $examination->prescriptions)
                 <div class="card border-0 shadow-sm rounded-3 mb-4">
                     <div class="card-header bg-transparent border-0 py-3">
                         <h5 class="mb-0 fw-bold">
@@ -195,6 +195,17 @@
                             <div class="mb-4">
                                 <strong>{{ __('translation.examination.diagnosis') }}:</strong>
                                 <p class="mb-0 mt-2" style="white-space: pre-wrap;">{{ $examination->diagnosis }}</p>
+                            </div>
+                        @endif
+                        @if($examination->icd_code)
+                            <div class="mb-4">
+                                <strong>{{ __('translation.examination.icd_code') }}:</strong>
+                                <p class="mb-0 mt-2">
+                                    <span class="badge bg-primary">{{ $examination->icd_code }}</span>
+                                    <a href="https://icd.who.int/browse/2025-01/mms/en#{{ $examination->icd_code }}" target="_blank" class="text-info ms-2 small">
+                                        <i class="bi bi-box-arrow-up-right"></i> {{ __('translation.examination.view_icd_details') }}
+                                    </a>
+                                </p>
                             </div>
                         @endif
                         @if($examination->treatment_plan)
