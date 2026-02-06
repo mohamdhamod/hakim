@@ -13,7 +13,7 @@ class GrowthChartController extends Controller
     /**
      * Display a listing of growth measurements for a patient.
      */
-    public function index(Patient $patient)
+    public function index($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 
@@ -39,7 +39,7 @@ class GrowthChartController extends Controller
     /**
      * Show the form for creating a new growth measurement.
      */
-    public function create(Patient $patient)
+    public function create($lang ,Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -52,7 +52,7 @@ class GrowthChartController extends Controller
     /**
      * Store a newly created growth measurement in storage.
      */
-    public function store(Request $request, Patient $patient)
+    public function store(Request $request,$lang , Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -79,6 +79,14 @@ class GrowthChartController extends Controller
         
         $measurement->save();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.growth_measurement_added_successfully'),
+                'data' => $measurement
+            ]);
+        }
+
         return redirect()
             ->route('patients.growth-charts.index', $patient)
             ->with('success', __('translation.growth_measurement_added_successfully'));
@@ -87,7 +95,7 @@ class GrowthChartController extends Controller
     /**
      * Display the specified growth measurement.
      */
-    public function show(Patient $patient, GrowthMeasurement $growthChart)
+    public function show($lang ,Patient $patient, GrowthMeasurement $growthChart)
     {
         $this->authorize('view', $patient);
 
@@ -99,7 +107,7 @@ class GrowthChartController extends Controller
     /**
      * Show the form for editing the specified growth measurement.
      */
-    public function edit(Patient $patient, GrowthMeasurement $growthChart)
+    public function edit($lang ,Patient $patient, GrowthMeasurement $growthChart)
     {
         $this->authorize('update', $patient);
 
@@ -109,7 +117,7 @@ class GrowthChartController extends Controller
     /**
      * Update the specified growth measurement in storage.
      */
-    public function update(Request $request, Patient $patient, GrowthMeasurement $growthChart)
+    public function update(Request $request,$lang , Patient $patient, GrowthMeasurement $growthChart)
     {
         $this->authorize('update', $patient);
 
@@ -134,7 +142,7 @@ class GrowthChartController extends Controller
     /**
      * Remove the specified growth measurement from storage.
      */
-    public function destroy(Patient $patient, GrowthMeasurement $growthChart)
+    public function destroy($lang ,Patient $patient, GrowthMeasurement $growthChart)
     {
         $this->authorize('update', $patient);
 
@@ -148,7 +156,7 @@ class GrowthChartController extends Controller
     /**
      * Display growth chart visualization.
      */
-    public function chart(Patient $patient)
+    public function chart($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 

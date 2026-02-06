@@ -181,9 +181,23 @@ class PatientController extends Controller
             abort(403);
         }
 
-        $patient->load(['examinations' => function ($query) {
-            $query->orderBy('examination_date', 'desc');
-        }]);
+        $patient->load([
+            'examinations' => function ($query) {
+                $query->orderBy('examination_date', 'desc');
+            },
+            'labTestResults' => function ($query) {
+                $query->with('labTestType')->latest('test_date')->limit(10);
+            },
+            'vaccinationRecords' => function ($query) {
+                $query->with('vaccinationType')->latest('vaccination_date')->limit(10);
+            },
+            'growthMeasurements' => function ($query) {
+                $query->latest('measurement_date')->limit(10);
+            },
+            'chronicDiseases' => function ($query) {
+                $query->with('chronicDiseaseType')->where('status', '!=', 'resolved');
+            }
+        ]);
 
         // Generate examination number for the modal form
         $examinationNumber = Examination::generateExaminationNumber($clinic->id);

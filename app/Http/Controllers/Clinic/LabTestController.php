@@ -14,7 +14,7 @@ class LabTestController extends Controller
     /**
      * Display a listing of lab tests for a patient.
      */
-    public function index(Patient $patient)
+    public function index($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 
@@ -29,7 +29,7 @@ class LabTestController extends Controller
     /**
      * Show the form for creating a new lab test.
      */
-    public function create(Patient $patient)
+    public function create($lang ,Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -41,7 +41,7 @@ class LabTestController extends Controller
     /**
      * Store a newly created lab test in storage.
      */
-    public function store(Request $request, Patient $patient)
+    public function store(Request $request,$lang , Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -59,8 +59,17 @@ class LabTestController extends Controller
 
         $validated['patient_id'] = $patient->id;
         $validated['ordered_by_user_id'] = Auth::id();
+        $validated['status'] = $validated['status'] ?? 'completed';
 
-        LabTestResult::create($validated);
+        $labTest = LabTestResult::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.lab_test_added_successfully'),
+                'data' => $labTest
+            ]);
+        }
 
         return redirect()
             ->route('patients.lab-tests.index', $patient)
@@ -70,7 +79,7 @@ class LabTestController extends Controller
     /**
      * Display the specified lab test.
      */
-    public function show(Patient $patient, LabTestResult $labTest)
+    public function show($lang ,Patient $patient, LabTestResult $labTest)
     {
         $this->authorize('view', $patient);
 
@@ -82,7 +91,7 @@ class LabTestController extends Controller
     /**
      * Show the form for editing the specified lab test.
      */
-    public function edit(Patient $patient, LabTestResult $labTest)
+    public function edit($lang ,Patient $patient, LabTestResult $labTest)
     {
         $this->authorize('update', $patient);
 
@@ -94,7 +103,7 @@ class LabTestController extends Controller
     /**
      * Update the specified lab test in storage.
      */
-    public function update(Request $request, Patient $patient, LabTestResult $labTest)
+    public function update(Request $request,$lang , Patient $patient, LabTestResult $labTest)
     {
         $this->authorize('update', $patient);
 
@@ -120,7 +129,7 @@ class LabTestController extends Controller
     /**
      * Remove the specified lab test from storage.
      */
-    public function destroy(Patient $patient, LabTestResult $labTest)
+    public function destroy($lang ,Patient $patient, LabTestResult $labTest)
     {
         $this->authorize('update', $patient);
 
@@ -134,7 +143,7 @@ class LabTestController extends Controller
     /**
      * Display abnormal lab tests.
      */
-    public function abnormal(Patient $patient)
+    public function abnormal($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 

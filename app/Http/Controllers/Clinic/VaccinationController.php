@@ -14,7 +14,7 @@ class VaccinationController extends Controller
     /**
      * Display a listing of vaccinations for a patient.
      */
-    public function index(Patient $patient)
+    public function index($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 
@@ -36,7 +36,7 @@ class VaccinationController extends Controller
     /**
      * Show the form for creating a new vaccination record.
      */
-    public function create(Patient $patient)
+    public function create($lang ,Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -48,7 +48,7 @@ class VaccinationController extends Controller
     /**
      * Store a newly created vaccination record in storage.
      */
-    public function store(Request $request, Patient $patient)
+    public function store(Request $request,$lang , Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -68,7 +68,15 @@ class VaccinationController extends Controller
         $validated['patient_id'] = $patient->id;
         $validated['administered_by_user_id'] = Auth::id();
 
-        VaccinationRecord::create($validated);
+        $vaccination = VaccinationRecord::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.vaccination_added_successfully'),
+                'data' => $vaccination
+            ]);
+        }
 
         return redirect()
             ->route('patients.vaccinations.index', $patient)
@@ -78,7 +86,7 @@ class VaccinationController extends Controller
     /**
      * Display the specified vaccination record.
      */
-    public function show(Patient $patient, VaccinationRecord $vaccination)
+    public function show($lang ,Patient $patient, VaccinationRecord $vaccination)
     {
         $this->authorize('view', $patient);
 
@@ -90,7 +98,7 @@ class VaccinationController extends Controller
     /**
      * Show the form for editing the specified vaccination record.
      */
-    public function edit(Patient $patient, VaccinationRecord $vaccination)
+    public function edit($lang ,Patient $patient, VaccinationRecord $vaccination)
     {
         $this->authorize('update', $patient);
 
@@ -102,7 +110,7 @@ class VaccinationController extends Controller
     /**
      * Update the specified vaccination record in storage.
      */
-    public function update(Request $request, Patient $patient, VaccinationRecord $vaccination)
+    public function update(Request $request,$lang , Patient $patient, VaccinationRecord $vaccination)
     {
         $this->authorize('update', $patient);
 
@@ -129,7 +137,7 @@ class VaccinationController extends Controller
     /**
      * Remove the specified vaccination record from storage.
      */
-    public function destroy(Patient $patient, VaccinationRecord $vaccination)
+    public function destroy($lang ,Patient $patient, VaccinationRecord $vaccination)
     {
         $this->authorize('update', $patient);
 
@@ -143,7 +151,7 @@ class VaccinationController extends Controller
     /**
      * Display vaccination schedule.
      */
-    public function schedule(Patient $patient)
+    public function schedule($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 

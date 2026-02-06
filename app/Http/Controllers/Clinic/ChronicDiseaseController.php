@@ -15,7 +15,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Display a listing of chronic diseases for a patient.
      */
-    public function index(Patient $patient)
+    public function index($lang ,Patient $patient)
     {
         $this->authorize('view', $patient);
 
@@ -29,7 +29,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Show the form for creating a new chronic disease.
      */
-    public function create(Patient $patient)
+    public function create($lang ,Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -41,7 +41,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Store a newly created chronic disease in storage.
      */
-    public function store(Request $request, Patient $patient)
+    public function store(Request $request, $lang ,Patient $patient)
     {
         $this->authorize('update', $patient);
 
@@ -58,7 +58,15 @@ class ChronicDiseaseController extends Controller
         $validated['patient_id'] = $patient->id;
         $validated['diagnosed_by_user_id'] = Auth::id();
 
-        PatientChronicDisease::create($validated);
+        $disease = PatientChronicDisease::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.chronic_disease_added_successfully'),
+                'data' => $disease
+            ]);
+        }
 
         return redirect()
             ->route('patients.chronic-diseases.index', $patient)
@@ -68,7 +76,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Display the specified chronic disease.
      */
-    public function show(Patient $patient, PatientChronicDisease $chronicDisease)
+    public function show($lang ,Patient $patient, PatientChronicDisease $chronicDisease)
     {
         $this->authorize('view', $patient);
 
@@ -80,7 +88,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Show the form for editing the specified chronic disease.
      */
-    public function edit(Patient $patient, PatientChronicDisease $chronicDisease)
+    public function edit($lang ,Patient $patient, PatientChronicDisease $chronicDisease)
     {
         $this->authorize('update', $patient);
 
@@ -92,7 +100,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Update the specified chronic disease in storage.
      */
-    public function update(Request $request, Patient $patient, PatientChronicDisease $chronicDisease)
+    public function update(Request $request,$lang , Patient $patient, PatientChronicDisease $chronicDisease)
     {
         $this->authorize('update', $patient);
 
@@ -117,7 +125,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Remove the specified chronic disease from storage.
      */
-    public function destroy(Patient $patient, PatientChronicDisease $chronicDisease)
+    public function destroy($lang ,Patient $patient,  PatientChronicDisease $chronicDisease)
     {
         $this->authorize('update', $patient);
 
@@ -131,7 +139,7 @@ class ChronicDiseaseController extends Controller
     /**
      * Store a new monitoring record.
      */
-    public function storeMonitoring(Request $request, Patient $patient, PatientChronicDisease $chronicDisease)
+    public function storeMonitoring(Request $request, $lang ,  Patient $patient, PatientChronicDisease $chronicDisease)
     {
         $this->authorize('update', $patient);
 
