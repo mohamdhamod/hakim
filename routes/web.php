@@ -81,6 +81,23 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::patch('/patients/{patient}/notes', [Clinic\PatientController::class, 'updateNotes'])->name('clinic.patients.update-notes');
         Route::resource('patients', Clinic\PatientController::class)->names('clinic.patients');
 
+        // Lab Tests Management
+        Route::get('/patients/{patient}/lab-tests/abnormal', [Clinic\LabTestController::class, 'abnormal'])->name('patients.lab-tests.abnormal');
+        Route::resource('patients.lab-tests', Clinic\LabTestController::class)->names('patients.lab-tests');
+
+        // Vaccinations Management
+        Route::get('/patients/{patient}/vaccinations/schedule', [Clinic\VaccinationController::class, 'schedule'])->name('patients.vaccinations.schedule');
+        Route::resource('patients.vaccinations', Clinic\VaccinationController::class)->names('patients.vaccinations');
+
+        // Growth Charts Management
+        Route::get('/patients/{patient}/growth-charts/chart', [Clinic\GrowthChartController::class, 'chart'])->name('patients.growth-charts.chart');
+        Route::resource('patients.growth-charts', Clinic\GrowthChartController::class)->names('patients.growth-charts');
+
+        // Chronic Diseases Management
+        Route::post('/patients/{patient}/chronic-diseases/{chronicDisease}/monitoring', [Clinic\ChronicDiseaseController::class, 'storeMonitoring'])->name('patients.chronic-diseases.monitoring.store');
+        Route::get('/chronic-diseases/overdue-followups', [Clinic\ChronicDiseaseController::class, 'overdueFollowups'])->name('chronic-diseases.overdue-followups');
+        Route::resource('patients.chronic-diseases', Clinic\ChronicDiseaseController::class)->names('patients.chronic-diseases');
+
         // Appointments Management (for doctors)
         Route::get('/appointments', [Clinic\WorkspaceController::class, 'allAppointments'])->name('clinic.appointments.index');
         Route::get('/appointments/{appointment}/details', [Clinic\WorkspaceController::class, 'appointmentDetails'])->name('clinic.appointments.details');

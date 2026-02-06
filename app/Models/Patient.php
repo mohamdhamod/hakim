@@ -189,6 +189,38 @@ class Patient extends Model
     }
 
     /**
+     * Get lab test results for this patient.
+     */
+    public function labTestResults()
+    {
+        return $this->hasMany(LabTestResult::class);
+    }
+
+    /**
+     * Get vaccination records for this patient.
+     */
+    public function vaccinationRecords()
+    {
+        return $this->hasMany(VaccinationRecord::class);
+    }
+
+    /**
+     * Get growth measurements for this patient.
+     */
+    public function growthMeasurements()
+    {
+        return $this->hasMany(GrowthMeasurement::class);
+    }
+
+    /**
+     * Get chronic diseases for this patient.
+     */
+    public function chronicDiseases()
+    {
+        return $this->hasMany(PatientChronicDisease::class);
+    }
+
+    /**
      * Scope for searching patients.
      */
     public function scopeSearch($query, $term)
