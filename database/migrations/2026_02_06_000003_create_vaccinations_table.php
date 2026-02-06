@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Main vaccination types table
         Schema::create('vaccination_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name_en');
-            $table->string('name_ar');
-            $table->text('description_en')->nullable();
-            $table->text('description_ar')->nullable();
+            $table->string('key')->unique(); // Unique identifier
             $table->string('disease_prevented'); // Disease this vaccine prevents
             $table->integer('recommended_age_months')->nullable(); // Age in months
             $table->string('age_group')->nullable(); // Infant, Child, Adult, etc.
@@ -29,6 +27,19 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        // Vaccination type translations table
+        Schema::create('vaccination_type_translations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('vaccination_type_id')->constrained()->onDelete('cascade');
+            $table->string('locale', 10)->index(); // ar, en, etc.
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->timestamps();
+            
+            $table->unique(['vaccination_type_id', 'locale']);
+        });
+
+        // Vaccination records table
         Schema::create('vaccination_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
@@ -56,6 +67,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('vaccination_records');
+        Schema::dropIfExists('vaccination_type_translations');
         Schema::dropIfExists('vaccination_types');
     }
 };

@@ -4,17 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Astrotomic\Translatable\Translatable;
 
-class LabTestType extends Model
+class LabTestType extends Model implements TranslatableContract
 {
-    use HasFactory;
+    use HasFactory, Translatable;
 
     protected $fillable = [
-        'name_en',
-        'name_ar',
-        'description_en',
-        'description_ar',
+        'key',
         'category',
         'unit',
         'normal_range_min',
@@ -22,6 +20,11 @@ class LabTestType extends Model
         'normal_range_text',
         'order',
         'is_active'
+    ];
+
+    public array $translatedAttributes = [
+        'name',
+        'description',
     ];
 
     protected $casts = [
@@ -39,22 +42,6 @@ class LabTestType extends Model
     }
 
     /**
-     * Get the localized name.
-     */
-    public function getNameAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
-    }
-
-    /**
-     * Get the localized description.
-     */
-    public function getDescriptionAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->description_ar : $this->description_en;
-    }
-
-    /**
      * Scope: Active test types only.
      */
     public function scopeActive($query)
@@ -67,7 +54,7 @@ class LabTestType extends Model
      */
     public function scopeOrdered($query)
     {
-        return $query->orderBy('order')->orderBy('name_en');
+        return $query->orderBy('order');
     }
 
     /**

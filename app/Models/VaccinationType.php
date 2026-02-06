@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Astrotomic\Translatable\Translatable;
 
-class VaccinationType extends Model
+class VaccinationType extends Model implements TranslatableContract
 {
-    use HasFactory;
+    use HasFactory, Translatable;
 
     protected $fillable = [
-        'name_en',
-        'name_ar',
-        'description_en',
-        'description_ar',
+        'key',
         'disease_prevented',
         'recommended_age_months',
         'age_group',
@@ -23,6 +22,11 @@ class VaccinationType extends Model
         'is_mandatory',
         'is_active',
         'order'
+    ];
+
+    public array $translatedAttributes = [
+        'name',
+        'description',
     ];
 
     protected $casts = [
@@ -36,22 +40,6 @@ class VaccinationType extends Model
     public function vaccinationRecords()
     {
         return $this->hasMany(VaccinationRecord::class);
-    }
-
-    /**
-     * Get the localized name.
-     */
-    public function getNameAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
-    }
-
-    /**
-     * Get the localized description.
-     */
-    public function getDescriptionAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->description_ar : $this->description_en;
     }
 
     /**

@@ -4,22 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Astrotomic\Translatable\Translatable;
 
-class ChronicDiseaseType extends Model
+class ChronicDiseaseType extends Model implements TranslatableContract
 {
-    use HasFactory;
+    use HasFactory, Translatable;
 
     protected $fillable = [
-        'name_en',
-        'name_ar',
-        'description_en',
-        'description_ar',
+        'key',
         'icd11_code',
         'category',
-        'management_guidelines_en',
-        'management_guidelines_ar',
         'followup_interval_days',
         'is_active'
+    ];
+
+    public array $translatedAttributes = [
+        'name',
+        'description',
+        'management_guidelines',
     ];
 
     protected $casts = [
@@ -32,30 +35,6 @@ class ChronicDiseaseType extends Model
     public function patientChronicDiseases()
     {
         return $this->hasMany(PatientChronicDisease::class);
-    }
-
-    /**
-     * Get the localized name.
-     */
-    public function getNameAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
-    }
-
-    /**
-     * Get the localized description.
-     */
-    public function getDescriptionAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->description_ar : $this->description_en;
-    }
-
-    /**
-     * Get the localized management guidelines.
-     */
-    public function getManagementGuidelinesAttribute()
-    {
-        return app()->getLocale() === 'ar' ? $this->management_guidelines_ar : $this->management_guidelines_en;
     }
 
     /**

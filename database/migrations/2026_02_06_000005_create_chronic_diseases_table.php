@@ -11,25 +11,40 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Main chronic disease types table
         Schema::create('chronic_disease_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name_en');
-            $table->string('name_ar');
-            $table->text('description_en')->nullable();
-            $table->text('description_ar')->nullable();
+            $table->string('key')->unique(); // Unique identifier
             $table->string('icd11_code')->nullable();
             $table->string('category'); // Diabetes, Hypertension, Asthma, etc.
-            $table->text('management_guidelines_en')->nullable();
-            $table->text('management_guidelines_ar')->nullable();
             $table->integer('followup_interval_days')->default(90); // Recommended follow-up
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
 
+        // Chronic disease type translations table
+        Schema::create('chronic_disease_type_translations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('chronic_disease_type_id')
+                ->constrained('chronic_disease_types')
+                ->onDelete('cascade')
+                ->name('cd_type_translations_type_id_fk');
+            $table->string('locale', 10)->index(); // ar, en, etc.
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->text('management_guidelines')->nullable();
+            $table->timestamps();
+            
+            $table->unique(['chronic_disease_type_id', 'locale'], 'cd_type_locale_unique');
+        });
+
         Schema::create('patient_chronic_diseases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
-            $table->foreignId('chronic_disease_type_id')->constrained()->onDelete('cascade');
+            $table->foreignId('chronic_disease_type_id')
+                ->constrained('chronic_disease_types')
+                ->onDelete('cascade')
+                ->name('pcd_cd_type_id_fk');
             $table->foreignId('diagnosed_by_user_id')->constrained('users')->onDelete('cascade');
             $table->date('diagnosis_date');
             $table->enum('severity', ['mild', 'moderate', 'severe'])->nullable();
@@ -42,12 +57,15 @@ return new class extends Migration
             
             $table->index(['patient_id', 'status']);
             $table->index('next_followup_date');
-            $table->unique(['patient_id', 'chronic_disease_type_id']);
+            $table->unique(['patient_id', 'chronic_disease_type_id'], 'pcd_patient_type_unique');
         });
 
         Schema::create('chronic_disease_monitoring', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_chronic_disease_id')->constrained()->onDelete('cascade');
+            $table->foreignId('patient_chronic_disease_id')
+                ->constrained('patient_chronic_diseases')
+                ->onDelete('cascade')
+                ->name('cdm_pcd_id_fk');
             $table->foreignId('examination_id')->nullable()->constrained('examinations')->onDelete('set null');
             $table->foreignId('recorded_by_user_id')->constrained('users')->onDelete('cascade');
             $table->date('monitoring_date');
@@ -58,7 +76,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
             
-            $table->index(['patient_chronic_disease_id', 'monitoring_date']);
+            $table->index(['patient_chronic_disease_id', 'monitoring_date'], 'cdm_pcd_date_idx');
             $table->index('parameter_name');
         });
     }
@@ -70,6 +88,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('chronic_disease_monitoring');
         Schema::dropIfExists('patient_chronic_diseases');
+        Schema::dropIfExists('chronic_disease_type_translations');
         Schema::dropIfExists('chronic_disease_types');
     }
 };

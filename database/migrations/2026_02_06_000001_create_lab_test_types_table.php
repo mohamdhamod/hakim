@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Main table
         Schema::create('lab_test_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name_en');
-            $table->string('name_ar');
-            $table->text('description_en')->nullable();
-            $table->text('description_ar')->nullable();
+            $table->string('key')->unique(); // Unique identifier
             $table->string('category'); // Hematology, Biochemistry, Microbiology, etc.
             $table->string('unit')->nullable(); // mg/dL, mmol/L, etc.
             $table->decimal('normal_range_min', 10, 2)->nullable();
@@ -26,6 +24,18 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
+
+        // Translations table
+        Schema::create('lab_test_type_translations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('lab_test_type_id')->constrained()->onDelete('cascade');
+            $table->string('locale', 10)->index(); // ar, en, etc.
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->timestamps();
+            
+            $table->unique(['lab_test_type_id', 'locale']);
+        });
     }
 
     /**
@@ -33,6 +43,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('lab_test_type_translations');
         Schema::dropIfExists('lab_test_types');
     }
 };
