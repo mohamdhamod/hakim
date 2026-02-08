@@ -66,6 +66,7 @@ return [
         'highest_rated' => 'الأعلى تقييماً',
         'availability' => 'التوفر',
         'available' => 'متاح',
+        'processing' => 'جاري المعالجة...',
     ],
 
     'export' => [
@@ -594,12 +595,23 @@ return [
         'welcome_subtitle' => 'إليك نظرة عامة على أداء منصتك اليوم',
         'generate_content' => 'حجز جديد',
         
+        // Platform Stats
+        'platform_stats' => 'إحصائيات المنصة',
+        'clinics' => 'العيادات',
+        'pending_clinics' => 'العيادات المعلقة',
+        'today_appointments' => 'مواعيد اليوم',
+        'week_appointments' => 'مواعيد الأسبوع',
+        'total_patients' => 'إجمالي المرضى',
+        'recent_appointments' => 'أحدث المواعيد',
+        'no_recent_appointments' => 'لا توجد مواعيد حديثة',
+        
         // Statistics
         'stats' => [
             'total_users' => 'إجمالي المستخدمين',
             'active_clinics' => 'العيادات النشطة',
             'contents_generated' => 'المواعيد',
             'specialties' => 'التخصصات',
+            'total_appointments' => 'إجمالي المواعيد',
         ],
         
         // Time periods
@@ -906,6 +918,9 @@ return [
         'active_subscriptions' => 'الاشتراكات النشطة',
         'manage_subscriptions' => 'إدارة الاشتراكات',
         'product_management'=> 'إدارة العيادات',
+        'content_generation' => 'عمليات العيادة',
+        'browse_clinics' => 'تصفح العيادات',
+        'favorites' => 'المفضلة',
         'medical_specialties' => 'التخصصات',
         'manage_specialties' => 'إدارة التخصصات',
         'specialties' => 'التخصصات',
@@ -2377,6 +2392,8 @@ return [
     
     'clinic' => [
         'management' => 'إدارة العيادة',
+        'management_description' => 'إدارة جميع العيادات المسجلة ومراجعة طلبات الموافقة ومتابعة أنشطة العيادات.',
+        'all_clinics' => 'جميع العيادات',
         'clinics' => 'العيادات',
         'dashboard' => 'لوحة التحكم',
         'welcome' => 'مرحباً',
@@ -2402,6 +2419,7 @@ return [
             'approved' => 'معتمدة',
             'rejected' => 'مرفوضة',
         ],
+        'status_label' => 'الحالة',
         'pending' => 'قيد الانتظار',
         'pending_approvals' => 'طلبات الموافقة',
         'pending_approval_title' => 'الحساب قيد المراجعة',
@@ -2417,6 +2435,7 @@ return [
         'reason_required' => 'يرجى تقديم سبب الرفض.',
         'contact_support' => 'يرجى التواصل مع الدعم للمزيد من المعلومات.',
         'confirm_approve' => 'هل أنت متأكد من الموافقة على هذه العيادة؟',
+        'approve_clinic_message' => 'سيتم تفعيل العيادة وحساب الطبيب.',
         'confirm_reject' => 'هل أنت متأكد من رفض هذه العيادة؟',
         'approved_successfully' => 'تمت الموافقة على العيادة بنجاح.',
         'rejected_successfully' => 'تم رفض العيادة بنجاح.',
@@ -2444,6 +2463,12 @@ return [
             'this_month' => 'معاينات هذا الشهر',
         ],
         'view_patient' => 'ملف المريض',
+        'icon' => 'الأيقونة',
+        'specialty' => 'التخصص',
+        'no_clinics_found' => 'لا توجد عيادات',
+        'no_clinics_found_message' => 'لا توجد عيادات مسجلة حتى الآن.',
+        'no_pending_clinics' => 'لا توجد طلبات معلقة',
+        'no_pending_clinics_message' => 'تمت معالجة جميع طلبات تسجيل العيادات. عمل رائع!',
     ],
 
     'patient' => [

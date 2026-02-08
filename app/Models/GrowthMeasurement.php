@@ -75,6 +75,88 @@ class GrowthMeasurement extends Model
     }
 
     /**
+     * Calculate WHO percentiles for all metrics.
+     */
+    public function calculatePercentiles()
+    {
+        if (!$this->patient || !$this->patient->gender || !$this->age_months) {
+            return;
+        }
+
+        $calculator = app(\App\Services\WhoGrowthCalculator::class);
+        $gender = $this->patient->gender;
+        $ageMonths = $this->age_months;
+
+        // Calculate weight percentile
+        if ($this->weight_kg) {
+            $this->weight_percentile = $calculator->calculateWeightPercentile(
+                $ageMonths,
+                $gender,
+                $this->weight_kg
+            );
+        }
+
+        // Calculate height percentile
+        if ($this->height_cm) {
+            $this->height_percentile = $calculator->calculateHeightPercentile(
+                $ageMonths,
+                $gender,
+                $this->height_cm
+            );
+        }
+
+        // Calculate BMI percentile
+        if ($this->bmi) {
+            $this->bmi_percentile = $calculator->calculateBmiPercentile(
+                $ageMonths,
+                $gender,
+                $this->bmi
+            );
+        }
+
+        // Calculate head circumference percentile
+        if ($this->head_circumference_cm) {
+            $this->head_circumference_percentile = $calculator->calculateHeadCircumferencePercentile(
+                $ageMonths,
+                $gender,
+                $this->head_circumference_cm
+            );
+        }
+
+        // Set interpretation
+        $this->interpretation = $this->getOverallInterpretation($calculator);
+    }
+
+    /**
+     * Get overall growth interpretation.
+     */
+    private function getOverallInterpretation($calculator)
+    {
+        $interpretations = [];
+
+        if ($this->weight_percentile !== null) {
+            $interpretations[] = $calculator->getInterpretation($this->weight_percentile, 'weight');
+        }
+
+        if ($this->height_percentile !== null) {
+            $interpretations[] = $calculator->getInterpretation($this->height_percentile, 'height');
+        }
+
+        if ($this->bmi_percentile !== null) {
+            $interpretations[] = $calculator->getInterpretation($this->bmi_percentile, 'bmi');
+        }
+
+        // Return most concerning interpretation
+        if (in_array('severely_low', $interpretations) || in_array('severely_high', $interpretations)) {
+            return 'attention_needed';
+        } elseif (in_array('low', $interpretations) || in_array('high', $interpretations)) {
+            return 'monitor';
+        } else {
+            return 'normal';
+        }
+    }
+
+    /**
      * Scope: Filter by patient.
      */
     public function scopeForPatient($query, $patientId)

@@ -30,9 +30,13 @@ class Specialty extends Model implements TranslatableContract
         'description',
     ];
 
-    
-
-
+    /**
+     * Get the clinics for this specialty.
+     */
+    public function clinics(): HasMany
+    {
+        return $this->hasMany(Clinic::class);
+    }
 
     /**
      * Scope to get only active specialties.

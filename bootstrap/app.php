@@ -8,7 +8,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
-    )->withMiddleware(function (Middleware $middleware): void {
+    )
+    ->withSchedule(function ($schedule) {
+        // Send medical reminders daily at 9:00 AM
+        $schedule->command('medical:send-reminders --type=all --days=7')
+            ->dailyAt('09:00')
+            ->timezone('Asia/Baghdad');
+    })
+    ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
             'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
@@ -38,8 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\Language::class,
-            \App\Http\Middleware\AutoDetectUserLocale::class,
+            \App\Http\Middleware\LocaleFromUrl::class,
             \App\Http\Middleware\VerifyRecaptchaV3::class,
         ]);
 

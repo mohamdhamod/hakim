@@ -23,15 +23,43 @@
 
         <!-- Navigation Menu -->
         <ul class="side-nav">
+            @can(\App\Enums\PermissionEnum::SETTING_VIEW)
+                <li class="side-nav-item">
+                    <a href="{{ route('dashboard') }}" class="side-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <i class="menu-icon bi bi-speedometer2"></i>
+                        <span class="menu-text">{{ __('translation.sidebar.dashboard') }}</span>
+                    </a>
+                </li>
+            @endcan
+
+            @canany([
+                \App\Enums\PermissionEnum::MANAGE_CLINICS_VIEW,
+            ])
+                <li class="side-nav-title mt-3">{{ __('translation.sidebar.browse_clinics') }}</li>
+
+                <li class="side-nav-item">
+                    <a href="{{ route('clinics.index') }}" class="side-nav-link {{ request()->routeIs('clinics.index') ? 'active' : '' }}">
+                        <i class="menu-icon bi bi-building"></i>
+                        <span class="menu-text">{{ __('translation.dashboard.clinics') }}</span>
+                    </a>
+                </li>
+                <li class="side-nav-item">
+                    <a href="{{ route('clinics.pending') }}" class="side-nav-link {{ request()->routeIs('clinics.pending') ? 'active' : '' }}">
+                        <i class="menu-icon bi bi-hourglass-split"></i>
+                        <span class="menu-text">{{ __('translation.dashboard.pending_clinics') }}</span>
+                    </a>
+                </li>
+            @endcanany
+
             @canany([
                 \App\Enums\PermissionEnum::MANAGE_SPECIALTIES_VIEW,
             ])
-                <li class="side-nav-title mt-3">{{ __('translation.sidebar.specialties') ?? 'Specialties' }}</li>
+                <li class="side-nav-title mt-3">{{ __('translation.sidebar.specialties') }}</li>
 
                 <li class="side-nav-item">
                     <a href="{{ route('specialties.index') }}" class="side-nav-link {{ request()->routeIs('specialties.*') ? 'active' : '' }}">
                         <i class="menu-icon bi bi-hospital"></i>
-                        <span class="menu-text">{{ __('translation.sidebar.manage_specialties') ?? 'Manage Specialties' }}</span>
+                        <span class="menu-text">{{ __('translation.sidebar.manage_specialties') }}</span>
                     </a>
                 </li>
             @endcanany

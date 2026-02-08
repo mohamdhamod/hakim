@@ -78,11 +78,11 @@ class DashboardController extends Controller
     {
         return [
             'users' => User::count(),
-            'clinics' => Clinic::where('is_approved', true)->count(),
+            'clinics' => Clinic::approved()->count(),
             'appointments' => Appointment::count(),
             'patients' => Patient::count(),
             'specialties' => Specialty::where('active', true)->count(),
-            'pending_clinics' => Clinic::where('is_approved', false)->count(),
+            'pending_clinics' => Clinic::pending()->count(),
             'today_appointments' => Appointment::whereDate('appointment_date', today())->count(),
             'week_appointments' => Appointment::whereBetween('appointment_date', [now()->startOfWeek(), now()->endOfWeek()])->count(),
             'month_appointments' => Appointment::whereMonth('appointment_date', now()->month)->whereYear('appointment_date', now()->year)->count(),

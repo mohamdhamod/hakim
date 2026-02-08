@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Clinic;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
 
 class ClinicsController extends Controller
 {
@@ -15,40 +14,12 @@ class ClinicsController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            $clinics = Clinic::with(['doctor'])
-                ->select('clinics.*');
+        $clinics = Clinic::with(['doctor', 'specialty'])
+            ->withCount('patients')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
-            return DataTables::of($clinics)
-                ->addColumn('doctor_name', function ($clinic) {
-                    return $clinic->doctor->name ?? '-';
-                })
-                ->addColumn('doctor_email', function ($clinic) {
-                    return $clinic->doctor->email ?? '-';
-                })
-                ->addColumn('status_badge', function ($clinic) {
-                    return '<span class="badge ' . $clinic->status_badge_class . '">' . $clinic->status_label . '</span>';
-                })
-                ->addColumn('patients_count', function ($clinic) {
-                    return $clinic->patients()->count();
-                })
-                ->addColumn('actions', function ($clinic) {
-                    $actions = '<div class="btn-group">';
-                    $actions .= '<a href="' . route('clinics.show', $clinic->id) . '" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>';
-                    
-                    if ($clinic->status === 'pending') {
-                        $actions .= '<button type="button" class="btn btn-sm btn-success approve-btn" data-id="' . $clinic->id . '"><i class="bi bi-check-lg"></i></button>';
-                        $actions .= '<button type="button" class="btn btn-sm btn-danger reject-btn" data-id="' . $clinic->id . '"><i class="bi bi-x-lg"></i></button>';
-                    }
-                    
-                    $actions .= '</div>';
-                    return $actions;
-                })
-                ->rawColumns(['status_badge', 'actions'])
-                ->make(true);
-        }
-
-        return view('dashboard.clinics.index');
+        return view('dashboard.clinics.index', compact('clinics'));
     }
 
     /**
@@ -56,46 +27,18 @@ class ClinicsController extends Controller
      */
     public function pending(Request $request)
     {
-        if ($request->ajax()) {
-            $clinics = Clinic::with(['doctor'])
-                ->pending()
-                ->select('clinics.*');
+        $clinics = Clinic::with(['doctor', 'specialty'])
+            ->pending()
+            ->orderBy('created_at', 'asc')
+            ->paginate(12);
 
-            return DataTables::of($clinics)
-                ->addColumn('doctor_name', function ($clinic) {
-                    return $clinic->doctor->name ?? '-';
-                })
-                ->addColumn('doctor_email', function ($clinic) {
-                    return $clinic->doctor->email ?? '-';
-                })
-                ->addColumn('doctor_phone', function ($clinic) {
-                    return $clinic->doctor->phone ?? '-';
-                })
-                ->addColumn('created_at_formatted', function ($clinic) {
-                    return $clinic->created_at->format('Y-m-d H:i');
-                })
-                ->addColumn('actions', function ($clinic) {
-                    return '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success approve-btn" data-id="' . $clinic->id . '">
-                                <i class="bi bi-check-lg"></i> ' . __('translation.common.approve') . '
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger reject-btn" data-id="' . $clinic->id . '">
-                                <i class="bi bi-x-lg"></i> ' . __('translation.common.reject') . '
-                            </button>
-                        </div>';
-                })
-                ->rawColumns(['actions'])
-                ->make(true);
-        }
-
-        return view('dashboard.clinics.pending');
+        return view('dashboard.clinics.pending', compact('clinics'));
     }
 
     /**
      * Show clinic details.
      */
-    public function show(Clinic $clinic)
+    public function show($lang, Clinic $clinic)
     {
         $clinic->load(['doctor', 'patients', 'approver']);
         return view('dashboard.clinics.show', compact('clinic'));
@@ -104,7 +47,7 @@ class ClinicsController extends Controller
     /**
      * Approve a clinic.
      */
-    public function approve(Request $request, Clinic $clinic)
+    public function approve(Request $request,$lang, Clinic $clinic)
     {
         if ($clinic->status !== 'pending') {
             return response()->json([
@@ -127,7 +70,7 @@ class ClinicsController extends Controller
     /**
      * Reject a clinic.
      */
-    public function reject(Request $request, Clinic $clinic)
+    public function reject(Request $request,$lang, Clinic $clinic)
     {
         $request->validate([
             'reason' => 'required|string|max:500',

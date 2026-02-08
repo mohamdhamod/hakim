@@ -1,4 +1,5 @@
 @vite(['resources/css/app.css'])
+<link rel="stylesheet" href="{{ asset('css/print.css') }}" media="print">
 @stack("extra_styles")
 <style>
     html[dir=rtl] .content-page , html[dir=ltr] .content-page {

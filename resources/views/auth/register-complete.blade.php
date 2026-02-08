@@ -2,12 +2,6 @@
 @include('layout.extra_meta')
 
 @section('content')
-    <style>
-        @media (max-width: 574px) {
-
-        }
-    </style>
-
     <div class="auth-box overflow-hidden align-items-center d-flex">
         <div class="container">
             <div class="row justify-content-center">
@@ -63,25 +57,6 @@
                                 <input type="tel" id="phone" name="phone" class="form-control" value="{{ old('phone') }}">
                             </div>
 
-                                <div class="mb-3">
-                                    <label for="country_id" class="form-label">
-                                        {{ __('translation.auth.country') }} <span class="text-danger">*</span>
-                                    </label>
-                                    <select id="country_id" name="country_id" class="form-select select2" required>
-                                        <option value="">{{ __('translation.auth.select_country') }}</option>
-                                        @foreach(\App\Models\Country::where('is_active', 1)->orderedWithPriority()->get() as $country)
-                                            <option value="{{ $country->id }}" 
-                                                    data-flag="{{ $country->flag_url }}" 
-                                                    {{ old('country_id') == $country->id ? 'selected' : '' }}>
-                                                {{ $country->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('country_id')
-                                    <span class="invalid-feedback d-block"><strong>{{ $message }}</strong></span>
-                                    @enderror
-                                </div>
-
                                 <!-- User Type Selection -->
                                 <div class="mb-3">
                                     <label for="user_type" class="form-label">
@@ -117,23 +92,6 @@
                                     @error('specialty_id')
                                     <span class="invalid-feedback d-block"><strong>{{ $message }}</strong></span>
                                     @enderror
-                                </div>
-
-                                <!-- Clinic Name (Only for Doctors) -->
-                                <div class="mb-3" id="clinic_name_container" style="display: none;">
-                                    <label for="clinic_name" class="form-label">
-                                        {{ __('translation.auth.clinic_name') }} <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" id="clinic_name" name="clinic_name" 
-                                           value="{{ old('clinic_name') }}" 
-                                           placeholder="{{ __('translation.auth.clinic_name_placeholder') }}" 
-                                           class="form-control">
-                                    @error('clinic_name')
-                                    <span class="invalid-feedback d-block"><strong>{{ $message }}</strong></span>
-                                    @enderror
-                                    <small class="text-muted">
-                                        {{ __('translation.auth.clinic_approval_notice') }}
-                                    </small>
                                 </div>
 
                                 <!-- Clinic Address (Only for Doctors) -->
@@ -200,64 +158,49 @@
             try { if (window.bindPasswordToggle) bindPasswordToggle(); } catch(e) { console.error(e); }
             try { if (window.handleSubmit) handleSubmit('#formRegisterComplete'); } catch(e) { console.error(e); }
             
-            // Initialize Select2 for country dropdown with flags
-            if (typeof $.fn.select2 !== 'undefined') {
-                $('#country_id').select2({
-                    placeholder: '{{ __('translation.auth.select_country') }}',
-                    allowClear: false,
-                    width: '100%',
-                    templateResult: formatCountryOption,
-                    templateSelection: formatCountryOption
-                });
-            }
-
-            // User type change handler - show/hide clinic fields
+            // Get elements
             const userTypeSelect = document.getElementById('user_type');
             const specialtyContainer = document.getElementById('specialty_container');
-            const clinicNameContainer = document.getElementById('clinic_name_container');
             const clinicAddressContainer = document.getElementById('clinic_address_container');
-            const clinicNameInput = document.getElementById('clinic_name');
             const specialtyInput = document.getElementById('specialty_id');
 
             function toggleClinicFields() {
-                if (userTypeSelect.value === 'doctor') {
+                const value = userTypeSelect.value;
+                if (value === 'doctor') {
                     specialtyContainer.style.display = 'block';
-                    clinicNameContainer.style.display = 'block';
                     clinicAddressContainer.style.display = 'block';
-                    clinicNameInput.setAttribute('required', 'required');
                     specialtyInput.setAttribute('required', 'required');
                 } else {
                     specialtyContainer.style.display = 'none';
-                    clinicNameContainer.style.display = 'none';
                     clinicAddressContainer.style.display = 'none';
-                    clinicNameInput.removeAttribute('required');
                     specialtyInput.removeAttribute('required');
                 }
             }
 
-            userTypeSelect.addEventListener('change', toggleClinicFields);
-            // Check initial state
-            toggleClinicFields();
-        });
+            // Initialize Choices.js for user type dropdown
+            window.loadChoices().then(function(Choices) {
+                new Choices(userTypeSelect, {
+                    searchEnabled: false,
+                    itemSelectText: '',
+                    shouldSort: false,
+                    allowHTML: true
+                });
 
-        // Format country option with flag
-        function formatCountryOption(country) {
-            if (!country.id) {
-                return country.text;
-            }
-            
-            var flagUrl = $(country.element).data('flag');
-            if (!flagUrl) {
-                return country.text;
-            }
-            
-            var $country = $(
-                '<span style="display: flex; align-items: center;">' +
-                '<img src="' + flagUrl + '" class="img-flag" style="width: 20px; height: 15px; margin-right: 8px; object-fit: cover; border: 1px solid #ddd;" onerror="this.style.display=\'none\'" /> ' +
-                '<span>' + country.text + '</span>' +
-                '</span>'
-            );
-            return $country;
-        }
+                // Initialize Choices.js for specialty dropdown
+                new Choices(specialtyInput, {
+                    searchEnabled: true,
+                    itemSelectText: '',
+                    shouldSort: false,
+                    allowHTML: true,
+                    searchPlaceholderValue: '{{ __("translation.common.search") }}'
+                });
+
+                // Listen for change event after Choices.js is initialized
+                userTypeSelect.addEventListener('change', toggleClinicFields);
+                
+                // Check initial state
+                toggleClinicFields();
+            });
+        });
     </script>
 @endpush

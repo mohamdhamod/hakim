@@ -112,4 +112,24 @@ class User extends Authenticatable
         }
         return null;
     }
+
+    /**
+     * Approve a doctor user (when their clinic is approved).
+     * Currently a no-op since approval is managed via Clinic status.
+     */
+    public function approveDoctor(): bool
+    {
+        // Future: could set email_verified_at or other approval flags
+        return true;
+    }
+
+    /**
+     * Reject a doctor user (when their clinic is rejected).
+     * Currently a no-op since rejection is managed via Clinic status.
+     */
+    public function rejectDoctor(?string $reason = null): bool
+    {
+        // Future: could send rejection email or set status flag
+        return true;
+    }
 }

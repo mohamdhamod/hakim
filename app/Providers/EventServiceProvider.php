@@ -20,7 +20,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-            \App\Listeners\Auth\ProcessPendingTeamInvitation::class,
             \App\Listeners\Auth\LinkPatientRecordsOnRegistration::class,
         ],
         Verified::class => [
@@ -28,7 +27,6 @@ class EventServiceProvider extends ServiceProvider
         ],
         Login::class => [
             \App\Listeners\Auth\SetCurrentSessionId::class,
-            \App\Listeners\Auth\ProcessPendingTeamInvitation::class,
         ],
         Logout::class => [
             \App\Listeners\Auth\ClearCurrentSessionId::class,

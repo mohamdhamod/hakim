@@ -38,7 +38,6 @@ class CreateNewUser implements CreatesNewUsers
         // Add clinic validation rules for doctors
         if (isset($input['user_type']) && $input['user_type'] === 'doctor') {
             $rules['specialty_id'] = ['required', 'integer', 'exists:specialties,id'];
-            $rules['clinic_name'] = ['required', 'string', 'max:255'];
             $rules['clinic_address'] = ['nullable', 'string', 'max:500'];
         }
 
@@ -100,7 +99,7 @@ class CreateNewUser implements CreatesNewUsers
                 Clinic::create([
                     'user_id' => $user->id,
                     'specialty_id' => $input['specialty_id'],
-                    'name' => $input['clinic_name'],
+                    'name' => $input['name'], // استخدام اسم المستخدم كاسم للعيادة
                     'address' => $input['clinic_address'] ?? null,
                     'status' => 'pending',
                 ]);

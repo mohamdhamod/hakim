@@ -38,6 +38,14 @@
             'session_expired_redirecting' => __('translation.messages.session_expired_redirecting'),
             'confirm_status_change_title' => __('translation.messages.confirm_status_change_title'),
             'change_status_to_text' => __('translation.messages.change_status_to_text'),
+            // Patient duplicate detection
+            'duplicate_warning' => __('translation.patient.duplicate_warning'),
+            'duplicate_match_name' => __('translation.patient.duplicate_match_name'),
+            'duplicate_match_phone' => __('translation.patient.duplicate_match_phone'),
+            'duplicate_match_email' => __('translation.patient.duplicate_match_email'),
+            'duplicate_confidence' => __('translation.patient.duplicate_confidence'),
+            'view_existing' => __('translation.patient.view_existing'),
+            'create_anyway' => __('translation.patient.create_anyway'),
         ],
 
         'datatable' => [

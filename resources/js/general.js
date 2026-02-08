@@ -7,7 +7,7 @@
  * 
  * @version 4.0 (Phase 4: Advanced Features)
  * @date January 31, 2026
- * @author Senior Laravel Architect + AI Product Designer + Senior AI Prompt Engineer + Senior Doctor
+ * @author Senior Laravel Architect +Senior Product Designer +  Senior Doctor
  * 
 
  * 
@@ -783,6 +783,142 @@ const FormManager = {
     },
 
     /**
+     * Show duplicate confirmation dialog for patient creation
+     */
+    showDuplicateConfirmation(form, result) {
+        const i18n = window.i18n || {};
+        const messages = i18n.messages || {};
+        const isRTL = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
+        
+        // Build duplicate patient info HTML
+        let duplicatesHtml = '';
+        if (result.duplicates && result.duplicates.length > 0) {
+            duplicatesHtml = result.duplicates.map(dup => {
+                const matchTypes = {
+                    'name': messages.duplicate_match_name || 'Name match',
+                    'phone': messages.duplicate_match_phone || 'Phone match', 
+                    'email': messages.duplicate_match_email || 'Email match'
+                };
+                const matchType = matchTypes[dup.match_type] || dup.match_type;
+                const confidence = Math.round((dup.confidence || 0) * 100);
+                
+                return `
+                    <div class="card mb-2 border-warning">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${Utils.escapeHtml(dup.name)}</strong>
+                                    <br><small class="text-muted">#${Utils.escapeHtml(dup.file_number)}</small>
+                                    ${dup.phone ? `<br><small class="text-muted">${Utils.escapeHtml(dup.phone)}</small>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-warning text-dark">${matchType}</span>
+                                    <br><small class="text-muted">${messages.duplicate_confidence || 'Confidence'}: ${confidence}%</small>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <a href="${window.location.origin}${window.location.pathname.replace('/create', '')}/${dup.id}" 
+                                   class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-eye me-1"></i>${messages.view_existing || 'View Existing'}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Create modal element
+        const modalId = 'duplicateConfirmModal';
+        let modal = document.getElementById(modalId);
+        if (modal) {
+            modal.remove();
+        }
+
+        const modalHtml = `
+            <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning-subtle">
+                            <h5 class="modal-title">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                ${messages.duplicate_warning || 'Potential Duplicate Patient'}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-3">${Utils.escapeHtml(result.message)}</p>
+                            <div class="duplicate-list">
+                                ${duplicatesHtml}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i>${messages.cancel || 'Cancel'}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirmDuplicateBtn">
+                                <i class="fas fa-plus me-1"></i>${messages.create_anyway || 'Create New Patient Anyway'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        modal = document.getElementById(modalId);
+
+        // Show modal using Bootstrap
+        let bsModal;
+        if (window.bootstrap && window.bootstrap.Modal) {
+            bsModal = new window.bootstrap.Modal(modal);
+            bsModal.show();
+        } else {
+            // Fallback without Bootstrap JS
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            document.body.classList.add('modal-open');
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+        }
+
+        // Handle confirm button click
+        const confirmBtn = document.getElementById('confirmDuplicateBtn');
+        confirmBtn.addEventListener('click', async () => {
+            // Add confirm_duplicate field to form and resubmit
+            let confirmField = form.querySelector('input[name="confirm_duplicate"]');
+            if (!confirmField) {
+                confirmField = document.createElement('input');
+                confirmField.type = 'hidden';
+                confirmField.name = 'confirm_duplicate';
+                form.appendChild(confirmField);
+            }
+            confirmField.value = '1';
+
+            // Hide modal
+            if (bsModal) {
+                bsModal.hide();
+            } else {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }
+
+            // Resubmit form
+            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+            form.dispatchEvent(submitEvent);
+        });
+
+        // Cleanup modal on close
+        modal.addEventListener('hidden.bs.modal', () => {
+            modal.remove();
+        });
+    },
+
+    /**
      * Handle AJAX form submission
      */
     async handleFormSubmit(event, form) {
@@ -876,10 +1012,17 @@ const FormManager = {
             if (contentType.includes('application/json')) {
                 // Parse JSON safely
                 try {
-                    result = await response.json();
+                    let responseText = await response.clone().text();
+                    // Remove BOM if present (some PHP servers add it)
+                    if (responseText.charCodeAt(0) === 0xFEFF) {
+                        responseText = responseText.slice(1);
+                    }
+                    // Also handle UTF-8 BOM sequence
+                    responseText = responseText.replace(/^\xEF\xBB\xBF/, '').trim();
+                    result = JSON.parse(responseText);
                 } catch (e) {
                     // Malformed JSON; treat as generic failure
-                    throw new Error(window.i18n?.messages?.invalid_server_response || '');
+                    throw new Error(window.i18n?.messages?.invalid_server_response || 'Invalid server response');
                 }
 
                 // Some servers return success=false with a 200/2xx or a 4xx status.
@@ -921,6 +1064,13 @@ const FormManager = {
                 } else {
                     // Error path for JSON or explicit success=false
 
+                    // Special handling for duplicate confirmation flow
+                    if (result && result.requires_confirmation && result.duplicates) {
+                        restoreButton();
+                        this.showDuplicateConfirmation(form, result);
+                        return;
+                    }
+
                     // If the server returned validation-style errors, show them on the form
                     if (result && result.errors) {
                         restoreButton();
@@ -957,6 +1107,7 @@ const FormManager = {
                     if ((result && (result.errors || result.message || result.redirect))) {
                         return;
                     }
+
 
                     // Fallback: unknown error
                     restoreButton();

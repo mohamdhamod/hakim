@@ -41,6 +41,44 @@
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newExaminationModal">
                                 <i class="fas fa-plus me-2"></i>{{ __('translation.examination.new') }}
                             </button>
+                            
+                            {{-- Export Dropdown --}}
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-file-export me-2"></i>{{ __('translation.export.menu') }}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('patients.export.medical-record', $patient) }}" target="_blank">
+                                            <i class="fas fa-file-medical me-2"></i>{{ __('translation.patient.medical_history') }}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('patients.export.lab-tests', $patient) }}" target="_blank">
+                                            <i class="fas fa-flask me-2"></i>{{ __('translation.lab_tests') }}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('patients.export.vaccinations', $patient) }}" target="_blank">
+                                            <i class="fas fa-syringe me-2"></i>{{ __('translation.vaccinations') }}
+                                        </a>
+                                    </li>
+                                    @if($patient->age < 18)
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('patients.export.growth-chart', $patient) }}" target="_blank">
+                                            <i class="fas fa-chart-line me-2"></i>{{ __('translation.growth_chart') }}
+                                        </a>
+                                    </li>
+                                    @endif
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="javascript:void(0);" onclick="window.print()">
+                                            <i class="fas fa-print me-2"></i>{{ __('translation.export.print') }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            
                             <a href="{{ route('clinic.patients.edit', $patient) }}" class="btn btn-warning">
                                 <i class="fas fa-edit me-2"></i>{{ __('translation.common.edit') }}
                             </a>

@@ -53,7 +53,7 @@
                                 <td>{{ $clinic->phone ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <th class="text-muted">{{ __('translation.clinic.status') }}</th>
+                                <th class="text-muted">{{ __('translation.clinic.status_label') }}</th>
                                 <td><span class="badge {{ $clinic->status_badge_class }}">{{ $clinic->status_label }}</span></td>
                             </tr>
                             <tr>

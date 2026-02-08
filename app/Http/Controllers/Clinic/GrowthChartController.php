@@ -74,8 +74,8 @@ class GrowthChartController extends Controller
         // Calculate BMI
         $measurement->calculateBmi();
         
-        // TODO: Calculate percentiles based on WHO standards
-        // This would require implementing WHO growth chart algorithms
+        // Calculate WHO percentiles
+        $measurement->calculatePercentiles();
         
         $measurement->save();
 

@@ -93,6 +93,12 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/patients/{patient}/growth-charts/chart', [Clinic\GrowthChartController::class, 'chart'])->name('patients.growth-charts.chart');
         Route::resource('patients.growth-charts', Clinic\GrowthChartController::class)->names('patients.growth-charts');
 
+        // PDF Export Routes
+        Route::get('/patients/{patient}/export/medical-record', [Clinic\PatientExportController::class, 'exportMedicalRecord'])->name('patients.export.medical-record');
+        Route::get('/patients/{patient}/export/lab-tests', [Clinic\PatientExportController::class, 'exportLabTests'])->name('patients.export.lab-tests');
+        Route::get('/patients/{patient}/export/vaccinations', [Clinic\PatientExportController::class, 'exportVaccinations'])->name('patients.export.vaccinations');
+        Route::get('/patients/{patient}/export/growth-chart', [Clinic\PatientExportController::class, 'exportGrowthChart'])->name('patients.export.growth-chart');
+
         // Chronic Diseases Management
         Route::post('/patients/{patient}/chronic-diseases/{chronicDisease}/monitoring', [Clinic\ChronicDiseaseController::class, 'storeMonitoring'])->name('patients.chronic-diseases.monitoring.store');
         Route::get('/chronic-diseases/overdue-followups', [Clinic\ChronicDiseaseController::class, 'overdueFollowups'])->name('chronic-diseases.overdue-followups');

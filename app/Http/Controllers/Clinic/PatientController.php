@@ -162,11 +162,11 @@ class PatientController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.patient.created_successfully'),
-                'redirect' => route('clinic.patients.show', $patient->id),
+                'redirect' => route('clinic.patients.show', $patient->file_number),
             ], 200);
         }
 
-        return redirect()->route('clinic.patients.show', $patient->id)
+        return redirect()->route('clinic.patients.show', $patient->file_number)
             ->with('success', __('translation.patient.created_successfully'));
     }
 
@@ -254,10 +254,11 @@ class PatientController extends Controller
                 'success' => true,
                 'message' => __('translation.patient.updated_successfully'),
                 'patient' => $patient,
+                'redirect' => route('clinic.patients.show', $patient->file_number),
             ]);
         }
 
-        return redirect()->route('clinic.patients.show', $patient->id)
+        return redirect()->route('clinic.patients.show', $patient->file_number)
             ->with('success', __('translation.patient.updated_successfully'));
     }
 

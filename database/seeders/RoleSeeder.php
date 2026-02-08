@@ -47,6 +47,13 @@ class RoleSeeder extends Seeder
             // Role Management
             ["name" => PermissionEnum::MANAGE_ROLES, 'guard_name' => "web", 'page' => ''],
 
+            // Specialties Management (Admin)
+            ["name" => PermissionEnum::MANAGE_SPECIALTIES, 'guard_name' => "web", 'page' => ''],
+            ["name" => PermissionEnum::MANAGE_SPECIALTIES_ADD, 'guard_name' => "web", 'page' => PermissionEnum::MANAGE_SPECIALTIES],
+            ["name" => PermissionEnum::MANAGE_SPECIALTIES_VIEW, 'guard_name' => "web", 'page' => PermissionEnum::MANAGE_SPECIALTIES],
+            ["name" => PermissionEnum::MANAGE_SPECIALTIES_UPDATE, 'guard_name' => "web", 'page' => PermissionEnum::MANAGE_SPECIALTIES],
+            ["name" => PermissionEnum::MANAGE_SPECIALTIES_DELETE, 'guard_name' => "web", 'page' => PermissionEnum::MANAGE_SPECIALTIES],
+
             // Clinic Management (Admin)
             ["name" => PermissionEnum::MANAGE_CLINICS, 'guard_name' => "web", 'page' => ''],
             ["name" => PermissionEnum::MANAGE_CLINICS_VIEW, 'guard_name' => "web", 'page' => PermissionEnum::MANAGE_CLINICS],

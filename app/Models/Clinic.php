@@ -47,6 +47,14 @@ class Clinic extends Model
     }
 
     /**
+     * Alias for doctor relationship for backward compatibility.
+     */
+    public function user()
+    {
+        return $this->doctor();
+    }
+
+    /**
      * Get the admin who approved the clinic.
      */
     public function approver()

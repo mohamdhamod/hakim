@@ -27,7 +27,7 @@ class SpecialtiesController extends Controller
      */
     public function index(Request $request)
     {
-        $specialties = Specialty::with(['translations', 'topics'])
+        $specialties = Specialty::with(['translations'])
             ->orderBy('sort_order')
             ->latest()
             ->paginate(12);
@@ -121,7 +121,7 @@ class SpecialtiesController extends Controller
        
         $model = $id instanceof Specialty ? $id : Specialty::findOrFail($id);
 
-        // Topics will be deleted automatically due to cascade
+        
         $model->delete();
         $model->deleteTranslations();
 

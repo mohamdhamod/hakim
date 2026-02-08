@@ -1,0 +1,506 @@
+/**
+ * Print-friendly CSS for Medical System
+ * This file contains print-specific styles to optimize medical documents for printing
+ * Include in layouts: <link rel="stylesheet" href="{{ asset('css/print.css') }}" media="print">
+ */
+
+/* ============================================
+   Global Print Settings
+   ============================================ */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 15mm;
+    }
+
+    body {
+        font-family: 'Arial', 'Helvetica', sans-serif;
+        font-size: 11pt;
+        line-height: 1.4;
+        color: #000;
+        background: #fff;
+    }
+
+    /* ============================================
+       Elements to Hide When Printing
+       ============================================ */
+    
+    /* Navigation and Headers */
+    header,
+    nav,
+    .navbar,
+    .header,
+    .top-bar,
+    .menu,
+    .breadcrumb,
+    aside,
+    .sidebar,
+    .side-nav {
+        display: none !important;
+    }
+
+    /* UI Controls */
+    button,
+    .btn,
+    .button,
+    .action-button,
+    .edit-btn,
+    .delete-btn,
+    .submit-btn,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"] {
+        display: none !important;
+    }
+
+    /* Forms and Inputs */
+    form,
+    input,
+    textarea,
+    select,
+    .form-group,
+    .input-group,
+    .form-control {
+        display: none !important;
+    }
+
+    /* Footers and Pagination */
+    footer,
+    .footer,
+    .pagination,
+    .pager {
+        display: none !important;
+    }
+
+    /* Tooltips, Modals, Alerts */
+    .tooltip,
+    .modal,
+    .alert,
+    .toast,
+    .notification,
+    .dropdown,
+    .popover {
+        display: none !important;
+    }
+
+    /* Actions and Links */
+    .action-links,
+    .action-buttons,
+    .dropdown-menu,
+    .context-menu,
+    .floating-action,
+    .fab {
+        display: none !important;
+    }
+
+    /* Hide specific medical system elements */
+    .back-link,
+    .print-button,
+    .export-button,
+    .edit-section,
+    .delete-section,
+    .add-button,
+    .filter-section,
+    .search-bar {
+        display: none !important;
+    }
+
+    /* ============================================
+       Layout Adjustments
+       ============================================ */
+
+    /* Remove unnecessary spacing */
+    .container,
+    .wrapper,
+    .content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+    }
+
+    /* Single column layout */
+    .row,
+    .col,
+    .column,
+    [class*="col-"] {
+        width: 100% !important;
+        float: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ============================================
+       Page Breaks
+       ============================================ */
+
+    /* Prevent breaks inside important elements */
+    .patient-info,
+    .medical-record-section,
+    .lab-test-group,
+    .vaccination-record,
+    .examination-section,
+    table,
+    tr,
+    .no-page-break {
+        page-break-inside: avoid !important;
+    }
+
+    /* Force breaks before sections */
+    .section-break,
+    .page-break-before {
+        page-break-before: always !important;
+    }
+
+    /* Force breaks after sections */
+    .page-break-after {
+        page-break-after: always !important;
+    }
+
+    /* ============================================
+       Typography Adjustments
+       ============================================ */
+
+    h1 {
+        font-size: 20pt;
+        margin: 10pt 0 5pt 0;
+        page-break-after: avoid;
+    }
+
+    h2 {
+        font-size: 16pt;
+        margin: 8pt 0 4pt 0;
+        page-break-after: avoid;
+    }
+
+    h3 {
+        font-size: 14pt;
+        margin: 6pt 0 3pt 0;
+        page-break-after: avoid;
+    }
+
+    h4, h5, h6 {
+        font-size: 12pt;
+        margin: 4pt 0 2pt 0;
+        page-break-after: avoid;
+    }
+
+    p {
+        margin: 0 0 5pt 0;
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* ============================================
+       Links Processing
+       ============================================ */
+
+    /* Show URLs after links (optional) */
+    a[href]:after {
+        content: "" !important; /* Disabled by default */
+    }
+
+    /* Remove link underlines */
+    a {
+        text-decoration: none;
+        color: #000;
+    }
+
+    /* ============================================
+       Tables Optimization
+       ============================================ */
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse;
+        page-break-inside: avoid;
+        margin: 5pt 0;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    tbody tr {
+        page-break-inside: avoid;
+    }
+
+    th {
+        background: #333 !important;
+        color: #fff !important;
+        font-weight: bold;
+        padding: 6pt;
+        text-align: left;
+        border: 1pt solid #000;
+    }
+
+    td {
+        padding: 5pt;
+        border: 1pt solid #ddd;
+    }
+
+    /* Alternating row colors */
+    tr:nth-child(even) {
+        background: #f5f5f5 !important;
+    }
+
+    /* ============================================
+       Medical-Specific Styles
+       ============================================ */
+
+    /* Patient Header */
+    .patient-header,
+    .patient-card {
+        border: 2pt solid #333;
+        padding: 10pt;
+        margin-bottom: 10pt;
+        background: #f0f0f0 !important;
+    }
+
+    /* Lab Test Results */
+    .lab-test-result {
+        margin: 5pt 0;
+        padding: 5pt;
+        border-bottom: 1pt solid #ddd;
+    }
+
+    .abnormal-result {
+        background: #ffe0e0 !important;
+        font-weight: bold;
+    }
+
+    .critical-result {
+        background: #ffcccc !important;
+        font-weight: bold;
+        border: 2pt solid #c00 !important;
+    }
+
+    /* Badges and Status */
+    .badge,
+    .status-badge,
+    .label {
+        padding: 2pt 5pt;
+        border: 1pt solid #333;
+        border-radius: 3pt;
+        font-size: 9pt;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: #90ee90 !important;
+        color: #000 !important;
+    }
+
+    .badge-danger {
+        background: #ffb3b3 !important;
+        color: #000 !important;
+    }
+
+    .badge-warning {
+        background: #ffffcc !important;
+        color: #000 !important;
+    }
+
+    .badge-info {
+        background: #add8e6 !important;
+        color: #000 !important;
+    }
+
+    /* Vaccination Record */
+    .vaccination-card {
+        border: 1pt solid #333;
+        padding: 8pt;
+        margin: 5pt 0;
+    }
+
+    /* Growth Chart */
+    .growth-measurement {
+        margin: 3pt 0;
+        padding: 3pt 0;
+        border-bottom: 1pt dotted #999;
+    }
+
+    /* Examination Details */
+    .examination-section {
+        border: 1pt solid #ddd;
+        padding: 8pt;
+        margin: 8pt 0;
+    }
+
+    /* Chronic Disease Cards */
+    .disease-card {
+        border-left: 3pt solid #333;
+        padding: 8pt;
+        margin: 8pt 0;
+        background: #fafafa !important;
+    }
+
+    /* ============================================
+       Images and Charts
+       ============================================ */
+
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid;
+    }
+
+    /* Hide canvas elements (charts) - use table data instead */
+    canvas {
+        display: none !important;
+    }
+
+    /* Show chart fallback tables */
+    .chart-data-table {
+        display: table !important;
+    }
+
+    /* ============================================
+       Headers and Footers for Print
+       ============================================ */
+
+    .print-header {
+        display: block !important;
+        text-align: center;
+        border-bottom: 2pt solid #333;
+        padding-bottom: 10pt;
+        margin-bottom: 15pt;
+    }
+
+    .print-footer {
+        display: block !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        border-top: 1pt solid #999;
+        padding-top: 5pt;
+        font-size: 9pt;
+        color: #666;
+    }
+
+    /* Clinic Logo */
+    .clinic-logo {
+        max-width: 100pt;
+        height: auto;
+    }
+
+    /* ============================================
+       Signature Sections
+       ============================================ */
+
+    .signature-section {
+        margin-top: 30pt;
+        page-break-inside: avoid;
+    }
+
+    .signature-block {
+        display: inline-block;
+        width: 45%;
+        text-align: center;
+        border-top: 1pt solid #000;
+        padding-top: 5pt;
+        margin: 20pt 2% 0 2%;
+    }
+
+    /* ============================================
+       QR Codes and Barcodes
+       ============================================ */
+
+    .qr-code,
+    .barcode {
+        display: block !important;
+        margin: 10pt auto;
+    }
+
+    /* ============================================
+       Utilities
+       ============================================ */
+
+    .print-only {
+        display: block !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-text-center {
+        text-align: center !important;
+    }
+
+    .print-text-right {
+        text-align: right !important;
+    }
+
+    .print-bold {
+        font-weight: bold !important;
+    }
+
+    /* ============================================
+       RTL Support
+       ============================================ */
+
+    [dir="rtl"] table {
+        direction: rtl;
+    }
+
+    [dir="rtl"] th,
+    [dir="rtl"] td {
+        text-align: right;
+    }
+
+    /* ============================================
+       Color Adjustments for Grayscale Printing
+       ============================================ */
+
+    @media print and (monochrome) {
+        * {
+            background: transparent !important;
+            color: #000 !important;
+        }
+
+        .badge,
+        .status-badge {
+            border: 1pt solid #000 !important;
+        }
+    }
+}
+
+/* ============================================
+   Print Button Styles (shown on screen only)
+   ============================================ */
+@media screen {
+    .print-button,
+    .btn-print {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .print-button:hover,
+    .btn-print:hover {
+        background: #45a049;
+    }
+
+    .print-button::before,
+    .btn-print::before {
+        content: "🖨 ";
+    }
+}
