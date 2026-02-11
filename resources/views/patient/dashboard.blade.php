@@ -242,11 +242,18 @@
                             <a href="{{ route('patient.clinic.show', ['locale' => app()->getLocale(), 'clinic' => $clinic->id]) }}" 
                                class="d-block border-bottom p-3 text-decoration-none text-dark hover-bg-light">
                                 <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
-                                        <i class="bi bi-hospital text-success"></i>
-                                    </div>
+                                    @if($clinic->logo)
+                                        <div class="rounded-circle overflow-hidden me-3" style="width: 45px; height: 45px;">
+                                            <img src="{{ $clinic->logo_path }}" alt="{{ $clinic->display_name }}" 
+                                                 class="w-100 h-100 object-fit-cover">
+                                        </div>
+                                    @else
+                                        <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                            <i class="bi bi-hospital text-success"></i>
+                                        </div>
+                                    @endif
                                     <div>
-                                        <h6 class="mb-0 fw-semibold">{{ $clinic->user->name ?? $clinic->name }}</h6>
+                                        <h6 class="mb-0 fw-semibold">{{ $clinic->display_name }}</h6>
                                         <small class="text-muted">{{ $clinic->specialty->name ?? '-' }}</small>
                                     </div>
                                 </div>

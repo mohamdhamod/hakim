@@ -28,7 +28,17 @@ class Clinic extends Model
         'approved_at' => 'datetime',
     ];
 
-    protected $appends = ['logo_path', 'status_label', 'status_badge_class'];
+    protected $appends = ['logo_path', 'status_label', 'status_badge_class', 'display_name'];
+
+    /**
+     * Get formatted clinic display name.
+     * Returns "عيادة الدكتور [owner name]"
+     */
+    public function getDisplayNameAttribute()
+    {
+        $doctorName = $this->doctor?->name ?? $this->name;
+        return __('translation.clinic.display_name_format', ['name' => $doctorName]);
+    }
 
     /**
      * Get the specialty of the clinic.
@@ -91,7 +101,7 @@ class Clinic extends Model
      */
     public function getLogoPathAttribute()
     {
-        return $this->logo ? asset('storage/' . $this->logo) : asset('images/clinic-default.png');
+        return $this->logo ? asset('storage/' . $this->logo) : asset('images/img.png');
     }
 
     /**

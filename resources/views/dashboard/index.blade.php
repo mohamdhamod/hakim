@@ -370,7 +370,7 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span class="small">{{ $appointment->clinic->name ?? '-' }}</span>
+                                                    <span class="small">{{ $appointment->clinic->display_name ?? '-' }}</span>
                                                 </td>
                                                 <td>
                                                     @php

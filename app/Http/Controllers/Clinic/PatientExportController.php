@@ -4,17 +4,38 @@ namespace App\Http\Controllers\Clinic;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Traits\ClinicAuthorization;
 use Illuminate\Support\Facades\Auth;
+use Mpdf\Mpdf;
 
 class PatientExportController extends Controller
 {
+    use ClinicAuthorization;
+
+    /**
+     * Create mPDF instance with Arabic support.
+     */
+    protected function createPdf($orientation = 'P')
+    {
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => $orientation,
+            'default_font' => 'dejavusans',
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'directionality' => app()->getLocale() === 'ar' ? 'rtl' : 'ltr',
+        ]);
+
+        return $mpdf;
+    }
+
     /**
      * Export patient medical record to PDF.
      */
     public function exportMedicalRecord($lang, Patient $patient)
     {
-        $this->authorize('view', $patient);
+        $this->authorizePatientAccess($patient);
 
         // Load all medical data
         $patient->load([
@@ -39,18 +60,22 @@ class PatientExportController extends Controller
         $doctor = Auth::user();
         $exportDate = now();
 
-        $pdf = Pdf::loadView('clinic.exports.medical-record', compact(
+        $html = view('clinic.exports.medical-record', compact(
             'patient',
             'clinic',
             'doctor',
             'exportDate'
-        ));
+        ))->render();
 
-        $pdf->setPaper('a4', 'portrait');
+        $mpdf = $this->createPdf('P');
+        $mpdf->WriteHTML($html);
         
         $filename = 'medical-record-' . $patient->file_number . '-' . date('Y-m-d') . '.pdf';
 
-        return $pdf->download($filename);
+        return response($mpdf->Output($filename, 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     /**
@@ -58,7 +83,7 @@ class PatientExportController extends Controller
      */
     public function exportLabTests($lang, Patient $patient)
     {
-        $this->authorize('view', $patient);
+        $this->authorizePatientAccess($patient);
 
         $labTests = $patient->labTestResults()
             ->with('labTestType', 'orderedBy')
@@ -66,20 +91,26 @@ class PatientExportController extends Controller
             ->get();
 
         $clinic = $patient->clinic;
+        $doctor = Auth::user();
         $exportDate = now();
 
-        $pdf = Pdf::loadView('clinic.exports.lab-tests', compact(
+        $html = view('clinic.exports.lab-tests', compact(
             'patient',
             'labTests',
             'clinic',
+            'doctor',
             'exportDate'
-        ));
+        ))->render();
 
-        $pdf->setPaper('a4', 'portrait');
+        $mpdf = $this->createPdf('P');
+        $mpdf->WriteHTML($html);
         
         $filename = 'lab-tests-' . $patient->file_number . '-' . date('Y-m-d') . '.pdf';
 
-        return $pdf->download($filename);
+        return response($mpdf->Output($filename, 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     /**
@@ -87,7 +118,7 @@ class PatientExportController extends Controller
      */
     public function exportVaccinations($lang, Patient $patient)
     {
-        $this->authorize('view', $patient);
+        $this->authorizePatientAccess($patient);
 
         $vaccinations = $patient->vaccinationRecords()
             ->with('vaccinationType', 'administeredBy')
@@ -95,20 +126,26 @@ class PatientExportController extends Controller
             ->get();
 
         $clinic = $patient->clinic;
+        $doctor = Auth::user();
         $exportDate = now();
 
-        $pdf = Pdf::loadView('clinic.exports.vaccinations', compact(
+        $html = view('clinic.exports.vaccinations', compact(
             'patient',
             'vaccinations',
             'clinic',
+            'doctor',
             'exportDate'
-        ));
+        ))->render();
 
-        $pdf->setPaper('a4', 'portrait');
+        $mpdf = $this->createPdf('P');
+        $mpdf->WriteHTML($html);
         
         $filename = 'vaccinations-' . $patient->file_number . '-' . date('Y-m-d') . '.pdf';
 
-        return $pdf->download($filename);
+        return response($mpdf->Output($filename, 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     /**
@@ -116,7 +153,7 @@ class PatientExportController extends Controller
      */
     public function exportGrowthChart($lang, Patient $patient)
     {
-        $this->authorize('view', $patient);
+        $this->authorizePatientAccess($patient);
 
         $measurements = $patient->growthMeasurements()
             ->with('measuredBy')
@@ -124,19 +161,25 @@ class PatientExportController extends Controller
             ->get();
 
         $clinic = $patient->clinic;
+        $doctor = Auth::user();
         $exportDate = now();
 
-        $pdf = Pdf::loadView('clinic.exports.growth-chart', compact(
+        $html = view('clinic.exports.growth-chart', compact(
             'patient',
             'measurements',
             'clinic',
+            'doctor',
             'exportDate'
-        ));
+        ))->render();
 
-        $pdf->setPaper('a4', 'landscape');
+        $mpdf = $this->createPdf('L'); // Landscape
+        $mpdf->WriteHTML($html);
         
         $filename = 'growth-chart-' . $patient->file_number . '-' . date('Y-m-d') . '.pdf';
 
-        return $pdf->download($filename);
+        return response($mpdf->Output($filename, 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

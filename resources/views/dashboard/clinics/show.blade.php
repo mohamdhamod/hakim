@@ -7,12 +7,12 @@
         {{-- Header --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h4 class="fw-bold mb-1">{{ $clinic->name }}</h4>
+                <h4 class="fw-bold mb-1">{{ $clinic->display_name }}</h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('translation.dashboard.title') }}</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('clinics.index') }}">{{ __('translation.clinic.clinics') }}</a></li>
-                        <li class="breadcrumb-item active">{{ $clinic->name }}</li>
+                        <li class="breadcrumb-item active">{{ $clinic->display_name }}</li>
                     </ol>
                 </nav>
             </div>

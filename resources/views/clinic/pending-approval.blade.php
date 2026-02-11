@@ -20,7 +20,7 @@
                         </p>
                         
                         <div class="alert alert-info">
-                            <strong>{{ __('translation.clinic.clinic_name') }}:</strong> {{ $clinic->name }}<br>
+                            <strong>{{ __('translation.clinic.clinic_name') }}:</strong> {{ $clinic->display_name }}<br>
                             <strong>{{ __('translation.clinic.submitted_at') }}:</strong> {{ $clinic->created_at->format('Y-m-d H:i') }}
                         </div>
 

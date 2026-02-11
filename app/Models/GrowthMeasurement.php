@@ -39,12 +39,38 @@ class GrowthMeasurement extends Model
         'bmi_percentile' => 'decimal:2',
     ];
 
+    protected $appends = ['weight', 'height', 'head_circumference'];
+
     /**
      * Get the patient that owns this measurement.
      */
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    /**
+     * Get weight accessor for JSON serialization.
+     */
+    public function getWeightAttribute()
+    {
+        return $this->weight_kg;
+    }
+
+    /**
+     * Get height accessor for JSON serialization.
+     */
+    public function getHeightAttribute()
+    {
+        return $this->height_cm;
+    }
+
+    /**
+     * Get head circumference accessor for JSON serialization.
+     */
+    public function getHeadCircumferenceAttribute()
+    {
+        return $this->head_circumference_cm;
     }
 
     /**
@@ -68,9 +94,11 @@ class GrowthMeasurement extends Model
      */
     public function calculateBmi()
     {
-        if ($this->weight_kg && $this->height_cm) {
+        if ($this->weight_kg && $this->height_cm && $this->height_cm > 0) {
             $heightInMeters = $this->height_cm / 100;
-            $this->bmi = $this->weight_kg / ($heightInMeters * $heightInMeters);
+            $bmi = $this->weight_kg / ($heightInMeters * $heightInMeters);
+            // Limit BMI to reasonable range (1-100) and round to 2 decimals
+            $this->bmi = min(100, max(1, round($bmi, 2)));
         }
     }
 

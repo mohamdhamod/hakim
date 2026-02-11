@@ -34,6 +34,24 @@ class VaccinationType extends Model implements TranslatableContract
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['name', 'description'];
+
+    /**
+     * Get translated name attribute for JSON serialization.
+     */
+    public function getNameAttribute()
+    {
+        return $this->translate()?->name ?? $this->key;
+    }
+
+    /**
+     * Get translated description attribute for JSON serialization.
+     */
+    public function getDescriptionAttribute()
+    {
+        return $this->translate()?->description;
+    }
+
     /**
      * Get the vaccination records for this type.
      */

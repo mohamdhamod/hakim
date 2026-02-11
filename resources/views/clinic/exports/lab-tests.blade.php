@@ -164,7 +164,7 @@
 <body>
     {{-- Header --}}
     <div class="header">
-        <div class="clinic-name">{{ $clinic->name }}</div>
+        <div class="clinic-name">{{ $clinic->display_name }}</div>
         <h1>{{ __('translation.lab_tests_report') }}</h1>
         <div class="export-info">
             {{ __('translation.exported_by') }}: {{ $doctor->name }} | 
@@ -288,7 +288,7 @@
 
     {{-- Footer --}}
     <div class="footer">
-        {{ __('translation.confidential_document') }} | {{ $clinic->name }} | 
+        {{ __('translation.confidential_document') }} | {{ $clinic->display_name }} | 
         {{ __('translation.doctor') }}: {{ $doctor->name }}
     </div>
 </body>

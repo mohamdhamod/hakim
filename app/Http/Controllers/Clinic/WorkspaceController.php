@@ -263,13 +263,20 @@ class WorkspaceController extends Controller
             ]);
         }
 
+        // Build date_of_birth from birth_year and birth_month
+        $dateOfBirth = null;
+        if ($request->birth_year) {
+            $month = $request->birth_month ?? 1;
+            $dateOfBirth = $request->birth_year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01';
+        }
+
         // Create patient from appointment
         $patient = Patient::create([
             'clinic_id' => $clinic->id,
             'full_name' => $appointment->patient_name,
             'phone' => $appointment->patient_phone,
             'email' => $appointment->patient_email,
-            'date_of_birth' => $request->date_of_birth,
+            'date_of_birth' => $dateOfBirth,
             'gender' => $request->gender,
             'notes' => $request->notes,
         ]);

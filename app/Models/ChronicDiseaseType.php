@@ -29,6 +29,24 @@ class ChronicDiseaseType extends Model implements TranslatableContract
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['name', 'description'];
+
+    /**
+     * Get the name attribute from translation.
+     */
+    public function getNameAttribute()
+    {
+        return $this->translate()?->name ?? $this->key;
+    }
+
+    /**
+     * Get the description attribute from translation.
+     */
+    public function getDescriptionAttribute()
+    {
+        return $this->translate()?->description ?? '';
+    }
+
     /**
      * Get the patient chronic diseases for this type.
      */

@@ -12,7 +12,7 @@
                         {{ auth()->user()->first_name }}
                     </h5>
                     <h6 class="my-0 text-muted">
-                        {{ auth()->user()->clinic?->name ?? __('translation.user.type.doctor') }}
+                        {{ auth()->user()->clinic?->display_name ?? __('translation.user.type.doctor') }}
                     </h6>
                 </div>
             </a>

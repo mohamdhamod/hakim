@@ -9,7 +9,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h5 class="mb-0 fw-bold">{{ __('translation.clinic_chat.welcome_doctor') }} {{ auth()->user()->name }}</h5>
-                <small class="text-muted">{{ $clinic->name }}</small>
+                <small class="text-muted">{{ $clinic->display_name }}</small>
             </div>
             <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
                 <i class="fas fa-bars"></i>
@@ -24,11 +24,18 @@
                 {{-- Clinic Info --}}
                 <div class="card-body border-bottom pb-2">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-2">
-                            <i class="fas fa-hospital text-primary"></i>
-                        </div>
+                        @if($clinic->logo)
+                            <div class="rounded-circle overflow-hidden me-2" style="width: 40px; height: 40px;">
+                                <img src="{{ $clinic->logo_path }}" alt="{{ $clinic->display_name }}" 
+                                     class="w-100 h-100 object-fit-cover">
+                            </div>
+                        @else
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-2">
+                                <i class="fas fa-hospital text-primary"></i>
+                            </div>
+                        @endif
                         <div class="flex-grow-1" style="min-width: 0;">
-                            <h6 class="mb-0 text-truncate">{{ $clinic->name }}</h6>
+                            <h6 class="mb-0 text-truncate">{{ $clinic->display_name }}</h6>
                             <span class="badge bg-success bg-opacity-10 text-success small">{{ __('translation.clinic.status.approved') }}</span>
                         </div>
                     </div>
@@ -290,8 +297,16 @@
 {{-- Mobile Sidebar Offcanvas --}}
 <div class="offcanvas offcanvas-{{ app()->getLocale() === 'ar' ? 'end' : 'start' }}" tabindex="-1" id="mobileSidebar">
     <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title">
-            <i class="fas fa-hospital text-primary me-2"></i>{{ $clinic->name }}
+        <h5 class="offcanvas-title d-flex align-items-center">
+            @if($clinic->logo)
+                <div class="rounded-circle overflow-hidden me-2" style="width: 32px; height: 32px;">
+                    <img src="{{ $clinic->logo_path }}" alt="{{ $clinic->display_name }}" 
+                         class="w-100 h-100 object-fit-cover">
+                </div>
+            @else
+                <i class="fas fa-hospital text-primary me-2"></i>
+            @endif
+            {{ $clinic->display_name }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
@@ -472,13 +487,35 @@
                         <label class="form-label">{{ __('translation.patient.phone') }}</label>
                         <input type="text" id="patientPhone" class="form-control" readonly>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
                         <select id="patientBirthYear" class="form-select">
                             <option value="">{{ __('translation.patient.select_year') }}</option>
                             @for($year = date('Y'); $year >= 1920; $year--)
-                                <option value="{{ $year }}-01-01">{{ $year }}</option>
+                                <option value="{{ $year }}">{{ $year }}</option>
                             @endfor
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
+                        <select id="patientBirthMonth" class="form-select">
+                            <option value="">{{ __('translation.common.select') }}</option>
+                            @foreach([
+                                1 => __('translation.months_list.january'),
+                                2 => __('translation.months_list.february'),
+                                3 => __('translation.months_list.march'),
+                                4 => __('translation.months_list.april'),
+                                5 => __('translation.months_list.may'),
+                                6 => __('translation.months_list.june'),
+                                7 => __('translation.months_list.july'),
+                                8 => __('translation.months_list.august'),
+                                9 => __('translation.months_list.september'),
+                                10 => __('translation.months_list.october'),
+                                11 => __('translation.months_list.november'),
+                                12 => __('translation.months_list.december'),
+                            ] as $num => $name)
+                                <option value="{{ $num }}">{{ $name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -767,6 +804,7 @@ function createPatientFromAppointment(id, patientName = '', patientPhone = '') {
     document.getElementById('patientName').value = patientName;
     document.getElementById('patientPhone').value = patientPhone;
     document.getElementById('patientBirthYear').value = '';
+    document.getElementById('patientBirthMonth').value = '';
     document.getElementById('patientGender').value = '';
     document.getElementById('patientNotes').value = '';
     registerModal.show();
@@ -780,7 +818,8 @@ async function submitRegisterPatient(id) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __("translation.common.loading") }}';
     
     const postData = {
-        date_of_birth: document.getElementById('patientBirthYear').value,
+        birth_year: document.getElementById('patientBirthYear').value,
+        birth_month: document.getElementById('patientBirthMonth').value,
         gender: document.getElementById('patientGender').value,
         notes: document.getElementById('patientNotes').value
     };

@@ -58,6 +58,53 @@
                                 <input type="email" id="email" name="email" class="form-control"
                                         placeholder="{{ __('translation.auth.email_placeholder') }}" required value="{{ old('email', auth()->user()->email) }}">
                             </div>
+
+                            @if(auth()->user()->hasRole(\App\Enums\RoleEnum::DOCTOR) && auth()->user()->clinic)
+                            <div class="col-lg-12">
+                                <label for="specialty_id" class="form-label">
+                                    {{ __('translation.auth.specialty') }} <span class="text-danger">*</span>
+                                </label>
+                                <select id="specialty_id" name="specialty_id" class="form-select" required>
+                                    <option value="">{{ __('translation.auth.select_specialty') }}</option>
+                                    @foreach(\App\Models\Specialty::active()->ordered()->get() as $specialty)
+                                        <option value="{{ $specialty->id }}" 
+                                                {{ old('specialty_id', auth()->user()->clinic->specialty_id) == $specialty->id ? 'selected' : '' }}>
+                                            {{ $specialty->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('specialty_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-lg-12">
+                                <label for="clinic_address" class="form-label">
+                                    {{ __('translation.clinic.address') }}
+                                </label>
+                                <input type="text" id="clinic_address" name="clinic_address" class="form-control"
+                                       placeholder="{{ __('translation.auth.clinic_address_placeholder') }}"
+                                       value="{{ old('clinic_address', auth()->user()->clinic->address) }}">
+                            </div>
+
+                            <div class="col-lg-12">
+                                <label class="form-label">{{ __('translation.clinic.logo') }}</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="clinic-logo-preview rounded-3 overflow-hidden bg-light border">
+                                        <img id="clinic_logo_preview" 
+                                             src="{{ auth()->user()->clinic->logo_path }}" 
+                                             alt="{{ auth()->user()->clinic->name }}"
+                                             class="w-100 h-100 object-fit-cover">
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <input type="file" id="clinic_logo" name="clinic_logo" 
+                                               class="form-control form-control-sm" accept="image/*"
+                                               onchange="previewClinicLogo(this)">
+                                        <small class="text-muted">{{ __('translation.clinic.logo_hint') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                             
                             <div class="col-12">
                                 <button class="btn btn-primary" type="submit">{{ __('translation.submit') }}</button>
@@ -120,88 +167,58 @@
                 </div>
             </div>
         </div>
-
-        <!-- Clinic Info (Only for Doctors) -->
-        @if(auth()->user()->user_type === 'doctor' && auth()->user()->clinic)
-        <div class="row mb-4">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title">{{ __('translation.clinic.info') }}</h5>
-                        <div class="card-action">
-                            <button type="button" class="card-action-item border-0 btn">
-                                <i class="bi bi-chevron-up"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <form id="formClinic" class="row g-3" action="{{ route('profile.clinic.update') }}" method="POST">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="col-lg-6">
-                                <label for="clinic_name" class="form-label">
-                                    {{ __('translation.clinic.name') }} <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" id="clinic_name" name="clinic_name" class="form-control"
-                                       placeholder="{{ __('translation.auth.clinic_name_placeholder') }}" required
-                                       value="{{ old('clinic_name', auth()->user()->clinic->name) }}">
-                            </div>
-
-                            <div class="col-lg-6">
-                                <label for="specialty_id" class="form-label">
-                                    {{ __('translation.auth.specialty') }} <span class="text-danger">*</span>
-                                </label>
-                                <select id="specialty_id" name="specialty_id" class="form-select" required>
-                                    <option value="">{{ __('translation.auth.select_specialty') }}</option>
-                                    @foreach(\App\Models\Specialty::active()->ordered()->get() as $specialty)
-                                        <option value="{{ $specialty->id }}" 
-                                                {{ old('specialty_id', auth()->user()->clinic->specialty_id) == $specialty->id ? 'selected' : '' }}>
-                                            {{ $specialty->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('specialty_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-lg-12">
-                                <label for="clinic_address" class="form-label">
-                                    {{ __('translation.clinic.address') }}
-                                </label>
-                                <textarea id="clinic_address" name="clinic_address" class="form-control" rows="2"
-                                          placeholder="{{ __('translation.auth.clinic_address_placeholder') }}">{{ old('clinic_address', auth()->user()->clinic->address) }}</textarea>
-                            </div>
-
-                            <div class="col-12">
-                                <button class="btn btn-primary" type="submit">{{ __('translation.submit') }}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
     </div>
 </div>
 @endsection
 
 @push('styles')
-
+<style>
+    .clinic-logo-preview {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+    }
+    .object-fit-cover {
+        object-fit: cover;
+    }
+</style>
 @endpush
 
 @push('scripts')
     @include('modules.i18n')
     <script>
+        // Clinic logo preview function
+        function previewClinicLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('clinic_logo_preview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             try { if (window.bindPasswordToggle) bindPasswordToggle(); } catch(e) { console.error(e); }
             
             try { if (window.handleSubmit) handleSubmit('#formProfile'); } catch(e) { console.error(e); }
             try { if (window.handleSubmit) handleSubmit('#formUpdatePassword'); } catch(e) { console.error(e); }
-            try { if (window.handleSubmit) handleSubmit('#formCompany'); } catch(e) { console.error(e); }
-            try { if (window.handleSubmit) handleSubmit('#formClinic'); } catch(e) { console.error(e); }
+            
+            // Initialize Choices.js for specialty dropdown
+            const specialtySelect = document.getElementById('specialty_id');
+            if (specialtySelect && window.loadChoices) {
+                window.loadChoices().then(function(Choices) {
+                    new Choices(specialtySelect, {
+                        searchEnabled: true,
+                        itemSelectText: '',
+                        shouldSort: false,
+                        allowHTML: true,
+                        searchPlaceholderValue: '{{ __("translation.common.search") }}',
+                        noResultsText: '{{ __("translation.common.no_results") }}',
+                        noChoicesText: '{{ __("translation.common.no_results") }}'
+                    });
+                });
+            }
         });
     </script>
 @endpush

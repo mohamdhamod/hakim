@@ -82,16 +82,19 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::resource('patients', Clinic\PatientController::class)->names('clinic.patients');
 
         // Lab Tests Management
-        Route::get('/patients/{patient}/lab-tests/abnormal', [Clinic\LabTestController::class, 'abnormal'])->name('patients.lab-tests.abnormal');
-        Route::resource('patients.lab-tests', Clinic\LabTestController::class)->names('patients.lab-tests');
+        Route::post('/patients/{patient}/lab-tests', [Clinic\LabTestController::class, 'store'])->name('patients.lab-tests.store');
+        Route::put('/patients/{patient}/lab-tests/{lab_test}', [Clinic\LabTestController::class, 'update'])->name('patients.lab-tests.update');
+        Route::delete('/patients/{patient}/lab-tests/{lab_test}', [Clinic\LabTestController::class, 'destroy'])->name('patients.lab-tests.destroy');
 
         // Vaccinations Management
-        Route::get('/patients/{patient}/vaccinations/schedule', [Clinic\VaccinationController::class, 'schedule'])->name('patients.vaccinations.schedule');
-        Route::resource('patients.vaccinations', Clinic\VaccinationController::class)->names('patients.vaccinations');
+        Route::post('/patients/{patient}/vaccinations', [Clinic\VaccinationController::class, 'store'])->name('patients.vaccinations.store');
+        Route::put('/patients/{patient}/vaccinations/{vaccination}', [Clinic\VaccinationController::class, 'update'])->name('patients.vaccinations.update');
+        Route::delete('/patients/{patient}/vaccinations/{vaccination}', [Clinic\VaccinationController::class, 'destroy'])->name('patients.vaccinations.destroy');
 
         // Growth Charts Management
-        Route::get('/patients/{patient}/growth-charts/chart', [Clinic\GrowthChartController::class, 'chart'])->name('patients.growth-charts.chart');
-        Route::resource('patients.growth-charts', Clinic\GrowthChartController::class)->names('patients.growth-charts');
+        Route::post('/patients/{patient}/growth-charts', [Clinic\GrowthChartController::class, 'store'])->name('patients.growth-charts.store');
+        Route::put('/patients/{patient}/growth-charts/{growth_chart}', [Clinic\GrowthChartController::class, 'update'])->name('patients.growth-charts.update');
+        Route::delete('/patients/{patient}/growth-charts/{growth_chart}', [Clinic\GrowthChartController::class, 'destroy'])->name('patients.growth-charts.destroy');
 
         // PDF Export Routes
         Route::get('/patients/{patient}/export/medical-record', [Clinic\PatientExportController::class, 'exportMedicalRecord'])->name('patients.export.medical-record');
@@ -100,9 +103,11 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/patients/{patient}/export/growth-chart', [Clinic\PatientExportController::class, 'exportGrowthChart'])->name('patients.export.growth-chart');
 
         // Chronic Diseases Management
-        Route::post('/patients/{patient}/chronic-diseases/{chronicDisease}/monitoring', [Clinic\ChronicDiseaseController::class, 'storeMonitoring'])->name('patients.chronic-diseases.monitoring.store');
-        Route::get('/chronic-diseases/overdue-followups', [Clinic\ChronicDiseaseController::class, 'overdueFollowups'])->name('chronic-diseases.overdue-followups');
-        Route::resource('patients.chronic-diseases', Clinic\ChronicDiseaseController::class)->names('patients.chronic-diseases');
+        Route::post('/patients/{patient}/chronic-diseases', [Clinic\ChronicDiseaseController::class, 'store'])->name('patients.chronic-diseases.store');
+        Route::get('/patients/{patient}/chronic-diseases/{patientChronicDisease}', [Clinic\ChronicDiseaseController::class, 'show'])->name('patients.chronic-diseases.show');
+        Route::put('/patients/{patient}/chronic-diseases/{patientChronicDisease}', [Clinic\ChronicDiseaseController::class, 'update'])->name('patients.chronic-diseases.update');
+        Route::delete('/patients/{patient}/chronic-diseases/{patientChronicDisease}', [Clinic\ChronicDiseaseController::class, 'destroy'])->name('patients.chronic-diseases.destroy');
+        Route::post('/patients/{patient}/chronic-diseases/{patientChronicDisease}/monitoring', [Clinic\ChronicDiseaseController::class, 'storeMonitoring'])->name('patients.chronic-diseases.monitoring.store');
 
         // Appointments Management (for doctors)
         Route::get('/appointments', [Clinic\WorkspaceController::class, 'allAppointments'])->name('clinic.appointments.index');

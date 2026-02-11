@@ -1,90 +1,119 @@
 @extends('layout.home.main')
 
 @section('content')
-<!-- Search Bar - Compact Card -->
-<div class="py-3">
-    <div class="container">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-3">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                    <h1 class="h5 fw-semibold mb-0 text-dark">
-                        <i class="bi bi-hospital text-primary me-2"></i>{{ __('translation.clinic_home.available_clinics') }}
-                    </h1>
-                    <span class="badge bg-light text-dark border small">
-                        {{ $clinics->total() }} {{ __('translation.clinic_home.clinics_subtitle') }}
-                    </span>
-                </div>
-                
-                <form id="searchForm" method="GET">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-12 col-md-5">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="bi bi-search text-muted"></i>
-                                </span>
-                                <input type="text" id="search_query" name="q" class="form-control border-start-0 ps-0" 
-                                       placeholder="{{ __('translation.clinic_home.search_placeholder') }}"
-                                       value="{{ request('q') }}">
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <select id="specialty_filter" name="specialty" class="form-select form-select-sm">
-                                <option value="">{{ __('translation.clinic_home.all_specialties') }}</option>
-                                @foreach($specialties as $specialty)
-                                    <option value="{{ $specialty->id }}" {{ request('specialty') == $specialty->id ? 'selected' : '' }}>
-                                        {{ $specialty->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <button type="submit" class="btn btn-primary btn-sm w-100">
-                                <i class="bi bi-search me-1"></i>{{ __('translation.common.search') }}
-                            </button>
-                        </div>
-                        <div class="col-12 col-md-2 d-grid d-md-flex justify-content-md-end">
-                            @guest
-                                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-person-plus me-1"></i>{{ __('translation.auth.sign_up') }}
-                                </a>
-                            @endguest
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Clinics Grid with Sidebar Filters -->
+<!-- Clinics Grid -->
 <section class="py-4">
     <div class="container">
         <div class="row g-4 align-items-start justify-content-center">
             
-        
             <!-- Main Content -->
             <div class="col-lg-10">
                 <div class="row g-3" id="clinicsContainer">
+                    
+                    <!-- Search Card - Same Style as Clinic Cards -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100 rounded-3">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <!-- Search Icon -->
+                                    <div class="col-auto">
+                                        <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center p-3 flex-shrink-0">
+                                            <i class="bi bi-search text-primary fs-2"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Search Form -->
+                                    <div class="col">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="flex-grow-1">
+                                                <h5 class="fw-semibold mb-1 h6">{{ __('translation.clinic_home.available_clinics') }}</h5>
+                                                <p class="text-muted small mb-2 d-flex align-items-center gap-1">
+                                                    <i class="bi bi-hospital"></i>
+                                                    <span>{{ $clinics->total() }} {{ __('translation.clinic_home.clinics_subtitle') }}</span>
+                                                </p>
+                                            </div>
+                                            @guest
+                                                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-person-plus me-1"></i>{{ __('translation.auth.sign_up') }}
+                                                </a>
+                                            @endguest
+                                        </div>
+                                        
+                                        <!-- Search Form Row -->
+                                        <form id="searchForm" method="GET">
+                                            <div class="row g-2 mb-2">
+                                                <div class="col-md-5">
+                                                    <div class="position-relative">
+                                                        <i class="bi bi-search text-muted position-absolute top-50 translate-middle-y {{ app()->getLocale() === 'ar' ? 'end-0 me-2' : 'start-0 ms-2' }}"></i>
+                                                        <input type="text" id="search_query" name="q" class="form-control form-control-sm {{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }}" 
+                                                               placeholder="{{ __('translation.clinic_home.search_placeholder') }}"
+                                                               value="{{ request('q') }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <select id="specialty_filter" name="specialty" class="form-select form-select-sm">
+                                                        <option value="">{{ __('translation.clinic_home.all_specialties') }}</option>
+                                                        @foreach($specialties as $specialty)
+                                                            <option value="{{ $specialty->id }}" {{ request('specialty') == $specialty->id ? 'selected' : '' }}>
+                                                                {{ $specialty->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                        <i class="bi bi-search me-1"></i>{{ __('translation.common.search') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        
+                                        <!-- Stats & Info -->
+                                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                            <div class="d-flex gap-3">
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-check-circle text-success me-1"></i>
+                                                    {{ __('translation.clinic_home.verified_clinics') }}
+                                                </span>
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-clock text-warning me-1"></i>
+                                                    {{ __('translation.common.available') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
             @forelse($clinics as $clinic)
                 <div class="col-12">
                     <div class="card border-0 shadow-sm h-100 rounded-3">
                         <div class="card-body ">
                             <div class="row g-3">
-                                <!-- Clinic Icon/Image -->
+                                <!-- Clinic Logo/Icon -->
                                 <div class="col-auto">
-                                    <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center p-3 flex-shrink-0">
-                                        <i class="bi bi-hospital text-primary fs-2"></i>
-                                    </div>
+                                    @if($clinic->logo)
+                                        <div class="rounded-3 overflow-hidden flex-shrink-0" style="width: 64px; height: 64px;">
+                                            <img src="{{ $clinic->logo_path }}" alt="{{ $clinic->display_name }}" 
+                                                 class="w-100 h-100 object-fit-cover">
+                                        </div>
+                                    @else
+                                        <div class="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 64px; height: 64px;">
+                                            <i class="bi bi-hospital text-primary fs-2"></i>
+                                        </div>
+                                    @endif
                                 </div>
                                 
                                 <!-- Clinic Info -->
                                 <div class="col">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="flex-grow-1">
-                                            <h5 class="fw-semibold mb-1 h6">{{ $clinic->name }}</h5>
+                                            <h5 class="fw-semibold mb-1 h6">{{ $clinic->display_name }}</h5>
                                             <p class="text-muted small mb-2 d-flex align-items-center gap-1">
-                                                <i class="bi bi-person-badge"></i>
-                                                <span>{{ $clinic->doctor->name ?? __('translation.common.unknown') }}</span>
+                                                <i class="bi bi-tag"></i>
+                                                <span>{{ $clinic->specialty->name ?? __('translation.common.unknown') }}</span>
                                             </p>
                                             
                                             @if($clinic->specialty)
@@ -132,7 +161,7 @@
                                         <button type="button" 
                                                 class="btn btn-primary btn-sm px-4 book-appointment-btn"
                                                 data-clinic-id="{{ $clinic->id }}"
-                                                data-clinic-name="{{ $clinic->name }}"
+                                                data-clinic-name="{{ $clinic->display_name }}"
                                                 data-doctor-name="{{ $clinic->doctor->name ?? '' }}">
                                             <i class="bi bi-calendar-check me-1"></i>
                                             {{ __('translation.clinic_home.book_appointment') }}
@@ -248,6 +277,23 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+    
+    // Initialize Choices.js for specialty filter
+    const specialtyFilter = document.getElementById('specialty_filter');
+    if (specialtyFilter && window.loadChoices) {
+        window.loadChoices().then(function(Choices) {
+            new Choices(specialtyFilter, {
+                searchEnabled: true,
+                itemSelectText: '',
+                shouldSort: false,
+                placeholder: true,
+                placeholderValue: '{{ __('translation.clinic_home.all_specialties') }}',
+                searchPlaceholderValue: '{{ __('translation.common.search') }}',
+                noResultsText: '{{ __('translation.common.no_results') }}',
+                noChoicesText: '{{ __('translation.common.no_results') }}'
+            });
+        });
+    }
     
     // Handle book appointment button clicks
     document.querySelectorAll('.book-appointment-btn').forEach(btn => {

@@ -28,12 +28,19 @@
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-start">
-                                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; min-width: 60px;">
-                                        <i class="bi bi-person-badge text-primary fs-4"></i>
-                                    </div>
+                                    @if($appointment->clinic->logo)
+                                        <div class="rounded-circle overflow-hidden me-3" style="width: 60px; height: 60px; min-width: 60px;">
+                                            <img src="{{ $appointment->clinic->logo_path }}" alt="{{ $appointment->clinic->display_name }}" 
+                                                 class="w-100 h-100 object-fit-cover">
+                                        </div>
+                                    @else
+                                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; min-width: 60px;">
+                                            <i class="bi bi-hospital text-primary fs-4"></i>
+                                        </div>
+                                    @endif
                                     <div>
                                         <h5 class="mb-1 fw-semibold">
-                                            {{ $appointment->clinic->user->name ?? $appointment->clinic->name }}
+                                            {{ $appointment->clinic->display_name }}
                                         </h5>
                                         <p class="text-muted mb-1">
                                             <i class="bi bi-tag me-1"></i>

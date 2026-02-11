@@ -197,13 +197,35 @@
                             <option value="female">{{ __('translation.patient.female') }}</option>
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
                         <select id="registerPatientBirthYear" class="form-select">
                             <option value="">{{ __('translation.common.select') }}</option>
                             @for($year = date('Y'); $year >= date('Y') - 100; $year--)
                                 <option value="{{ $year }}">{{ $year }}</option>
                             @endfor
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
+                        <select id="registerPatientBirthMonth" class="form-select">
+                            <option value="">{{ __('translation.common.select') }}</option>
+                            @foreach([
+                                1 => __('translation.months_list.january'),
+                                2 => __('translation.months_list.february'),
+                                3 => __('translation.months_list.march'),
+                                4 => __('translation.months_list.april'),
+                                5 => __('translation.months_list.may'),
+                                6 => __('translation.months_list.june'),
+                                7 => __('translation.months_list.july'),
+                                8 => __('translation.months_list.august'),
+                                9 => __('translation.months_list.september'),
+                                10 => __('translation.months_list.october'),
+                                11 => __('translation.months_list.november'),
+                                12 => __('translation.months_list.december'),
+                            ] as $num => $name)
+                                <option value="{{ $num }}">{{ $name }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -347,6 +369,7 @@
         document.getElementById('registerPatientName').value = patientName || patientPhone;
         document.getElementById('registerPatientGender').value = '';
         document.getElementById('registerPatientBirthYear').value = '';
+        document.getElementById('registerPatientBirthMonth').value = '';
         document.getElementById('registerPatientNotes').value = '';
         new bootstrap.Modal(document.getElementById('registerPatientModal')).show();
     }
@@ -354,19 +377,19 @@
     document.getElementById('confirmRegisterBtn').addEventListener('click', async function() {
         const gender = document.getElementById('registerPatientGender').value;
         const birthYear = document.getElementById('registerPatientBirthYear').value;
+        const birthMonth = document.getElementById('registerPatientBirthMonth').value;
         const notes = document.getElementById('registerPatientNotes').value;
         const btn = this;
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.loading") }}';
         
-        const dateOfBirth = birthYear ? `${birthYear}-01-01` : null;
-        
         try {
             const url = `{{ url('/') }}/${document.documentElement.lang}/clinic/appointments/${currentAppointmentId}/register-patient`;
             const data = await ApiClient.post(url, {
                 gender: gender,
-                date_of_birth: dateOfBirth,
+                birth_year: birthYear,
+                birth_month: birthMonth,
                 notes: notes
             });
             

@@ -14,7 +14,7 @@
                 <div class="row align-items-center">
                     <div class="col-lg-8">
                         <h2 class="fw-bold mb-2">{{ __('translation.clinic.welcome') }}, {{ $clinic->doctor->name ?? auth()->user()->name }} 👋</h2>
-                        <p class="mb-0 opacity-75">{{ __('translation.clinic.clinic_name') }}: {{ $clinic->name }}</p>
+                        <p class="mb-0 opacity-75">{{ $clinic->display_name }}</p>
                     </div>
                     <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
                         <a href="{{ route('clinic.patients.create') }}" class="btn btn-light btn-lg">

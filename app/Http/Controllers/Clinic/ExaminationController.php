@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Examination;
 use App\Models\ExaminationAttachment;
 use App\Models\Patient;
+use App\Traits\ClinicAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,25 +14,14 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ExaminationController extends Controller
 {
-    /**
-     * Get the current doctor's clinic.
-     */
-    protected function getClinic()
-    {
-        return Auth::user()->clinic;
-    }
+    use ClinicAuthorization;
 
     /**
      * Display a listing of examinations.
      */
     public function index(Request $request)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || !$clinic->isApproved()) {
-            return redirect()->route('clinic.dashboard')
-                ->with('error', __('translation.clinic.not_approved'));
-        }
+        $clinic = $this->authorizeClinicAccess();
 
         if ($request->ajax()) {
             $examinations = Examination::with(['patient'])
@@ -82,12 +72,7 @@ class ExaminationController extends Controller
      */
     public function today(Request $request)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || !$clinic->isApproved()) {
-            return redirect()->route('clinic.dashboard')
-                ->with('error', __('translation.clinic.not_approved'));
-        }
+        $clinic = $this->authorizeClinicAccess();
 
         $examinations = Examination::with(['patient'])
             ->where('clinic_id', $clinic->id)
@@ -103,14 +88,7 @@ class ExaminationController extends Controller
      */
     public function store(Request $request)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || !$clinic->isApproved()) {
-            return response()->json([
-                'success' => false,
-                'message' => __('translation.clinic.not_approved'),
-            ], 403);
-        }
+        $clinic = $this->authorizeClinicAccess(true);
 
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
@@ -171,11 +149,7 @@ class ExaminationController extends Controller
      */
     public function show($lang ,Examination $examination)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $examination->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizeClinicModel($examination);
 
         $examination->load(['patient', 'attachments']);
 
@@ -187,11 +161,7 @@ class ExaminationController extends Controller
      */
     public function edit($lang , Examination $examination)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $examination->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizeClinicModel($examination);
 
         $examination->load(['patient']);
 
@@ -203,11 +173,7 @@ class ExaminationController extends Controller
      */
     public function update(Request $request, $lang , Examination $examination)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $examination->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizeClinicModel($examination, true);
 
         $validated = $request->validate([
             'examination_date' => 'required|date',
@@ -256,11 +222,7 @@ class ExaminationController extends Controller
      */
     public function print($lang , Examination $examination)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $examination->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizeClinicModel($examination);
 
         $examination->load(['patient', 'clinic', 'doctor']);
 
@@ -272,11 +234,7 @@ class ExaminationController extends Controller
      */
     public function uploadAttachment(Request $request, $lang , Examination $examination)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $examination->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizeClinicModel($examination, true);
 
         $request->validate([
             'file' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx',
@@ -342,11 +300,7 @@ class ExaminationController extends Controller
      */
     public function complete($lang , Examination $examination)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $examination->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizeClinicModel($examination, true);
 
         $examination->markAsCompleted();
 

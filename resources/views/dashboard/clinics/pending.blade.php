@@ -48,14 +48,21 @@
                                     @foreach($clinics as $clinic)
                                         <tr>
                                             <td>
-                                                <span class="d-flex align-items-center justify-content-center rounded-circle" 
-                                                      style="width: 40px; height: 40px; background-color: {{ $clinic->specialty->color ?? '#6c757d' }}20;">
-                                                    <i class="fas {{ $clinic->specialty->icon ?? 'fa-hospital' }}" style="color: {{ $clinic->specialty->color ?? '#6c757d' }};"></i>
-                                                </span>
+                                                @if($clinic->logo)
+                                                    <div class="rounded-circle overflow-hidden" style="width: 40px; height: 40px;">
+                                                        <img src="{{ $clinic->logo_path }}" alt="{{ $clinic->display_name }}" 
+                                                             class="w-100 h-100 object-fit-cover">
+                                                    </div>
+                                                @else
+                                                    <span class="d-flex align-items-center justify-content-center rounded-circle" 
+                                                          style="width: 40px; height: 40px; background-color: {{ $clinic->specialty->color ?? '#6c757d' }}20;">
+                                                        <i class="fas {{ $clinic->specialty->icon ?? 'fa-hospital' }}" style="color: {{ $clinic->specialty->color ?? '#6c757d' }};"></i>
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <div>
-                                                    <strong>{{ $clinic->name }}</strong>
+                                                    <strong>{{ $clinic->display_name }}</strong>
                                                     @if($clinic->address)
                                                         <br><small class="text-muted">{{ Str::limit($clinic->address, 40) }}</small>
                                                     @endif

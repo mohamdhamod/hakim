@@ -5,65 +5,35 @@ namespace App\Http\Controllers\Clinic;
 use App\Http\Controllers\Controller;
 use App\Models\GrowthMeasurement;
 use App\Models\Patient;
+use App\Traits\ClinicAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GrowthChartController extends Controller
 {
-    /**
-     * Display a listing of growth measurements for a patient.
-     */
-    public function index($lang ,Patient $patient)
-    {
-        $this->authorize('view', $patient);
-
-        $measurements = GrowthMeasurement::with(['measuredBy', 'examination'])
-            ->forPatient($patient->id)
-            ->chronological()
-            ->get();
-
-        // Prepare chart data
-        $chartData = $measurements->map(function ($measurement) {
-            return [
-                'age_months' => $measurement->age_months,
-                'weight' => $measurement->weight_kg,
-                'height' => $measurement->height_cm,
-                'bmi' => $measurement->bmi,
-                'date' => $measurement->measurement_date->format('Y-m-d'),
-            ];
-        });
-
-        return view('clinic.growth-charts.index', compact('patient', 'measurements', 'chartData'));
-    }
-
-    /**
-     * Show the form for creating a new growth measurement.
-     */
-    public function create($lang ,Patient $patient)
-    {
-        $this->authorize('update', $patient);
-
-        // Calculate current age in months
-        $ageMonths = $patient->date_of_birth ? $patient->date_of_birth->diffInMonths(now()) : 0;
-
-        return view('clinic.growth-charts.create', compact('patient', 'ageMonths'));
-    }
+    use ClinicAuthorization;
 
     /**
      * Store a newly created growth measurement in storage.
      */
-    public function store(Request $request,$lang , Patient $patient)
+    public function store(Request $request, $lang, Patient $patient)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient);
 
         $validated = $request->validate([
             'measurement_date' => 'required|date',
-            'age_months' => 'required|integer|min:0',
+            'age_months' => 'nullable|integer|min:0',
             'weight_kg' => 'nullable|numeric|min:0|max:500',
             'height_cm' => 'nullable|numeric|min:0|max:300',
             'head_circumference_cm' => 'nullable|numeric|min:0|max:100',
             'notes' => 'nullable|string',
         ]);
+
+        // Calculate age in months if not provided
+        if (empty($validated['age_months']) && $patient->date_of_birth) {
+            $measurementDate = \Carbon\Carbon::parse($validated['measurement_date']);
+            $validated['age_months'] = $patient->date_of_birth->diffInMonths($measurementDate);
+        }
 
         $validated['patient_id'] = $patient->id;
         $validated['measured_by_user_id'] = Auth::id();
@@ -74,8 +44,10 @@ class GrowthChartController extends Controller
         // Calculate BMI
         $measurement->calculateBmi();
         
-        // Calculate WHO percentiles
-        $measurement->calculatePercentiles();
+        // Calculate WHO percentiles if method exists
+        if (method_exists($measurement, 'calculatePercentiles')) {
+            $measurement->calculatePercentiles();
+        }
         
         $measurement->save();
 
@@ -88,87 +60,67 @@ class GrowthChartController extends Controller
         }
 
         return redirect()
-            ->route('patients.growth-charts.index', $patient)
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.growth_measurement_added_successfully'));
-    }
-
-    /**
-     * Display the specified growth measurement.
-     */
-    public function show($lang ,Patient $patient, GrowthMeasurement $growthChart)
-    {
-        $this->authorize('view', $patient);
-
-        $growthChart->load(['measuredBy', 'examination']);
-
-        return view('clinic.growth-charts.show', compact('patient', 'growthChart'));
-    }
-
-    /**
-     * Show the form for editing the specified growth measurement.
-     */
-    public function edit($lang ,Patient $patient, GrowthMeasurement $growthChart)
-    {
-        $this->authorize('update', $patient);
-
-        return view('clinic.growth-charts.edit', compact('patient', 'growthChart'));
     }
 
     /**
      * Update the specified growth measurement in storage.
      */
-    public function update(Request $request,$lang , Patient $patient, GrowthMeasurement $growthChart)
+    public function update(Request $request, $lang, Patient $patient, GrowthMeasurement $growthChart)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient);
 
         $validated = $request->validate([
             'measurement_date' => 'required|date',
-            'age_months' => 'required|integer|min:0',
+            'age_months' => 'nullable|integer|min:0',
             'weight_kg' => 'nullable|numeric|min:0|max:500',
             'height_cm' => 'nullable|numeric|min:0|max:300',
             'head_circumference_cm' => 'nullable|numeric|min:0|max:100',
             'notes' => 'nullable|string',
         ]);
 
+        // Calculate age in months if not provided
+        if (empty($validated['age_months']) && $patient->date_of_birth) {
+            $measurementDate = \Carbon\Carbon::parse($validated['measurement_date']);
+            $validated['age_months'] = $patient->date_of_birth->diffInMonths($measurementDate);
+        }
+
         $growthChart->fill($validated);
         $growthChart->calculateBmi();
         $growthChart->save();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.growth_measurement_updated_successfully'),
+                'data' => $growthChart
+            ]);
+        }
+
         return redirect()
-            ->route('patients.growth-charts.show', [$patient, $growthChart])
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.growth_measurement_updated_successfully'));
     }
 
     /**
      * Remove the specified growth measurement from storage.
      */
-    public function destroy($lang ,Patient $patient, GrowthMeasurement $growthChart)
+    public function destroy($lang, Patient $patient, GrowthMeasurement $growthChart)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient);
 
         $growthChart->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.growth_measurement_deleted_successfully'),
+            ]);
+        }
+
         return redirect()
-            ->route('patients.growth-charts.index', $patient)
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.growth_measurement_deleted_successfully'));
-    }
-
-    /**
-     * Display growth chart visualization.
-     */
-    public function chart($lang ,Patient $patient)
-    {
-        $this->authorize('view', $patient);
-
-        $measurements = GrowthMeasurement::forPatient($patient->id)
-            ->chronological()
-            ->get();
-
-        // Prepare data for Chart.js
-        $weightData = $measurements->pluck('weight_kg', 'age_months')->toArray();
-        $heightData = $measurements->pluck('height_cm', 'age_months')->toArray();
-        $bmiData = $measurements->pluck('bmi', 'age_months')->toArray();
-
-        return view('clinic.growth-charts.chart', compact('patient', 'measurements', 'weightData', 'heightData', 'bmiData'));
     }
 }

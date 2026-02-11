@@ -46,17 +46,39 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
-                                <select name="date_of_birth" class="form-select @error('date_of_birth') is-invalid @enderror">
+                                <select name="birth_year" id="birth_year" class="form-select @error('date_of_birth') is-invalid @enderror">
                                     <option value="">{{ __('translation.patient.select_year') }}</option>
                                     @for($year = date('Y'); $year >= 1920; $year--)
-                                        <option value="{{ $year }}-01-01" {{ old('date_of_birth') == $year.'-01-01' ? 'selected' : '' }}>{{ $year }}</option>
+                                        <option value="{{ $year }}" {{ old('birth_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
                                     @endfor
                                 </select>
                                 @error('date_of_birth')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
+                                <select name="birth_month" id="birth_month" class="form-select">
+                                    <option value="">{{ __('translation.common.select') }}</option>
+                                    @foreach([
+                                        1 => __('translation.months_list.january'),
+                                        2 => __('translation.months_list.february'),
+                                        3 => __('translation.months_list.march'),
+                                        4 => __('translation.months_list.april'),
+                                        5 => __('translation.months_list.may'),
+                                        6 => __('translation.months_list.june'),
+                                        7 => __('translation.months_list.july'),
+                                        8 => __('translation.months_list.august'),
+                                        9 => __('translation.months_list.september'),
+                                        10 => __('translation.months_list.october'),
+                                        11 => __('translation.months_list.november'),
+                                        12 => __('translation.months_list.december'),
+                                    ] as $num => $name)
+                                        <option value="{{ $num }}" {{ old('birth_month') == $num ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">{{ __('translation.patient.gender') }}</label>

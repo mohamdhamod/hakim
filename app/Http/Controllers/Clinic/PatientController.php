@@ -7,12 +7,15 @@ use App\Models\Patient;
 use App\Models\Examination;
 use App\Models\User;
 use App\Services\PatientIntegrationService;
+use App\Traits\ClinicAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class PatientController extends Controller
 {
+    use ClinicAuthorization;
+
     protected PatientIntegrationService $integrationService;
 
     public function __construct(PatientIntegrationService $integrationService)
@@ -21,24 +24,11 @@ class PatientController extends Controller
     }
 
     /**
-     * Get the current doctor's clinic.
-     */
-    protected function getClinic()
-    {
-        return Auth::user()->clinic;
-    }
-
-    /**
      * Display a listing of patients.
      */
     public function index(Request $request)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || !$clinic->isApproved()) {
-            return redirect()->route('clinic.dashboard')
-                ->with('error', __('translation.clinic.not_approved'));
-        }
+        $clinic = $this->authorizeClinicAccess();
 
         if ($request->ajax()) {
             $patients = Patient::with(['latestExamination'])
@@ -90,12 +80,7 @@ class PatientController extends Controller
      */
     public function create()
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || !$clinic->isApproved()) {
-            return redirect()->route('clinic.dashboard')
-                ->with('error', __('translation.clinic.not_approved'));
-        }
+        $clinic = $this->authorizeClinicAccess();
 
         $fileNumber = Patient::generateFileNumber($clinic->id);
 
@@ -107,24 +92,25 @@ class PatientController extends Controller
      */
     public function store(Request $request)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || !$clinic->isApproved()) {
-            return response()->json([
-                'success' => false,
-                'message' => __('translation.clinic.not_approved'),
-            ], 403);
-        }
+        $clinic = $this->authorizeClinicAccess(true);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
+            'birth_year' => 'nullable|integer|min:1920|max:' . date('Y'),
+            'birth_month' => 'nullable|integer|min:1|max:12',
             'gender' => 'nullable|in:male,female',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
             'blood_type' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
         ]);
+
+        // Convert birth_year and birth_month to date_of_birth
+        if (!empty($validated['birth_year'])) {
+            $month = $validated['birth_month'] ?? 1;
+            $validated['date_of_birth'] = $validated['birth_year'] . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01';
+        }
+        unset($validated['birth_year'], $validated['birth_month']);
 
         // Check for potential duplicates
         $duplicates = $this->integrationService->findPotentialDuplicates($clinic, $validated);
@@ -175,27 +161,25 @@ class PatientController extends Controller
      */
     public function show($lang , Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $clinic = $this->authorizePatientAccess($patient);
 
         $patient->load([
             'examinations' => function ($query) {
                 $query->orderBy('examination_date', 'desc');
             },
             'labTestResults' => function ($query) {
-                $query->with('labTestType')->latest('test_date')->limit(10);
+                $query->with('labTestType.translations')->latest('test_date')->limit(10);
             },
             'vaccinationRecords' => function ($query) {
-                $query->with('vaccinationType')->latest('vaccination_date')->limit(10);
+                $query->with('vaccinationType.translations')->latest('vaccination_date')->limit(10);
             },
             'growthMeasurements' => function ($query) {
                 $query->latest('measurement_date')->limit(10);
             },
             'chronicDiseases' => function ($query) {
-                $query->with('chronicDiseaseType')->where('status', '!=', 'resolved');
+                $query->with(['chronicDiseaseType.translations', 'monitoringRecords' => function ($q) {
+                    $q->latest('monitoring_date')->limit(20);
+                }])->where('status', '!=', 'resolved');
             }
         ]);
 
@@ -210,11 +194,7 @@ class PatientController extends Controller
      */
     public function edit($lang , Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizePatientAccess($patient);
 
         return view('clinic.patients.edit', compact('patient'));
     }
@@ -224,15 +204,12 @@ class PatientController extends Controller
      */
     public function update(Request $request, $lang , Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
+            'birth_year' => 'nullable|integer|min:1920|max:' . date('Y'),
+            'birth_month' => 'nullable|integer|min:1|max:12',
             'gender' => 'nullable|in:male,female',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -246,6 +223,15 @@ class PatientController extends Controller
             'emergency_contact_phone' => 'nullable|string|max:20',
             'notes' => 'nullable|string|max:2000',
         ]);
+
+        // Convert birth_year and birth_month to date_of_birth
+        if (!empty($validated['birth_year'])) {
+            $month = $validated['birth_month'] ?? 1;
+            $validated['date_of_birth'] = $validated['birth_year'] . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01';
+        } else {
+            $validated['date_of_birth'] = null;
+        }
+        unset($validated['birth_year'], $validated['birth_month']);
 
         $patient->update($validated);
 
@@ -267,11 +253,7 @@ class PatientController extends Controller
      */
     public function destroy($lang , Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizePatientAccess($patient, true);
 
         $patient->delete();
 
@@ -307,11 +289,7 @@ class PatientController extends Controller
      */
     public function updateMedicalHistory(Request $request, $lang, Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'allergies' => 'nullable|string|max:2000',
@@ -338,11 +316,7 @@ class PatientController extends Controller
      */
     public function updateEmergencyContact(Request $request, $lang, Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'emergency_contact_name' => 'nullable|string|max:255',
@@ -367,11 +341,7 @@ class PatientController extends Controller
      */
     public function updateNotes(Request $request, $lang, Patient $patient)
     {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $patient->clinic_id !== $clinic->id) {
-            abort(403);
-        }
+        $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'notes' => 'nullable|string|max:5000',

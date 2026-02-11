@@ -4,59 +4,83 @@ namespace App\Http\Controllers\Clinic;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChronicDiseaseMonitoring;
-use App\Models\ChronicDiseaseType;
 use App\Models\Patient;
 use App\Models\PatientChronicDisease;
+use App\Traits\ClinicAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChronicDiseaseController extends Controller
 {
-    /**
-     * Display a listing of chronic diseases for a patient.
-     */
-    public function index($lang ,Patient $patient)
-    {
-        $this->authorize('view', $patient);
-
-        $chronicDiseases = PatientChronicDisease::with(['chronicDiseaseType', 'diagnosedBy'])
-            ->where('patient_id', $patient->id)
-            ->get();
-
-        return view('clinic.chronic-diseases.index', compact('patient', 'chronicDiseases'));
-    }
+    use ClinicAuthorization;
 
     /**
-     * Show the form for creating a new chronic disease.
+     * Display the specified chronic disease.
      */
-    public function create($lang ,Patient $patient)
+    public function show($lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient);
 
-        $diseaseTypes = ChronicDiseaseType::active()->get();
+        // Verify the disease belongs to this patient
+        if ($patientChronicDisease->patient_id !== $patient->id) {
+            abort(404);
+        }
 
-        return view('clinic.chronic-diseases.create', compact('patient', 'diseaseTypes'));
+        $disease = $patientChronicDisease->load(['chronicDiseaseType.translations', 'monitoringRecords']);
+
+        return response()->json([
+            'success' => true,
+            'disease' => [
+                'id' => $disease->id,
+                'type_name' => $disease->chronicDiseaseType->name,
+                'category' => $disease->chronicDiseaseType->category,
+                'icd11_code' => $disease->chronicDiseaseType->icd11_code,
+                'status' => $disease->status,
+                'severity' => $disease->severity,
+                'diagnosis_date' => $disease->diagnosis_date,
+                'last_followup_date' => $disease->last_followup_date,
+                'next_followup_date' => $disease->next_followup_date,
+                'treatment_plan' => $disease->treatment_plan,
+                'monitoring_count' => $disease->monitoringRecords->count(),
+            ]
+        ]);
     }
 
     /**
      * Store a newly created chronic disease in storage.
      */
-    public function store(Request $request, $lang ,Patient $patient)
+    public function store(Request $request, $lang, Patient $patient)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'chronic_disease_type_id' => 'required|exists:chronic_disease_types,id',
             'diagnosis_date' => 'required|date',
             'severity' => 'nullable|in:mild,moderate,severe',
-            'status' => 'required|in:active,in_remission,resolved',
+            'status' => 'nullable|in:active,in_remission,resolved',
             'treatment_plan' => 'nullable|string',
             'notes' => 'nullable|string',
             'next_followup_date' => 'nullable|date',
         ]);
 
+        // Check if patient already has this chronic disease type
+        $existingDisease = PatientChronicDisease::where('patient_id', $patient->id)
+            ->where('chronic_disease_type_id', $validated['chronic_disease_type_id'])
+            ->first();
+
+        if ($existingDisease) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('translation.chronic_disease_already_exists')
+                ], 422);
+            }
+            return redirect()->back()->with('error', __('translation.chronic_disease_already_exists'));
+        }
+
         $validated['patient_id'] = $patient->id;
         $validated['diagnosed_by_user_id'] = Auth::id();
+        $validated['status'] = $validated['status'] ?? 'active';
 
         $disease = PatientChronicDisease::create($validated);
 
@@ -69,79 +93,85 @@ class ChronicDiseaseController extends Controller
         }
 
         return redirect()
-            ->route('patients.chronic-diseases.index', $patient)
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.chronic_disease_added_successfully'));
-    }
-
-    /**
-     * Display the specified chronic disease.
-     */
-    public function show($lang ,Patient $patient, PatientChronicDisease $chronicDisease)
-    {
-        $this->authorize('view', $patient);
-
-        $chronicDisease->load(['chronicDiseaseType', 'diagnosedBy', 'monitoringRecords']);
-
-        return view('clinic.chronic-diseases.show', compact('patient', 'chronicDisease'));
-    }
-
-    /**
-     * Show the form for editing the specified chronic disease.
-     */
-    public function edit($lang ,Patient $patient, PatientChronicDisease $chronicDisease)
-    {
-        $this->authorize('update', $patient);
-
-        $diseaseTypes = ChronicDiseaseType::active()->get();
-
-        return view('clinic.chronic-diseases.edit', compact('patient', 'chronicDisease', 'diseaseTypes'));
     }
 
     /**
      * Update the specified chronic disease in storage.
      */
-    public function update(Request $request,$lang , Patient $patient, PatientChronicDisease $chronicDisease)
+    public function update(Request $request, $lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient, true);
+
+        // Verify the disease belongs to this patient
+        if ($patientChronicDisease->patient_id !== $patient->id) {
+            abort(404);
+        }
 
         $validated = $request->validate([
             'chronic_disease_type_id' => 'required|exists:chronic_disease_types,id',
             'diagnosis_date' => 'required|date',
             'severity' => 'nullable|in:mild,moderate,severe',
-            'status' => 'required|in:active,in_remission,resolved',
+            'status' => 'nullable|in:active,in_remission,resolved',
             'treatment_plan' => 'nullable|string',
             'notes' => 'nullable|string',
             'last_followup_date' => 'nullable|date',
             'next_followup_date' => 'nullable|date',
         ]);
 
-        $chronicDisease->update($validated);
+        $patientChronicDisease->update($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.chronic_disease_updated_successfully'),
+                'data' => $patientChronicDisease
+            ]);
+        }
 
         return redirect()
-            ->route('patients.chronic-diseases.show', [$patient, $chronicDisease])
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.chronic_disease_updated_successfully'));
     }
 
     /**
      * Remove the specified chronic disease from storage.
      */
-    public function destroy($lang ,Patient $patient,  PatientChronicDisease $chronicDisease)
+    public function destroy($lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient, true);
 
-        $chronicDisease->delete();
+        // Verify the disease belongs to this patient
+        if ($patientChronicDisease->patient_id !== $patient->id) {
+            abort(404);
+        }
+
+        $patientChronicDisease->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.chronic_disease_deleted_successfully'),
+            ]);
+        }
 
         return redirect()
-            ->route('patients.chronic-diseases.index', $patient)
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.chronic_disease_deleted_successfully'));
     }
 
     /**
      * Store a new monitoring record.
      */
-    public function storeMonitoring(Request $request, $lang ,  Patient $patient, PatientChronicDisease $chronicDisease)
+    public function storeMonitoring(Request $request, $lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
-        $this->authorize('update', $patient);
+        $this->authorizePatientAccess($patient, true);
+
+        // Verify the disease belongs to this patient
+        if ($patientChronicDisease->patient_id !== $patient->id) {
+            abort(404);
+        }
 
         $validated = $request->validate([
             'monitoring_date' => 'required|date',
@@ -152,36 +182,25 @@ class ChronicDiseaseController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['patient_chronic_disease_id'] = $chronicDisease->id;
+        $validated['patient_chronic_disease_id'] = $patientChronicDisease->id;
         $validated['recorded_by_user_id'] = Auth::id();
 
         ChronicDiseaseMonitoring::create($validated);
 
         // Update last follow-up date
-        $chronicDisease->update([
+        $patientChronicDisease->update([
             'last_followup_date' => $validated['monitoring_date'],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.monitoring_record_added_successfully'),
+            ]);
+        }
+
         return redirect()
-            ->route('patients.chronic-diseases.show', [$patient, $chronicDisease])
+            ->route('clinic.patients.show', $patient)
             ->with('success', __('translation.monitoring_record_added_successfully'));
-    }
-
-    /**
-     * Display overdue follow-ups dashboard.
-     */
-    public function overdueFollowups()
-    {
-        $user = Auth::user();
-        
-        // Get patients from user's clinic
-        $patientIds = Patient::where('clinic_id', $user->clinic_id)->pluck('id');
-
-        $overdueDiseases = PatientChronicDisease::with(['patient', 'chronicDiseaseType'])
-            ->whereIn('patient_id', $patientIds)
-            ->overdueFollowup()
-            ->get();
-
-        return view('clinic.chronic-diseases.overdue', compact('overdueDiseases'));
     }
 }

@@ -120,7 +120,7 @@
                             <label class="form-label-compact">
                                 <i class="bi bi-heart-pulse me-1"></i>{{ __('translation.home.specialty') }}
                             </label>
-                            <select name="specialty" class="form-select form-select-compact">
+                            <select id="specialty-select" name="specialty" class="form-select form-select-compact">
                                 <option value="">{{ __('translation.home.all_specialties') }}</option>
                                 @if(isset($featuredSpecialties))
                                     @foreach($featuredSpecialties as $specialty)
@@ -208,96 +208,6 @@
         </div>
     </div>
 </section>
-
-{{-- How It Works Section - Compact --}}
-<section class="how-it-works-section bg-light">
-    <div class="container py-4">
-        <div class="section-header text-center mb-3">
-            <span class="section-badge bg-success-soft text-success">
-                <i class="bi bi-info-circle me-1"></i>{{ __('translation.home.for_patients') }}
-            </span>
-            <h2 class="section-title">{{ __('translation.home.how_to_book') }}</h2>
-        </div>
-
-        <div class="row g-2 g-md-3">
-            <div class="col-12 col-md-4">
-                <div class="step-card-compact">
-                    <div class="step-number">1</div>
-                    <div class="step-icon-compact bg-primary-soft">
-                        <i class="bi bi-search text-primary"></i>
-                    </div>
-                    <h6 class="step-title-compact">{{ __('translation.home.step_search') }}</h6>
-                    <p class="step-desc-compact">{{ __('translation.home.step_search_desc') }}</p>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="step-card-compact">
-                    <div class="step-number">2</div>
-                    <div class="step-icon-compact bg-success-soft">
-                        <i class="bi bi-calendar-plus text-success"></i>
-                    </div>
-                    <h6 class="step-title-compact">{{ __('translation.home.step_book') }}</h6>
-                    <p class="step-desc-compact">{{ __('translation.home.step_book_desc') }}</p>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="step-card-compact">
-                    <div class="step-number">3</div>
-                    <div class="step-icon-compact bg-info-soft">
-                        <i class="bi bi-emoji-smile text-info"></i>
-                    </div>
-                    <h6 class="step-title-compact">{{ __('translation.home.step_visit') }}</h6>
-                    <p class="step-desc-compact">{{ __('translation.home.step_visit_desc') }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="text-center mt-3">
-            <a href="{{ route('home.clinics') }}" class="btn btn-primary btn-compact">
-                <i class="bi bi-arrow-right-circle me-1"></i>{{ __('translation.home.find_clinic_now') }}
-            </a>
-        </div>
-    </div>
-</section>
-
-{{-- Featured Specialties - Compact --}}
-@if(isset($featuredSpecialties) && $featuredSpecialties->count() > 0)
-<section class="specialties-section">
-    <div class="container py-4">
-        <div class="section-header text-center mb-3">
-            <span class="section-badge bg-info-soft text-info">
-                <i class="bi bi-heart-pulse me-1"></i>{{ __('translation.home.specialties_badge') }}
-            </span>
-            <h2 class="section-title">{{ __('translation.home.medical_specialties') }}</h2>
-        </div>
-
-        <div class="row g-2">
-            @foreach($featuredSpecialties->take(8) as $specialty)
-            <div class="col-6 col-sm-4 col-md-3">
-                <a href="{{ route('home.clinics', ['specialty' => $specialty->id]) }}" class="specialty-card-compact">
-                    <div class="specialty-icon-compact">
-                        @php
-                            $icons = ['bi-heart-pulse', 'bi-eye', 'bi-emoji-smile', 'bi-lungs', 'bi-heart', 'bi-shield-plus', 'bi-hospital', 'bi-activity'];
-                            $icon = $icons[$loop->index % count($icons)];
-                        @endphp
-                        <i class="bi {{ $icon }}"></i>
-                    </div>
-                    <h6 class="specialty-name-compact">{{ $specialty->name }}</h6>
-                    <small class="specialty-count-compact">{{ $specialty->topics_count ?? 0 }} عيادة</small>
-                </a>
-            </div>
-            @endforeach
-        </div>
-
-        <div class="text-center mt-3">
-            <a href="{{ route('home.clinics') }}" class="btn btn-outline-primary btn-compact">
-                {{ __('translation.home.view_all_specialties') }}
-                <i class="bi bi-arrow-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }} ms-1"></i>
-            </a>
-        </div>
-    </div>
-</section>
-@endif
 
 {{-- Trust Section - Compact --}}
 <section class="trust-section bg-light">
@@ -778,4 +688,26 @@
     left: 0.5rem;
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const specialtySelect = document.getElementById('specialty-select');
+    if (specialtySelect && window.loadChoices) {
+        window.loadChoices().then(Choices => {
+            new Choices(specialtySelect, {
+                searchEnabled: true,
+                itemSelectText: '',
+                shouldSort: false,
+                placeholder: true,
+                placeholderValue: '{{ __('translation.home.all_specialties') }}',
+                searchPlaceholderValue: '{{ __('translation.common.search') }}',
+                noResultsText: '{{ __('translation.common.no_results') }}',
+                noChoicesText: '{{ __('translation.common.no_results') }}',
+            });
+        });
+    }
+});
+</script>
 @endpush

@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             // Clinic system seeders
             SpecialtiesSeeder::class,
             ClinicPermissionsSeeder::class,
+            LabTestTypeSeeder::class,
+            VaccinationTypeSeeder::class,
             
             // Demo data (optional - comment out in production)
             DemoUsersSeeder::class,

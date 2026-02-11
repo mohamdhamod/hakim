@@ -17,11 +17,13 @@ use Illuminate\Support\Str;
  * - Patient records (clinic's internal patient database)
  * - Appointments (booking system)
  * 
+ * Patient matching is done by phone number ONLY.
+ * 
  * Flow scenarios:
- * 1. Registered user books appointment → Link to existing or create new Patient record
+ * 1. Registered user books appointment → Link to existing or create new Patient record (by phone)
  * 2. Guest books appointment → Create Patient record when appointment is confirmed
  * 3. Clinic creates patient directly → Patient record without user account
- * 4. User registers with existing patient data → Link to existing Patient records
+ * 4. User registers with existing patient data → Link to existing Patient records (by phone)
  */
 class PatientIntegrationService
 {
@@ -52,40 +54,13 @@ class PatientIntegrationService
     }
 
     /**
-     * Find existing patient by user account, email, or phone.
+     * Find existing patient by phone number only.
      */
     public function findExistingPatient(Appointment $appointment): ?Patient
     {
         $clinic = $appointment->clinic;
         
-        // Priority 1: Find by linked user account
-        if ($appointment->patient_id) {
-            $patient = Patient::where('clinic_id', $clinic->id)
-                ->where('user_id', $appointment->patient_id)
-                ->first();
-            
-            if ($patient) {
-                return $patient;
-            }
-        }
-        
-        // Priority 2: Find by email
-        $email = $appointment->patient?->email ?? $appointment->patient_email;
-        if ($email) {
-            $patient = Patient::where('clinic_id', $clinic->id)
-                ->where('email', $email)
-                ->first();
-            
-            if ($patient) {
-                // Link user if not already linked
-                if ($appointment->patient_id && !$patient->user_id) {
-                    $patient->update(['user_id' => $appointment->patient_id]);
-                }
-                return $patient;
-            }
-        }
-        
-        // Priority 3: Find by phone
+        // Find by phone number only
         $phone = $appointment->patient?->phone ?? $appointment->patient_phone;
         if ($phone) {
             $patient = Patient::where('clinic_id', $clinic->id)
@@ -130,25 +105,20 @@ class PatientIntegrationService
     {
         $linkedCount = 0;
         
-        // Find patient records with matching email or phone
-        $patients = Patient::whereNull('user_id')
-            ->where(function ($query) use ($user) {
-                $query->where('email', $user->email);
-                if ($user->phone) {
-                    $query->orWhere('phone', $this->normalizePhone($user->phone));
-                }
-            })
-            ->get();
-        
-        foreach ($patients as $patient) {
-            $patient->update(['user_id' => $user->id]);
-            $linkedCount++;
-        }
-        
-        // Also update appointments
-        if ($user->email) {
+        // Find patient records with matching phone only
+        if ($user->phone) {
+            $patients = Patient::whereNull('user_id')
+                ->where('phone', $this->normalizePhone($user->phone))
+                ->get();
+            
+            foreach ($patients as $patient) {
+                $patient->update(['user_id' => $user->id]);
+                $linkedCount++;
+            }
+            
+            // Also update appointments by phone
             Appointment::whereNull('patient_id')
-                ->where('patient_email', $user->email)
+                ->where('patient_phone', $this->normalizePhone($user->phone))
                 ->update(['patient_id' => $user->id]);
         }
         
@@ -299,15 +269,13 @@ class PatientIntegrationService
     }
 
     /**
-     * Search for potential duplicate patients.
-     * Only returns duplicates with high confidence (80%+) to avoid false positives.
+     * Search for potential duplicate patients by phone number only.
      */
     public function findPotentialDuplicates(Clinic $clinic, array $data): array
     {
         $duplicates = [];
-        $minConfidenceThreshold = 80; // Only show duplicates with 80%+ confidence
         
-        // Search by exact phone match (most reliable)
+        // Search by exact phone match only
         if (!empty($data['phone'])) {
             $normalizedPhone = $this->normalizePhone($data['phone']);
             $phoneMatch = Patient::where('clinic_id', $clinic->id)
@@ -315,75 +283,15 @@ class PatientIntegrationService
                 ->first();
             
             if ($phoneMatch) {
-                $duplicates[$phoneMatch->id] = [
+                $duplicates[] = [
                     'patient' => $phoneMatch,
                     'match_type' => 'phone',
-                    'confidence' => 95,
+                    'confidence' => 100,
                 ];
             }
         }
         
-        // Search by exact email match (very reliable)
-        if (!empty($data['email'])) {
-            $emailMatch = Patient::where('clinic_id', $clinic->id)
-                ->where('email', strtolower($data['email']))
-                ->first();
-            
-            if ($emailMatch) {
-                if (isset($duplicates[$emailMatch->id])) {
-                    $duplicates[$emailMatch->id]['match_type'] .= '+email';
-                    $duplicates[$emailMatch->id]['confidence'] = 100;
-                } else {
-                    $duplicates[$emailMatch->id] = [
-                        'patient' => $emailMatch,
-                        'match_type' => 'email',
-                        'confidence' => 95,
-                    ];
-                }
-            }
-        }
-        
-        // Search by name similarity (only for very high matches)
-        if (!empty($data['full_name'])) {
-            // Get all patients and check similarity (only if not too many)
-            $patients = Patient::where('clinic_id', $clinic->id)
-                ->limit(500)
-                ->get(['id', 'full_name', 'phone', 'email', 'file_number', 'date_of_birth', 'gender', 'blood_type', 'address', 'user_id', 'clinic_id', 'created_at', 'updated_at']);
-            
-            foreach ($patients as $patient) {
-                $similarity = $this->calculateNameSimilarity($data['full_name'], $patient->full_name);
-                
-                // Only consider very high similarity (90%+) for name-only matches
-                if ($similarity >= 90) {
-                    if (isset($duplicates[$patient->id])) {
-                        $duplicates[$patient->id]['match_type'] .= '+name';
-                        $duplicates[$patient->id]['confidence'] = min(100, $duplicates[$patient->id]['confidence'] + 10);
-                    } else {
-                        $duplicates[$patient->id] = [
-                            'patient' => $patient,
-                            'match_type' => 'name',
-                            'confidence' => $similarity,
-                        ];
-                    }
-                }
-            }
-        }
-        
-        // Filter out low confidence matches
-        $duplicates = array_filter($duplicates, fn($d) => $d['confidence'] >= $minConfidenceThreshold);
-        
-        // Sort by confidence
-        uasort($duplicates, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
-        
-        return array_values($duplicates);
+        return $duplicates;
     }
 
-    /**
-     * Calculate name similarity percentage.
-     */
-    protected function calculateNameSimilarity(string $name1, string $name2): int
-    {
-        similar_text(strtolower($name1), strtolower($name2), $percent);
-        return (int) $percent;
-    }
 }

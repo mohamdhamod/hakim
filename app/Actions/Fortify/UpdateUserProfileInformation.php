@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 use App\Traits\FileHandler;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -20,10 +21,9 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
-        Validator::make($input, [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
-
             'email' => [
                 'required',
                 'string',
@@ -31,17 +31,24 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
+            'image' => ['nullable', 'file', 'max:4076', 'mimes:jpg,jpeg,png'],
+        ];
 
-            'image'       => ['nullable' , 'file', 'max:4076', 'mimes:jpg,jpeg,png'],
-            ])->validateWithBag('updateProfileInformation');
+        // Add clinic validation rules for doctors
+        if ($user->hasRole(RoleEnum::DOCTOR) && $user->clinic) {
+            $rules['specialty_id'] = ['required', 'integer', 'exists:specialties,id'];
+            $rules['clinic_address'] = ['nullable', 'string', 'max:500'];
+            $rules['clinic_logo'] = ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'];
+        }
 
-        $image = $this->processImage($input['image'] ?? null, $user->image);
+        Validator::make($input, $rules)->validateWithBag('updateProfileInformation');
+
 
         $data = [
             'name' => $input['name'],
             'phone' => $input['phone'],
             'email' => $input['email'],
-            'image' => $image,
+        
         ];
 
         if ($input['email'] !== $user->email && $user instanceof MustVerifyEmail) {
@@ -50,6 +57,21 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             $user->forceFill($data)->save();
         }
 
+        // Update clinic info for doctors
+        if ($user->hasRole(RoleEnum::DOCTOR) && $user->clinic) {
+            $clinicData = [
+                'specialty_id' => $input['specialty_id'] ?? $user->clinic->specialty_id,
+                'address' => $input['clinic_address'] ?? $user->clinic->address,
+            ];
+
+            // Handle clinic logo upload using FileHandler
+            $clinicData['logo'] = $this->processClinicLogo(
+                $input['clinic_logo'] ?? null, 
+                $user->clinic->logo
+            );
+
+            $user->clinic->update($clinicData);
+        }
     }
 
     /**
@@ -80,5 +102,18 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             return $this->updateFile($imageFile, $oldImage, 'users',false);
         }
         return $oldImage;
+    }
+
+    /**
+     * Process clinic logo using FileHandler trait.
+     */
+    protected function processClinicLogo($logoFile, $oldLogo)
+    {
+        if (!$oldLogo && $logoFile && $logoFile->isValid() && $logoFile->isFile()) {
+            return $this->storeFile($logoFile, 'clinics/logos');
+        } elseif ($oldLogo && $logoFile && $logoFile->isValid() && $logoFile->isFile()) {
+            return $this->updateFile($logoFile, $oldLogo, 'clinics/logos');
+        }
+        return $oldLogo;
     }
 }

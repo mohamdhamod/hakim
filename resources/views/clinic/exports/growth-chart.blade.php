@@ -202,7 +202,7 @@
 <body>
     {{-- Header --}}
     <div class="header">
-        <div class="clinic-name">{{ $clinic->name }}</div>
+        <div class="clinic-name">{{ $clinic->display_name }}</div>
         <h1>📊 {{ __('translation.growth_chart_report') }}</h1>
         <div class="export-info">
             {{ __('translation.exported_by') }}: {{ $doctor->name }} | 
@@ -222,7 +222,7 @@
         </div>
         <div class="info-group">
             <div class="label">{{ __('translation.date_of_birth') }}</div>
-            <div class="value">{{ $patient->birth_date->format('Y-m-d') }}</div>
+            <div class="value">{{ $patient->date_of_birth?->format('Y-m-d') ?? '-' }}</div>
         </div>
         <div class="info-group">
             <div class="label">{{ __('translation.current_age') }}</div>
@@ -440,7 +440,7 @@
 
     {{-- Footer --}}
     <div class="footer">
-        {{ __('translation.confidential_document') }} | {{ $clinic->name }} | 
+        {{ __('translation.confidential_document') }} | {{ $clinic->display_name }} | 
         {{ __('translation.based_on_who_growth_standards') }}
     </div>
 </body>

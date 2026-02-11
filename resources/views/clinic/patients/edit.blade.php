@@ -44,13 +44,35 @@
                                 <label class="form-label">{{ __('translation.patient.full_name') }} <span class="text-danger">*</span></label>
                                 <input type="text" name="full_name" class="form-control" value="{{ $patient->full_name }}" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
-                                <select name="date_of_birth" class="form-select">
+                                <select name="birth_year" id="birth_year" class="form-select">
                                     <option value="">{{ __('translation.patient.select_year') }}</option>
                                     @for($year = date('Y'); $year >= 1920; $year--)
-                                        <option value="{{ $year }}-01-01" {{ $patient->date_of_birth?->format('Y') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                        <option value="{{ $year }}" {{ $patient->date_of_birth?->format('Y') == $year ? 'selected' : '' }}>{{ $year }}</option>
                                     @endfor
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
+                                <select name="birth_month" id="birth_month" class="form-select">
+                                    <option value="">{{ __('translation.common.select') }}</option>
+                                    @foreach([
+                                        1 => __('translation.months_list.january'),
+                                        2 => __('translation.months_list.february'),
+                                        3 => __('translation.months_list.march'),
+                                        4 => __('translation.months_list.april'),
+                                        5 => __('translation.months_list.may'),
+                                        6 => __('translation.months_list.june'),
+                                        7 => __('translation.months_list.july'),
+                                        8 => __('translation.months_list.august'),
+                                        9 => __('translation.months_list.september'),
+                                        10 => __('translation.months_list.october'),
+                                        11 => __('translation.months_list.november'),
+                                        12 => __('translation.months_list.december'),
+                                    ] as $num => $name)
+                                        <option value="{{ $num }}" {{ $patient->date_of_birth?->format('n') == $num ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4">

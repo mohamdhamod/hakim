@@ -196,7 +196,7 @@
 <body>
     {{-- Header --}}
     <div class="header">
-        <div class="clinic-name">{{ $clinic->name }}</div>
+        <div class="clinic-name">{{ $clinic->display_name }}</div>
         <h1>📋 {{ __('translation.vaccination_record') }}</h1>
         <div class="export-info">
             {{ __('translation.exported_by') }}: {{ $doctor->name }} | 
@@ -215,7 +215,7 @@
             </tr>
             <tr>
                 <td>{{ __('translation.date_of_birth') }}</td>
-                <td>{{ $patient->birth_date->format('Y-m-d') }}</td>
+                <td>{{ $patient->date_of_birth?->format('Y-m-d') ?? '-' }}</td>
                 <td>{{ __('translation.age') }}</td>
                 <td>{{ $patient->age }} {{ __('translation.years') }}</td>
             </tr>
@@ -337,14 +337,14 @@
         <div class="signature-block">
             <div class="signature-line">
                 {{ __('translation.clinic_stamp') }}<br>
-                {{ $clinic->name }}
+                {{ $clinic->display_name }}
             </div>
         </div>
     </div>
 
     {{-- Footer --}}
     <div class="footer">
-        {{ __('translation.official_vaccination_record') }} | {{ $clinic->name }} | 
+        {{ __('translation.official_vaccination_record') }} | {{ $clinic->display_name }} | 
         {{ __('translation.keep_for_school_records') }}
     </div>
 </body>
