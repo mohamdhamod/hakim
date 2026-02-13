@@ -48,7 +48,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
-                                <select name="birth_year" id="birth_year" class="form-select @error('date_of_birth') is-invalid @enderror">
+                                <select name="birth_year" id="birth_year" class="form-select choices-select @error('date_of_birth') is-invalid @enderror">
                                     <option value="">{{ __('translation.patient.select_year') }}</option>
                                     @for($year = date('Y'); $year >= 1920; $year--)
                                         <option value="{{ $year }}" {{ old('birth_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -60,7 +60,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
-                                <select name="birth_month" id="birth_month" class="form-select">
+                                <select name="birth_month" id="birth_month" class="form-select choices-select">
                                     <option value="">{{ __('translation.common.select') }}</option>
                                     @foreach([
                                         1 => __('translation.months_list.january'),
@@ -82,7 +82,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">{{ __('translation.patient.gender') }}</label>
-                                <select name="gender" class="form-select @error('gender') is-invalid @enderror">
+                                <select name="gender" class="form-select choices-select @error('gender') is-invalid @enderror">
                                     <option value="">{{ __('translation.common.select') }}</option>
                                     <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>{{ __('translation.patient.male') }}</option>
                                     <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>{{ __('translation.patient.female') }}</option>
@@ -93,7 +93,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">{{ __('translation.patient.blood_type') }}</label>
-                                <select name="blood_type" class="form-select @error('blood_type') is-invalid @enderror">
+                                <select name="blood_type" class="form-select choices-select @error('blood_type') is-invalid @enderror">
                                     <option value="">{{ __('translation.common.select') }}</option>
                                     @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $type)
                                         <option value="{{ $type }}" {{ old('blood_type') == $type ? 'selected' : '' }}>{{ $type }}</option>

@@ -1,6 +1,6 @@
 {{-- New Vaccination Modal --}}
 <div class="modal fade" id="newVaccinationModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title">
@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.injection_site') }}</label>
-                        <select class="form-select" id="injectionSite">
+                        <select class="form-select choices-select" id="injectionSite">
                             <option value="">{{ __('translation.select_site') }}</option>
                             <option value="Left Arm">{{ __('translation.left_arm') }}</option>
                             <option value="Right Arm">{{ __('translation.right_arm') }}</option>
@@ -71,7 +71,7 @@
 
 {{-- View Vaccination Details Modal --}}
 <div class="modal fade" id="viewVaccinationModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title">

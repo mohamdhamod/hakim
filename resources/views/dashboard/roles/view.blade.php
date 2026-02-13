@@ -1,6 +1,6 @@
 {{-- ADD MODEL START --}}
 <div id="view-modal" class="modal fade-scale" role="dialog" tabindex="-1" aria-hidden="true" aria-labelledby="ModelLabel">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="ModelLabel">{{ __('translation.roles.view_sub_program_info') }}</h4>

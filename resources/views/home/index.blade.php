@@ -120,7 +120,7 @@
                             <label class="form-label-compact">
                                 <i class="bi bi-heart-pulse me-1"></i>{{ __('translation.home.specialty') }}
                             </label>
-                            <select id="specialty-select" name="specialty" class="form-select form-select-compact">
+                            <select id="specialty-select" name="specialty" class="form-select form-select-compact choices-select">
                                 <option value="">{{ __('translation.home.all_specialties') }}</option>
                                 @if(isset($featuredSpecialties))
                                     @foreach($featuredSpecialties as $specialty)

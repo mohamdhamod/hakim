@@ -114,6 +114,24 @@ class Clinic extends Model
     }
 
     /**
+     * Get the editors (staff) of this clinic.
+     */
+    public function editors()
+    {
+        return $this->belongsToMany(User::class, 'clinic_users')
+            ->withPivot(['is_active', 'invited_at', 'accepted_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get active editors.
+     */
+    public function activeEditors()
+    {
+        return $this->editors()->wherePivot('is_active', true);
+    }
+
+    /**
      * Get logo full path.
      */
     public function getLogoPathAttribute()

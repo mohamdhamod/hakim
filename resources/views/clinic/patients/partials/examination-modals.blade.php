@@ -1,6 +1,6 @@
 {{-- New Examination Modal --}}
 <div class="modal fade" id="newExaminationModal" tabindex="-1" aria-labelledby="newExaminationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <form action="{{ route('clinic.examinations.store') }}" method="POST" id="newExaminationForm">
                 @csrf

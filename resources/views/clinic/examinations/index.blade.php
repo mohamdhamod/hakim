@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">{{ __('translation.examination.status_label') }}</label>
-                    <select id="filterStatus" class="form-select form-select-sm">
+                    <select id="filterStatus" class="form-select form-select-sm choices-select">
                         <option value="">{{ __('translation.common.all') }}</option>
                         <option value="scheduled">{{ __('translation.examination.status.scheduled') }}</option>
                         <option value="in_progress">{{ __('translation.examination.status.in_progress') }}</option>
@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">{{ __('translation.common.date_range') }}</label>
-                    <select id="filterDate" class="form-select form-select-sm">
+                    <select id="filterDate" class="form-select form-select-sm choices-select">
                         <option value="">{{ __('translation.common.all_time') }}</option>
                         <option value="today">{{ __('translation.common.today') }}</option>
                         <option value="week">{{ __('translation.common.this_week') }}</option>

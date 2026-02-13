@@ -64,7 +64,7 @@
                                 <label for="specialty_id" class="form-label">
                                     {{ __('translation.auth.specialty') }} <span class="text-danger">*</span>
                                 </label>
-                                <select id="specialty_id" name="specialty_id" class="form-select" required>
+                                <select id="specialty_id" name="specialty_id" class="form-select choices-select" required>
                                     <option value="">{{ __('translation.auth.select_specialty') }}</option>
                                     @foreach(\App\Models\Specialty::active()->ordered()->get() as $specialty)
                                         <option value="{{ $specialty->id }}" 
@@ -91,7 +91,7 @@
                                 <label for="clinic_services" class="form-label">
                                     {{ __('translation.clinic.services') }}
                                 </label>
-                                <select id="clinic_services" name="clinic_services[]" class="form-select" multiple>
+                                <select id="clinic_services" name="clinic_services[]" class="form-select choices-select" multiple>
                                     @foreach(\App\Models\ClinicService::active()->ordered()->get() as $service)
                                         <option value="{{ $service->id }}" 
                                                 {{ in_array($service->id, old('clinic_services', auth()->user()->clinic->services->pluck('id')->toArray())) ? 'selected' : '' }}>
@@ -130,6 +130,136 @@
                         </form>
                     </div>
                 </div>
+
+                {{-- Team Management Card (Doctors Only) --}}
+                @if(auth()->user()->hasRole(\App\Enums\RoleEnum::DOCTOR) && auth()->user()->clinic)
+                @php
+                    $teamMembers = auth()->user()->clinic->editors()
+                        ->withPivot(['is_active', 'invited_at', 'accepted_at'])
+                        ->orderBy('clinic_users.created_at', 'desc')
+                        ->get();
+                @endphp
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-people text-primary me-2"></i>{{ __('translation.clinic.team_management') }}
+                        </h5>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#inviteModal">
+                            <i class="bi bi-person-plus me-1"></i>{{ __('translation.clinic.invite_member') }}
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        @if($teamMembers->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="border-0">{{ __('translation.clinic.member') }}</th>
+                                            <th class="border-0">{{ __('translation.clinic.status') }}</th>
+                                            <th class="border-0 text-center">{{ __('translation.actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($teamMembers as $member)
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-2" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+                                                            {{ strtoupper(substr($member->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-semibold small">{{ $member->name }}</div>
+                                                            <small class="text-muted">{{ $member->email }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if($member->pivot->is_active)
+                                                        <span class="badge bg-success rounded-pill">{{ __('translation.clinic.active') }}</span>
+                                                    @else
+                                                        <span class="badge bg-secondary rounded-pill">{{ __('translation.clinic.inactive') }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <form action="{{ route('clinic.team.toggle-status', $member->pivot->id) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="btn btn-sm {{ $member->pivot->is_active ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $member->pivot->is_active ? __('translation.clinic.deactivate') : __('translation.clinic.activate') }}">
+                                                                <i class="bi {{ $member->pivot->is_active ? 'bi-pause' : 'bi-play' }}"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="{{ route('clinic.team.resend', $member->pivot->id) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-outline-info" title="{{ __('translation.clinic.resend_invitation') }}">
+                                                                <i class="bi bi-envelope"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="{{ route('clinic.team.remove', $member->pivot->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('translation.clinic.confirm_remove_member') }}')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('translation.clinic.remove_member') }}">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="bi bi-people text-muted" style="font-size: 2.5rem;"></i>
+                                <p class="text-muted mt-2 mb-0">{{ __('translation.clinic.no_team_members') }}</p>
+                                <small class="text-muted">{{ __('translation.clinic.invite_team_hint') }}</small>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Invite Modal --}}
+                <div class="modal fade" id="inviteModal" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="inviteModalLabel">
+                                    <i class="bi bi-person-plus text-primary me-2"></i>{{ __('translation.clinic.invite_team_member') }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{{ route('clinic.team.invite') }}" method="POST">
+                                @csrf
+                                <div class="modal-body">
+                                    <p class="text-muted small mb-3">{{ __('translation.clinic.invite_description') }}</p>
+                                    
+                                    <div class="mb-3">
+                                        <label for="invite_name" class="form-label">{{ __('translation.auth.name') }} <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="invite_name" name="name" required placeholder="{{ __('translation.clinic.member_name_placeholder') }}">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="invite_email" class="form-label">{{ __('translation.common.email') }} <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="invite_email" name="email" required placeholder="{{ __('translation.clinic.member_email_placeholder') }}">
+                                        <div class="form-text">{{ __('translation.clinic.email_invitation_hint') }}</div>
+                                    </div>
+
+                                    <div class="alert alert-info small mb-0">
+                                        <i class="bi bi-info-circle me-2"></i>{{ __('translation.clinic.invitation_info') }}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('translation.common.cancel') }}</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-send me-1"></i>{{ __('translation.clinic.send_invitation') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Change Password -->
@@ -221,39 +351,6 @@
             
             try { if (window.handleSubmit) handleSubmit('#formProfile'); } catch(e) { console.error(e); }
             try { if (window.handleSubmit) handleSubmit('#formUpdatePassword'); } catch(e) { console.error(e); }
-            
-            // Initialize Choices.js for specialty dropdown
-            const specialtySelect = document.getElementById('specialty_id');
-            if (specialtySelect && window.loadChoices) {
-                window.loadChoices().then(function(Choices) {
-                    new Choices(specialtySelect, {
-                        searchEnabled: true,
-                        itemSelectText: '',
-                        shouldSort: false,
-                        allowHTML: true,
-                        searchPlaceholderValue: '{{ __("translation.common.search") }}',
-                        noResultsText: '{{ __("translation.common.no_results") }}',
-                        noChoicesText: '{{ __("translation.common.no_results") }}'
-                    });
-                });
-            }
-
-            // Initialize Choices.js for services dropdown (multiple select)
-            const servicesSelect = document.getElementById('clinic_services');
-            if (servicesSelect && window.loadChoices) {
-                window.loadChoices().then(function(Choices) {
-                    new Choices(servicesSelect, {
-                        searchEnabled: true,
-                        itemSelectText: '',
-                        shouldSort: false,
-                        allowHTML: true,
-                        removeItemButton: true,
-                        searchPlaceholderValue: '{{ __("translation.common.search") }}',
-                        noResultsText: '{{ __("translation.common.no_results") }}',
-                        noChoicesText: '{{ __("translation.common.no_results") }}'
-                    });
-                });
-            }
         });
     </script>
 @endpush

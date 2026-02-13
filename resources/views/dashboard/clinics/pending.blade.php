@@ -149,7 +149,7 @@
 
     {{-- Reject Modal --}}
     <div class="modal fade" id="rejectModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">{{ __('translation.clinic.reject_clinic') }}</h5>
@@ -202,16 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             SwalHelper.showLoading('{{ __('translation.common.processing') }}');
             
             try {
-                const response = await fetch('{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/approve', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
+                const data = await ApiClient.post('{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/approve');
                 
                 if (data.success) {
                     await SwalHelper.success('{{ __('translation.common.success') }}', data.message);
@@ -248,17 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         SwalHelper.showLoading('{{ __('translation.common.processing') }}');
 
         try {
-            const response = await fetch('{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/reject', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ reason: reason })
-            });
-            
-            const data = await response.json();
+            const data = await ApiClient.post('{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/reject', { reason: reason });
             
             if (data.success) {
                 rejectModal.hide();

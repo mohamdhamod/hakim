@@ -58,7 +58,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">{{ __('translation.examination.status_label') }}</label>
-                                    <select name="status" class="form-select @error('status') is-invalid @enderror">
+                                    <select name="status" class="form-select choices-select @error('status') is-invalid @enderror">
                                         <option value="scheduled" {{ old('status', $examination->status) == 'scheduled' ? 'selected' : '' }}>{{ __('translation.examination.status.scheduled') }}</option>
                                         <option value="in_progress" {{ old('status', $examination->status) == 'in_progress' ? 'selected' : '' }}>{{ __('translation.examination.status.in_progress') }}</option>
                                         <option value="completed" {{ old('status', $examination->status) == 'completed' ? 'selected' : '' }}>{{ __('translation.examination.status.completed') }}</option>

@@ -79,11 +79,51 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is clinic patient editor
+     */
+    public function isClinicPatientEditor(): bool
+    {
+        return $this->hasRole(RoleEnum::CLINIC_PATIENT_EDITOR);
+    }
+
+    /**
      * Get the clinic associated with the doctor.
      */
     public function clinic()
     {
         return $this->hasOne(Clinic::class, 'user_id');
+    }
+
+    /**
+     * Get the clinics where user is an editor.
+     */
+    public function editorClinics()
+    {
+        return $this->belongsToMany(Clinic::class, 'clinic_users')
+            ->withPivot(['is_active', 'invited_at', 'accepted_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get active clinic for editor.
+     */
+    public function getEditorClinicAttribute()
+    {
+        return $this->editorClinics()->wherePivot('is_active', true)->first();
+    }
+
+    /**
+     * Get the working clinic (for doctor or editor).
+     */
+    public function getWorkingClinicAttribute()
+    {
+        if ($this->isDoctor()) {
+            return $this->clinic;
+        }
+        if ($this->isClinicPatientEditor()) {
+            return $this->editorClinic;
+        }
+        return null;
     }
 
     /**

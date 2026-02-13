@@ -193,32 +193,19 @@
             }
 
             // Send token to Laravel backend for verification
-            fetch(GOOGLE_TOKEN_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    credential: response.credential
-                }),
-                credentials: 'same-origin'
-            })
-            .then(res => res.json())
+            ApiClient.post(GOOGLE_TOKEN_URL, { credential: response.credential })
             .then(data => {
                 if (data.success && data.redirect) {
                     window.location.href = data.redirect;
                 } else {
                     // Show error and re-render button
-                    alert(data.message || 'Login failed. Please try again.');
+                    SwalHelper.error(data.message || 'Login failed. Please try again.');
                     initializeGoogleSignIn();
                 }
             })
             .catch(error => {
                 console.error('Google Sign-In error:', error);
-                alert('An error occurred. Please try again.');
+                SwalHelper.error('An error occurred. Please try again.');
                 initializeGoogleSignIn();
             });
         }

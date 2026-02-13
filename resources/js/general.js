@@ -2460,91 +2460,6 @@ Object.assign(window, {
 
 
 // ============================================================================
-// AI REFINEMENT UTILITIES
-// ============================================================================
-
-window.RefinementManager = {
-    applyRefinement: function(action, url, callback) {
-        SwalHelper.showLoading(
-            window.i18n?.messages?.processing || 'Processing...',
-            `Applying ${action} refinement...`
-        );
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': Utils.getCSRFToken(),
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ action: action })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                SwalHelper.success(
-                    window.i18n?.messages?.refinement_applied || 'Refinement Applied!',
-                    data.message || window.i18n?.messages?.content_refined_successfully || 'Content has been refined successfully.',
-                    { timer: 2000 }
-                ).then(() => {
-                    if (callback) callback(data);
-                    else window.location.reload();
-                });
-            } else {
-                throw new Error(data.message || window.i18n?.messages?.failed_to_apply_refinement || 'Failed to apply refinement');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            SwalHelper.error(
-                window.i18n?.messages?.refinement_failed || 'Refinement Failed',
-                error.message || window.i18n?.messages?.failed_to_apply_refinement_text || 'Failed to apply refinement. Please try again.'
-            );
-        });
-    },
-
-    adjustTone: function(tone, url, callback) {
-        SwalHelper.showLoading(
-            window.i18n?.messages?.adjusting_tone || 'Adjusting Tone...',
-            `Changing tone to ${tone}...`
-        );
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': Utils.getCSRFToken(),
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ tone: tone })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                SwalHelper.success(
-                    window.i18n?.messages?.tone_adjusted || 'Tone Adjusted!',
-                    data.message || window.i18n?.messages?.content_tone_adjusted || `Content tone has been changed to ${tone}.`,
-                    { timer: 2000 }
-                ).then(() => {
-                    if (callback) callback(data);
-                    else window.location.reload();
-                });
-            } else {
-                throw new Error(data.message || window.i18n?.messages?.failed_to_adjust_tone || 'Failed to adjust tone');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            SwalHelper.error(
-                window.i18n?.messages?.tone_adjustment_failed || 'Tone Adjustment Failed',
-                error.message || window.i18n?.messages?.failed_to_adjust_tone_text || 'Failed to adjust tone. Please try again.'
-            );
-        });
-    }
-};
-
-
-// ============================================================================
 // API CLIENT - Centralized HTTP Request Handler
 // ============================================================================
 // Unified API client for all HTTP requests with CSRF, error handling, and loading states
@@ -3008,14 +2923,89 @@ window.formatDate = Utils.formatDate;
 window.debounce = Utils.debounce;
 
 // ============================================================================
+// CHOICES.JS AUTO-INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize Choices.js on select elements
+ * @param {string|NodeList|Element} selector - CSS selector, NodeList, or single element
+ * @param {Object} customOptions - Custom options to override defaults
+ * @returns {Promise<Array>} Array of Choices instances
+ */
+window.initChoicesSelect = async function(selector = '.choices-select', customOptions = {}) {
+    if (typeof window.loadChoices !== 'function') {
+        console.warn('Choices.js loader not available');
+        return [];
+    }
+
+    const Choices = await window.loadChoices();
+    const instances = [];
+
+    // Get elements based on selector type
+    let elements;
+    if (typeof selector === 'string') {
+        elements = document.querySelectorAll(selector);
+    } else if (selector instanceof NodeList) {
+        elements = selector;
+    } else if (selector instanceof Element) {
+        elements = [selector];
+    } else {
+        return [];
+    }
+
+    elements.forEach(element => {
+        // Skip if already initialized
+        if (element.dataset.choicesInitialized) return;
+        // Skip if element is hidden or not a select
+        if (!element || element.tagName !== 'SELECT') return;
+
+        const defaultOptions = {
+            searchEnabled: element.options.length > 5,
+            itemSelectText: '',
+            shouldSort: false,
+            allowHTML: true,
+            searchPlaceholderValue: window.i18n?.common?.search || 'Search...',
+            noResultsText: window.i18n?.common?.no_results || 'No results found',
+            noChoicesText: window.i18n?.common?.no_results || 'No results found',
+            removeItemButton: element.hasAttribute('multiple'),
+            placeholder: true,
+            placeholderValue: element.getAttribute('placeholder') || ''
+        };
+
+        try {
+            const instance = new Choices(element, { ...defaultOptions, ...customOptions });
+            element.dataset.choicesInitialized = 'true';
+            instances.push(instance);
+        } catch (error) {
+            console.warn('Failed to initialize Choices on element:', element, error);
+        }
+    });
+
+    return instances;
+};
+
+/**
+ * Auto-initialize all .choices-select and .select2 elements on page load
+ */
+function autoInitChoices() {
+    const elements = document.querySelectorAll('.choices-select:not([data-choices-initialized]), .select2:not([data-choices-initialized])');
+    if (elements.length > 0) {
+        window.initChoicesSelect(elements);
+    }
+}
+
+// ============================================================================
 // AUTO-INITIALIZATION
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Hakim Clinics - JavaScript Utilities Loaded');
     console.log('📦 Available Managers:', {
-        RefinementManager: typeof window.RefinementManager !== 'undefined',
+        SwalHelper: typeof window.SwalUtil !== 'undefined',
         ApiClient: typeof window.ApiClient !== 'undefined',
         FormHelper: typeof window.FormHelper !== 'undefined'
     });
+
+    // Auto-initialize Choices.js on .choices-select and .select2 elements
+    autoInitChoices();
 });

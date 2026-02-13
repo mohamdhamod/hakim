@@ -67,12 +67,21 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
     // Workspace (main chat-style interface)
     Route::get('/', [Clinic\WorkspaceController::class, 'index'])->name('clinic.workspace');
     
-    // Routes requiring approved clinic
+    // Routes requiring approved clinic (doctor only)
     Route::middleware(['clinic.approved'])->group(function () {
         // Clinic Settings
         Route::get('/settings', [Clinic\DashboardController::class, 'settings'])->name('clinic.settings');
         Route::put('/settings', [Clinic\DashboardController::class, 'updateSettings'])->name('clinic.settings.update');
 
+        // Team Management (doctor only) - actions redirect to profile
+        Route::post('/team/invite', [Clinic\ClinicTeamController::class, 'invite'])->name('clinic.team.invite');
+        Route::patch('/team/{clinicUser}/toggle-status', [Clinic\ClinicTeamController::class, 'toggleStatus'])->name('clinic.team.toggle-status');
+        Route::delete('/team/{clinicUser}', [Clinic\ClinicTeamController::class, 'remove'])->name('clinic.team.remove');
+        Route::post('/team/{clinicUser}/resend', [Clinic\ClinicTeamController::class, 'resendInvitation'])->name('clinic.team.resend');
+    });
+
+    // Routes accessible by both doctors and clinic patient editors
+    Route::middleware(['clinic.staff'])->group(function () {
         // Patients Management
         Route::get('/patients/search', [Clinic\PatientController::class, 'search'])->name('clinic.patients.search');
         Route::get('/patients/{patient}/details', [Clinic\WorkspaceController::class, 'patientDetails'])->name('clinic.patients.details');
@@ -114,15 +123,20 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::delete('/patients/{patient}/chronic-diseases/{patientChronicDisease}', [Clinic\ChronicDiseaseController::class, 'destroy'])->name('patients.chronic-diseases.destroy');
         Route::post('/patients/{patient}/chronic-diseases/{patientChronicDisease}/monitoring', [Clinic\ChronicDiseaseController::class, 'storeMonitoring'])->name('patients.chronic-diseases.monitoring.store');
 
-        // Appointments Management (for doctors)
+        // Appointments Management (view for both, actions for doctors)
         Route::get('/appointments', [Clinic\WorkspaceController::class, 'allAppointments'])->name('clinic.appointments.index');
         Route::get('/appointments/{appointment}/details', [Clinic\WorkspaceController::class, 'appointmentDetails'])->name('clinic.appointments.details');
+    });
+
+    // Doctor-only routes for examinations
+    Route::middleware(['clinic.approved'])->group(function () {
+        // Appointment Actions (doctor only)
         Route::post('/appointments/{appointment}/confirm', [Clinic\WorkspaceController::class, 'confirmAppointment'])->name('clinic.appointments.confirm');
         Route::post('/appointments/{appointment}/complete', [Clinic\WorkspaceController::class, 'completeAppointment'])->name('clinic.appointments.complete');
         Route::post('/appointments/{appointment}/cancel', [Clinic\WorkspaceController::class, 'cancelAppointment'])->name('clinic.appointments.cancel');
         Route::post('/appointments/{appointment}/register-patient', [Clinic\WorkspaceController::class, 'registerPatientFromAppointment'])->name('clinic.appointments.register-patient');
 
-        // Examinations Management
+        // Examinations Management (doctor only for create/edit)
         Route::get('/examinations/today', [Clinic\ExaminationController::class, 'today'])->name('clinic.examinations.today');
         Route::post('/examinations/{examination}/complete', [Clinic\ExaminationController::class, 'complete'])->name('clinic.examinations.complete');
         Route::get('/examinations/{examination}/print', [Clinic\ExaminationController::class, 'print'])->name('clinic.examinations.print');

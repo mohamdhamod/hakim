@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">{{ __('translation.patient.gender') }}</label>
-                    <select id="filterGender" class="form-select form-select-sm">
+                    <select id="filterGender" class="form-select form-select-sm choices-select">
                         <option value="">{{ __('translation.common.all') }}</option>
                         <option value="male">{{ __('translation.patient.male') }}</option>
                         <option value="female">{{ __('translation.patient.female') }}</option>
@@ -33,7 +33,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">{{ __('translation.common.sort_by') }}</label>
-                    <select id="sortBy" class="form-select form-select-sm">
+                    <select id="sortBy" class="form-select form-select-sm choices-select">
                         <option value="recent">{{ __('translation.common.recent') }}</option>
                         <option value="name">{{ __('translation.patient.name') }}</option>
                         <option value="visits">{{ __('translation.patient.most_visits') }}</option>

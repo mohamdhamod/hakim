@@ -118,22 +118,13 @@ async function saveLabTest() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.saving") }}';
     
     try {
-        const response = await fetch('{{ route("patients.lab-tests.store", $patient) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                lab_test_type_id: typeId,
-                test_date: testDate,
-                result_value: resultValue,
-                notes: notes
-            })
+        const data = await ApiClient.post('{{ route("patients.lab-tests.store", $patient) }}', {
+            lab_test_type_id: typeId,
+            test_date: testDate,
+            result_value: resultValue,
+            notes: notes
         });
         
-        const data = await response.json();
         if (data.success) {
             bootstrap.Modal.getInstance(document.getElementById('newLabTestModal')).hide();
             SwalUtil.toast(data.message, 'success');
@@ -180,27 +171,18 @@ async function saveVaccination() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.saving") }}';
     
     try {
-        const response = await fetch('{{ route("patients.vaccinations.store", $patient) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                vaccination_type_id: typeId,
-                vaccination_date: vaccinationDate,
-                dose_number: document.getElementById('doseNumber').value,
-                batch_number: document.getElementById('batchNumber').value,
-                manufacturer: document.getElementById('manufacturer').value,
-                site: document.getElementById('injectionSite').value,
-                next_dose_due_date: document.getElementById('nextDoseDate').value,
-                reaction_notes: document.getElementById('reactionNotes').value,
-                status: 'completed'
-            })
+        const data = await ApiClient.post('{{ route("patients.vaccinations.store", $patient) }}', {
+            vaccination_type_id: typeId,
+            vaccination_date: vaccinationDate,
+            dose_number: document.getElementById('doseNumber').value,
+            batch_number: document.getElementById('batchNumber').value,
+            manufacturer: document.getElementById('manufacturer').value,
+            site: document.getElementById('injectionSite').value,
+            next_dose_due_date: document.getElementById('nextDoseDate').value,
+            reaction_notes: document.getElementById('reactionNotes').value,
+            status: 'completed'
         });
         
-        const data = await response.json();
         if (data.success) {
             bootstrap.Modal.getInstance(document.getElementById('newVaccinationModal')).hide();
             SwalUtil.toast(data.message, 'success');
@@ -460,24 +442,15 @@ async function saveChronicDisease() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.saving") }}';
 
     try {
-        const response = await fetch('{{ route('patients.chronic-diseases.store', $patient) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                chronic_disease_type_id: diseaseType,
-                diagnosis_date: diagnosisDate,
-                severity: severity,
-                treatment_plan: treatmentPlan,
-                next_followup_date: nextFollowupDate || null,
-                status: status
-            })
+        const data = await ApiClient.post('{{ route('patients.chronic-diseases.store', $patient) }}', {
+            chronic_disease_type_id: diseaseType,
+            diagnosis_date: diagnosisDate,
+            severity: severity,
+            treatment_plan: treatmentPlan,
+            next_followup_date: nextFollowupDate || null,
+            status: status
         });
 
-        const data = await response.json();
         if (data.success) {
             bootstrap.Modal.getInstance(document.getElementById('newChronicDiseaseModal')).hide();
             SwalUtil.toast(data.message, 'success');
@@ -742,24 +715,14 @@ async function saveMonitoring() {
     try {
         const url = `{{ url(app()->getLocale() . '/clinic/patients/' . $patient->file_number . '/chronic-diseases') }}/${diseaseId}/monitoring`;
         
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                monitoring_date: monitoringDate,
-                parameter_name: parameterName,
-                parameter_value: parameterValue,
-                parameter_unit: parameterUnit || null,
-                status: status || null,
-                notes: notes || null
-            })
+        const data = await ApiClient.post(url, {
+            monitoring_date: monitoringDate,
+            parameter_name: parameterName,
+            parameter_value: parameterValue,
+            parameter_unit: parameterUnit || null,
+            status: status || null,
+            notes: notes || null
         });
-        
-        const data = await response.json();
         
         if (data.success) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('addMonitoringModal'));
@@ -806,23 +769,13 @@ async function saveGrowthMeasurement() {
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.saving") }}';
     
     try {
-        const response = await fetch('{{ route("patients.growth-charts.store", $patient) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                measurement_date: measurementDate,
-                weight_kg: weight,
-                height_cm: height,
-                head_circumference_cm: headCircumference || null,
-                notes: notes
-            })
+        const data = await ApiClient.post('{{ route("patients.growth-charts.store", $patient) }}', {
+            measurement_date: measurementDate,
+            weight_kg: weight,
+            height_cm: height,
+            head_circumference_cm: headCircumference || null,
+            notes: notes
         });
-        
-        const data = await response.json();
         
         if (data.success) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('newGrowthMeasurementModal'));

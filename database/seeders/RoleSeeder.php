@@ -25,6 +25,7 @@ class RoleSeeder extends Seeder
             ["name" => RoleEnum::ADMIN, 'guard_name' => "web"],
             ["name" => RoleEnum::DOCTOR, 'guard_name' => "web"],
             ["name" => RoleEnum::PATIENT, 'guard_name' => "web"],
+            ["name" => RoleEnum::CLINIC_PATIENT_EDITOR, 'guard_name' => "web"],
         ];
 
         foreach ($roles as $role) {

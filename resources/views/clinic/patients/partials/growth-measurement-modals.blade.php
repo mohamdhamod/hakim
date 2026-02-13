@@ -1,6 +1,6 @@
 {{-- New Growth Measurement Modal --}}
 <div class="modal fade" id="newGrowthMeasurementModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">
@@ -45,7 +45,7 @@
 
 {{-- View Growth Measurement Modal --}}
 <div class="modal fade" id="viewGrowthMeasurementModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">

@@ -66,13 +66,7 @@ window.initTypeahead = function (options) {
             createEl.innerHTML = `Create new: <strong>${q}</strong>`;
             createEl.addEventListener('click', () => {
                 // POST to create
-                const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-                const token = tokenMeta ? tokenMeta.getAttribute('content') : '';
-                fetch(cfg.createUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify({ name: q })
-                }).then(r => r.json()).then(data => {
+                ApiClient.post(cfg.createUrl, { name: q }).then(data => {
                     if (data && data.id) selectItem(data);
                 }).catch(() => {});
             });
@@ -89,8 +83,7 @@ window.initTypeahead = function (options) {
         if (debounceTimer) clearTimeout(debounceTimer);
         if (q.length < cfg.minLength) { clear(); return; }
         debounceTimer = setTimeout(() => {
-            fetch(cfg.searchUrl + '?q=' + encodeURIComponent(q), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(r => r.json())
+            ApiClient.get(cfg.searchUrl + '?q=' + encodeURIComponent(q))
                 .then(data => render(data, q))
                 .catch(() => clear());
         }, cfg.debounce);

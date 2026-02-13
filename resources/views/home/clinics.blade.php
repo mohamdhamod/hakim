@@ -51,7 +51,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <select id="specialty_filter" name="specialty" class="form-select form-select-sm">
+                                                    <select id="specialty_filter" name="specialty" class="form-select form-select-sm choices-select">
                                                         <option value="">{{ __('translation.clinic_home.all_specialties') }}</option>
                                                         @foreach($specialties as $specialty)
                                                             <option value="{{ $specialty->id }}" {{ request('specialty') == $specialty->id ? 'selected' : '' }}>
@@ -196,7 +196,7 @@
 
 <!-- Booking Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-3 border-0 shadow">
             <div class="modal-header border-0 pb-2">
                 <h6 class="modal-title fw-semibold">

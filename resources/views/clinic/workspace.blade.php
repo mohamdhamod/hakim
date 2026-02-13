@@ -407,7 +407,7 @@
 
 {{-- Cancel Appointment Modal --}}
 <div class="modal fade" id="cancelAppointmentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title text-danger">
@@ -434,7 +434,7 @@
 
 {{-- Complete Appointment Modal --}}
 <div class="modal fade" id="completeAppointmentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title text-success">
@@ -467,7 +467,7 @@
 
 {{-- Register Patient Modal --}}
 <div class="modal fade" id="registerPatientModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title text-primary">
@@ -489,7 +489,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
-                        <select id="patientBirthYear" class="form-select">
+                        <select id="patientBirthYear" class="form-select choices-select">
                             <option value="">{{ __('translation.patient.select_year') }}</option>
                             @for($year = date('Y'); $year >= 1920; $year--)
                                 <option value="{{ $year }}">{{ $year }}</option>
@@ -498,7 +498,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
-                        <select id="patientBirthMonth" class="form-select">
+                        <select id="patientBirthMonth" class="form-select choices-select">
                             <option value="">{{ __('translation.common.select') }}</option>
                             @foreach([
                                 1 => __('translation.months_list.january'),
@@ -520,7 +520,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.patient.gender') }}</label>
-                        <select id="patientGender" class="form-select">
+                        <select id="patientGender" class="form-select choices-select">
                             <option value="">{{ __('translation.common.select') }}</option>
                             <option value="male">{{ __('translation.patient.male') }}</option>
                             <option value="female">{{ __('translation.patient.female') }}</option>
@@ -544,7 +544,7 @@
 
 {{-- Confirm Appointment Modal --}}
 <div class="modal fade" id="confirmAppointmentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title text-success">

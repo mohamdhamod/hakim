@@ -126,14 +126,7 @@
                 } else if (deleteBtn) {
                     // Basic confirm + navigate delete endpoint
                     if (confirm(t.confirmDelete || (window.i18n && window.i18n.messages && window.i18n.messages.are_you_sure) || '')) {
-                        fetch(`dashboard/team_members/${data.id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': (window.Utils && window.Utils.getCSRFToken) ? window.Utils.getCSRFToken() : '',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            }
-                        }).then(() => {
+                        ApiClient.delete(`dashboard/team_members/${data.id}`).then(() => {
                             try { table.ajax.reload(); } catch (_) { window.location.reload(); }
                         }).catch(() => window.location.reload());
                     }
@@ -149,16 +142,7 @@
                 if (!data) return;
                 const isActive = !!toggle.checked;
 
-                fetch(`dashboard/team_members/${data.id}/updateActiveStatus`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': (window.Utils && window.Utils.getCSRFToken) ? window.Utils.getCSRFToken() : '',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ active: isActive })
-                }).then(() => {
+                ApiClient.post(`dashboard/team_members/${data.id}/updateActiveStatus`, { active: isActive }).then(() => {
                     try { table.ajax.reload(null, false); } catch (_) { /* no-op */ }
                 }).catch(() => { /* no-op */ });
             });

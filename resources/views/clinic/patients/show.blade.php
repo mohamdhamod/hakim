@@ -267,7 +267,7 @@
 
 {{-- Medical History Modal --}}
 <div class="modal fade" id="medicalHistoryModal" tabindex="-1" aria-labelledby="medicalHistoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <form action="{{ route('clinic.patients.update-medical-history', $patient) }}" method="POST" id="medicalHistoryForm">
                 @csrf
@@ -312,7 +312,7 @@
 
 {{-- Emergency Contact Modal --}}
 <div class="modal fade" id="emergencyContactModal" tabindex="-1" aria-labelledby="emergencyContactModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <form action="{{ route('clinic.patients.update-emergency-contact', $patient) }}" method="POST" id="emergencyContactForm">
                 @csrf
@@ -347,7 +347,7 @@
 
 {{-- Notes Modal --}}
 <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <form action="{{ route('clinic.patients.update-notes', $patient) }}" method="POST" id="notesForm">
                 @csrf

@@ -162,7 +162,7 @@
 
 {{-- Reject Modal --}}
 <div class="modal fade" id="rejectModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title">{{ __('translation.clinic.reject_clinic') }}</h5>
@@ -188,49 +188,65 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
-    $('.approve-btn').on('click', function() {
-        var id = $(this).data('id');
-        if (!confirm('{{ __('translation.clinic.confirm_approve') }}')) return;
-        
-        $.ajax({
-            url: '{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/approve',
-            type: 'POST',
-            data: { _token: '{{ csrf_token() }}' },
-            success: function(response) {
-                if (response.success) {
-                    location.reload();
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            
+            const result = await SwalHelper.confirm(
+                '{{ __('translation.clinic.confirm_approve') }}',
+                '',
+                { confirmButtonText: '{{ __('translation.common.approve') }}', confirmButtonColor: '#198754' }
+            );
+            
+            if (!result.isConfirmed) return;
+            
+            SwalHelper.showLoading('{{ __('translation.common.processing') }}');
+            
+            try {
+                const data = await ApiClient.post('{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/approve');
+                if (data.success) {
+                    await SwalHelper.success('{{ __('translation.common.success') }}', data.message);
+                    window.location.reload();
+                } else {
+                    SwalHelper.error('{{ __('translation.common.error') }}', data.message);
                 }
+            } catch (error) {
+                SwalHelper.error('{{ __('translation.common.error') }}', error.message);
             }
         });
     });
 
-    $('.reject-btn').on('click', function() {
-        $('#rejectModal').modal('show');
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
+        });
     });
 
-    $('#confirm-reject').on('click', function() {
-        var id = $('#reject-clinic-id').val();
-        var reason = $('#reject-reason').val();
+    document.getElementById('confirm-reject')?.addEventListener('click', async function() {
+        const id = document.getElementById('reject-clinic-id')?.value;
+        const reason = document.getElementById('reject-reason')?.value;
         
-        if (!reason.trim()) {
-            alert('{{ __('translation.clinic.reason_required') }}');
+        if (!reason?.trim()) {
+            SwalHelper.error('{{ __('translation.common.error') }}', '{{ __('translation.clinic.reason_required') }}');
             return;
         }
 
-        $.ajax({
-            url: '{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/reject',
-            type: 'POST',
-            data: { 
-                _token: '{{ csrf_token() }}',
-                reason: reason
-            },
-            success: function(response) {
-                if (response.success) {
-                    location.reload();
-                }
+        SwalHelper.showLoading('{{ __('translation.common.processing') }}');
+
+        try {
+            const data = await ApiClient.post('{{ url('/' . app()->getLocale() . '/dashboard/clinics') }}/' + id + '/reject', { reason: reason });
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('rejectModal'))?.hide();
+                await SwalHelper.success('{{ __('translation.common.success') }}', data.message);
+                window.location.reload();
+            } else {
+                SwalHelper.error('{{ __('translation.common.error') }}', data.message);
             }
-        });
+        } catch (error) {
+            SwalHelper.error('{{ __('translation.common.error') }}', error.message);
+        }
     });
 });
 </script>

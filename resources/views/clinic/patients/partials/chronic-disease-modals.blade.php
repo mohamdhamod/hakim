@@ -1,6 +1,6 @@
 {{-- New Chronic Disease Modal --}}
 <div class="modal fade" id="newChronicDiseaseModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
                 <h5 class="modal-title">
@@ -12,7 +12,7 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.disease_type') }} <span class="text-danger">*</span></label>
-                        <select class="form-select" id="diseaseType" required>
+                        <select class="form-select choices-select" id="diseaseType" required>
                             <option value="">{{ __('translation.select_disease') }}</option>
                             @foreach(\App\Models\ChronicDiseaseType::with('translations')->where('is_active', true)->orderBy('category')->get()->groupBy('category') as $category => $diseases)
                                 <optgroup label="{{ $category }}">
@@ -31,7 +31,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.severity') }}</label>
-                        <select class="form-select" id="diseaseSeverity">
+                        <select class="form-select choices-select" id="diseaseSeverity">
                             <option value="mild">{{ __('translation.mild') }}</option>
                             <option value="moderate" selected>{{ __('translation.moderate') }}</option>
                             <option value="severe">{{ __('translation.severe') }}</option>
@@ -47,7 +47,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.disease_status') }}</label>
-                        <select class="form-select" id="diseaseStatus">
+                        <select class="form-select choices-select" id="diseaseStatus">
                             <option value="active" selected>{{ __('translation.active') }}</option>
                             <option value="in_remission">{{ __('translation.in_remission') }}</option>
                             <option value="resolved">{{ __('translation.resolved') }}</option>
@@ -112,7 +112,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.parameter_name') }} <span class="text-danger">*</span></label>
-                        <select class="form-select" id="monitoringParameterName">
+                        <select class="form-select choices-select" id="monitoringParameterName">
                             <option value="">{{ __('translation.select') }}...</option>
                             <option value="blood_pressure">{{ __('translation.blood_pressure') }}</option>
                             <option value="blood_sugar">{{ __('translation.blood_sugar') }}</option>
@@ -140,7 +140,7 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.status') }}</label>
-                        <select class="form-select" id="monitoringStatus">
+                        <select class="form-select choices-select" id="monitoringStatus">
                             <option value="">{{ __('translation.select') }}...</option>
                             <option value="controlled">{{ __('translation.controlled') }}</option>
                             <option value="uncontrolled">{{ __('translation.uncontrolled') }}</option>

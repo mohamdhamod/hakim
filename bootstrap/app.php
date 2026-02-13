@@ -35,6 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'auto.locale' => \App\Http\Middleware\AutoDetectUserLocale::class,
             'recaptcha' => \App\Http\Middleware\VerifyRecaptchaV3::class,
             'clinic.approved' => \App\Http\Middleware\EnsureClinicApproved::class,
+            'clinic.staff' => \App\Http\Middleware\EnsureClinicStaff::class,
+            'doctor.only' => \App\Http\Middleware\EnsureDoctorOnly::class,
         ]);
 
         $middleware->group('web', [

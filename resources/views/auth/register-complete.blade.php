@@ -62,7 +62,7 @@
                                     <label for="user_type" class="form-label">
                                         {{ __('translation.auth.user_type') }} <span class="text-danger">*</span>
                                     </label>
-                                    <select id="user_type" name="user_type" class="form-select" required>
+                                    <select id="user_type" name="user_type" class="form-select choices-select" required>
                                         <option value="">{{ __('translation.auth.select_user_type') }}</option>
                                         <option value="patient" {{ old('user_type') == 'patient' ? 'selected' : '' }}>
                                             {{ __('translation.auth.user_type_patient') }}
@@ -81,7 +81,7 @@
                                     <label for="specialty_id" class="form-label">
                                         {{ __('translation.auth.specialty') }} <span class="text-danger">*</span>
                                     </label>
-                                    <select id="specialty_id" name="specialty_id" class="form-select">
+                                    <select id="specialty_id" name="specialty_id" class="form-select choices-select">
                                         <option value="">{{ __('translation.auth.select_specialty') }}</option>
                                         @foreach(\App\Models\Specialty::active()->ordered()->get() as $specialty)
                                             <option value="{{ $specialty->id }}" {{ old('specialty_id') == $specialty->id ? 'selected' : '' }}>
@@ -112,7 +112,7 @@
                                     <label for="clinic_services" class="form-label">
                                         {{ __('translation.clinic.services') }}
                                     </label>
-                                    <select id="clinic_services" name="clinic_services[]" class="form-select" multiple>
+                                    <select id="clinic_services" name="clinic_services[]" class="form-select choices-select" multiple>
                                         @foreach(\App\Models\ClinicService::active()->ordered()->get() as $service)
                                             <option value="{{ $service->id }}" {{ in_array($service->id, old('clinic_services', [])) ? 'selected' : '' }}>
                                                 {{ $service->name }}

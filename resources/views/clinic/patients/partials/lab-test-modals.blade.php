@@ -1,6 +1,6 @@
 {{-- New Lab Test Modal --}}
 <div class="modal fade" id="newLabTestModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
@@ -64,7 +64,7 @@
 
 {{-- View Lab Test Details Modal --}}
 <div class="modal fade" id="viewLabTestModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
