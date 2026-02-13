@@ -3,14 +3,17 @@
 return [
     'action' => 'Action',
     'actions' => 'Actions',
+    'contact_info' => 'Contact Information',
     'date' => 'Date',
     'user' => 'User',
     'no_data' => 'No Data',
     'error_occurred' => 'An error occurred',
     'ok' => 'OK',
     'notes' => 'Notes',
+    'status' => 'Status',
     'for_infants_up_to_3_years' => 'For infants up to 3 years',
     'showing_latest_of_total' => 'Showing latest :shown of :total',
+    'view_all' => 'View All',
 
     'common' => [
         'error_occurred' => 'An error occurred',
@@ -68,6 +71,9 @@ return [
         'processing' => 'Processing...',
         'please_fill_required_fields' => 'Please fill all required fields',
         'table' => 'Table',
+        'phone' => 'Phone',
+        'email' => 'Email',
+        'address' => 'Address',
     ],
 
     'export' => [
@@ -75,6 +81,7 @@ return [
         'copy' => 'Copy',
         'csv' => 'Export CSV',
         'print' => 'Print',
+        'date' => 'Report Date',
     ],
     'columns' => [
         'dropdown' => 'Columns',
@@ -1470,6 +1477,9 @@ return [
         'no_clinics_found_message' => 'There are no clinics registered yet.',
         'no_pending_clinics' => 'No Pending Clinics',
         'no_pending_clinics_message' => 'All clinic registrations have been processed. Great job!',
+        'services' => 'Clinic Services',
+        'services_hint' => 'Select the services provided by your clinic',
+        'select_services' => 'Select Services',
     ],
 
     'patient' => [
@@ -1637,6 +1647,7 @@ return [
 
     'examination' => [
         'examinations' => 'Examinations',
+        'all_examinations' => 'All Examinations',
         'examination' => 'Examination',
         'manage_examinations' => 'Manage all patient examinations',
         'search_placeholder' => 'Search by patient name or examination number...',
@@ -1864,6 +1875,7 @@ return [
 
     // Lab Tests
     'lab_tests' => 'Lab Tests',
+    'all_lab_tests' => 'All Lab Tests',
     'lab_test' => 'Lab Test',
     'add_lab_test' => 'Add Lab Test',
     'edit_lab_test' => 'Edit Lab Test',
@@ -1893,6 +1905,7 @@ return [
     
     // Vaccinations
     'vaccinations' => 'Vaccinations',
+    'all_vaccinations' => 'All Vaccinations',
     'vaccination' => 'Vaccination',
     'add_vaccination' => 'Add Vaccination',
     'edit_vaccination' => 'Edit Vaccination',
@@ -1938,6 +1951,9 @@ return [
     // Growth Charts
     'growth_charts' => 'Growth Charts',
     'growth_chart' => 'Growth Chart',
+    'all_growth_measurements' => 'All Growth Measurements',
+    'latest_measurements' => 'Latest Measurements',
+    'measurements' => 'Measurements',
     'add_measurement' => 'Add Measurement',
     'edit_measurement' => 'Edit Measurement',
     'measurement_details' => 'Measurement Details',
@@ -1967,10 +1983,43 @@ return [
     'total_measurements' => 'Total Measurements',
     'view_charts' => 'View Charts',
     'view_chart' => 'View Chart',
+    'months_abbr' => 'm',
+    'years_abbr' => 'y',
+    'weight_for_age' => 'Weight for Age',
+    'height_for_age' => 'Height/Length for Age',
+    'bmi_for_age' => 'BMI for Age',
+    'head_circumference_for_age' => 'Head Circumference for Age',
+    
+    // Growth Chart Zones
+    'growth' => [
+        'zone_extreme' => 'Needs Attention',
+        'zone_caution' => 'Monitor',
+        'zone_normal' => 'Normal Range',
+        'patient_data' => 'Patient Data',
+        'median' => 'Median',
+        'about_who_standards' => 'About WHO Growth Standards',
+        'who_standards_description' => 'These charts use WHO Child Growth Standards which describe normal child growth from birth to 5 years under optimal environmental conditions. The colored zones indicate: Green (15-85%) = Normal, Yellow (3-15% & 85-97%) = Monitor, Red (<3% & >97%) = Needs attention.',
+        'below_3rd' => 'Below 3rd percentile',
+        'below_15th' => 'Below 15th percentile',
+        'above_97th' => 'Above 97th percentile',
+        'above_85th' => 'Above 85th percentile',
+        'normal_range' => 'Normal range',
+    ],
     
     // Chronic Diseases
     'chronic_diseases' => 'Chronic Diseases',
-    'chronic_disease' => 'Chronic Disease',
+    'all_chronic_diseases' => 'All Chronic Diseases',
+    'chronic_disease' => [
+        'name' => 'Disease Name',
+        'diagnosed_at' => 'Diagnosed Date',
+        'status' => 'Status',
+        'notes' => 'Notes',
+        'status_active' => 'Active',
+        'status_in_remission' => 'In Remission',
+        'status_resolved' => 'Resolved',
+        'status_controlled' => 'Controlled',
+        'status_uncontrolled' => 'Uncontrolled',
+    ],
     'add_chronic_disease' => 'Add Chronic Disease',
     'edit_chronic_disease' => 'Edit Chronic Disease',
     'chronic_disease_details' => 'Disease Details',
@@ -2128,6 +2177,11 @@ return [
     'measurement' => 'Measurement',
     'age' => 'Age',
     'please_fill_required_fields' => 'Please fill all required fields',
+
+    // Comprehensive Report
+    'comprehensive_report' => 'Comprehensive Medical Report',
+    'print_comprehensive_report' => 'Print Comprehensive Report',
+    'last_10' => 'Last 10',
 
     'months_list' => [
         'january' => 'January',

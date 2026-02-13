@@ -88,6 +88,24 @@
                             </div>
 
                             <div class="col-lg-12">
+                                <label for="clinic_services" class="form-label">
+                                    {{ __('translation.clinic.services') }}
+                                </label>
+                                <select id="clinic_services" name="clinic_services[]" class="form-select" multiple>
+                                    @foreach(\App\Models\ClinicService::active()->ordered()->get() as $service)
+                                        <option value="{{ $service->id }}" 
+                                                {{ in_array($service->id, old('clinic_services', auth()->user()->clinic->services->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                            {{ $service->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">{{ __('translation.clinic.services_hint') }}</small>
+                                @error('clinic_services')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-lg-12">
                                 <label class="form-label">{{ __('translation.clinic.logo') }}</label>
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="clinic-logo-preview rounded-3 overflow-hidden bg-light border">
@@ -213,6 +231,23 @@
                         itemSelectText: '',
                         shouldSort: false,
                         allowHTML: true,
+                        searchPlaceholderValue: '{{ __("translation.common.search") }}',
+                        noResultsText: '{{ __("translation.common.no_results") }}',
+                        noChoicesText: '{{ __("translation.common.no_results") }}'
+                    });
+                });
+            }
+
+            // Initialize Choices.js for services dropdown (multiple select)
+            const servicesSelect = document.getElementById('clinic_services');
+            if (servicesSelect && window.loadChoices) {
+                window.loadChoices().then(function(Choices) {
+                    new Choices(servicesSelect, {
+                        searchEnabled: true,
+                        itemSelectText: '',
+                        shouldSort: false,
+                        allowHTML: true,
+                        removeItemButton: true,
                         searchPlaceholderValue: '{{ __("translation.common.search") }}',
                         noResultsText: '{{ __("translation.common.no_results") }}',
                         noChoicesText: '{{ __("translation.common.no_results") }}'

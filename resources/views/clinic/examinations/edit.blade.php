@@ -15,13 +15,13 @@
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ route('clinic.workspace') }}">{{ __('translation.clinic.dashboard') }}</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('clinic.examinations.index') }}">{{ __('translation.examination.examinations') }}</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('clinic.examinations.show', $examination->id) }}">{{ $examination->examination_number }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('clinic.patients.show', ['patient' => $examination->patient->file_number, 'tab' => 'examinations']) }}">{{ $examination->examination_number }}</a></li>
                         <li class="breadcrumb-item active">{{ __('translation.common.edit') }}</li>
                     </ol>
                 </nav>
             </div>
             <div>
-                <a href="{{ route('clinic.examinations.show', $examination->id) }}" class="btn btn-outline-secondary">
+                <a href="{{ route('clinic.patients.show', ['patient' => $examination->patient->file_number, 'tab' => 'examinations']) }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-2"></i>{{ __('translation.common.back') }}
                 </a>
             </div>
@@ -373,7 +373,7 @@
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="bi bi-check-lg me-2"></i>{{ __('translation.common.save_changes') }}
                                 </button>
-                                <a href="{{ route('clinic.examinations.show', $examination->id) }}" class="btn btn-outline-secondary">
+                                <a href="{{ route('clinic.patients.show', ['patient' => $examination->patient->file_number, 'tab' => 'examinations']) }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-lg me-2"></i>{{ __('translation.common.cancel') }}
                                 </a>
                             </div>
@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.success) {
                 SwalUtil.toast('success', response.message || '{{ __('translation.examination.updated_successfully') }}');
                 setTimeout(() => {
-                    window.location.href = response.redirect || '{{ route('clinic.examinations.show', $examination->id) }}';
+                    window.location.href = response.redirect || '{{ route('clinic.patients.show', ['patient' => $examination->patient->file_number, 'tab' => 'examinations', 'examination' => $examination->id]) }}';
                 }, 1000);
             } else {
                 SwalUtil.toast('error', response.message || '{{ __('translation.common.error_occurred') }}');

@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             
             // Demo data (optional - comment out in production)
             DemoUsersSeeder::class,
+            DemoPatientsSeeder::class,
         ]);
     }
 }

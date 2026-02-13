@@ -3,14 +3,17 @@
 return [
     'action' => 'الإجراء',
     'actions' => 'الإجراءات',
+    'contact_info' => 'معلومات الاتصال',
     'date' => 'التاريخ',
     'user' => 'المستخدم',
     'no_data' => 'لا توجد بيانات',
     'error_occurred' => 'حدث خطأ',
     'ok' => 'موافق',
     'notes' => 'ملاحظات',
+    'status' => 'الحالة',
     'for_infants_up_to_3_years' => 'للرضع حتى 3 سنوات',
     'showing_latest_of_total' => 'عرض آخر :shown من أصل :total',
+    'view_all' => 'عرض الكل',
 
     'common' => [
         'error_occurred' => 'حدث خطأ',
@@ -73,6 +76,9 @@ return [
         'available' => 'متاح',
         'processing' => 'جاري المعالجة...',
         'please_fill_required_fields' => 'يرجى ملء جميع الحقول المطلوبة',
+        'phone' => 'الهاتف',
+        'email' => 'البريد الإلكتروني',
+        'address' => 'العنوان',
         'table' => 'جدول',
     ],
 
@@ -81,6 +87,7 @@ return [
         'copy' => 'نسخ',
         'csv' => 'تصدير CSV',
         'print' => 'طباعة',
+        'date' => 'تاريخ التقرير',
     ],
     'columns' => [
         'dropdown' => 'الأعمدة',
@@ -2481,6 +2488,9 @@ return [
         'no_clinics_found_message' => 'لا توجد عيادات مسجلة حتى الآن.',
         'no_pending_clinics' => 'لا توجد طلبات معلقة',
         'no_pending_clinics_message' => 'تمت معالجة جميع طلبات تسجيل العيادات. عمل رائع!',
+        'services' => 'خدمات العيادة',
+        'services_hint' => 'اختر الخدمات التي توفرها عيادتك',
+        'select_services' => 'اختر الخدمات',
     ],
 
     'patient' => [
@@ -2648,6 +2658,7 @@ return [
 
     'examination' => [
         'examinations' => 'المعاينات',
+        'all_examinations' => 'جميع المعاينات',
         'examination' => 'معاينة',
         'manage_examinations' => 'إدارة جميع معاينات المرضى',
         'search_placeholder' => 'بحث باسم المريض أو رقم المعاينة...',
@@ -2874,6 +2885,7 @@ return [
 
     // Lab Tests
     'lab_tests' => 'التحاليل المخبرية',
+    'all_lab_tests' => 'جميع التحاليل',
     'lab_test' => 'تحليل مخبري',
     'add_lab_test' => 'إضافة تحليل',
     'edit_lab_test' => 'تعديل تحليل',
@@ -2903,6 +2915,7 @@ return [
     
     // Vaccinations
     'vaccinations' => 'التطعيمات',
+    'all_vaccinations' => 'جميع التطعيمات',
     'vaccination' => 'تطعيم',
     'add_vaccination' => 'إضافة تطعيم',
     'edit_vaccination' => 'تعديل تطعيم',
@@ -2948,6 +2961,9 @@ return [
     // Growth Charts
     'growth_charts' => 'منحنيات النمو',
     'growth_chart' => 'منحنى النمو',
+    'all_growth_measurements' => 'جميع قياسات النمو',
+    'latest_measurements' => 'آخر القياسات',
+    'measurements' => 'القياسات',
     'add_measurement' => 'إضافة قياس',
     'edit_measurement' => 'تعديل قياس',
     'measurement_details' => 'تفاصيل القياس',
@@ -2977,10 +2993,43 @@ return [
     'total_measurements' => 'إجمالي القياسات',
     'view_charts' => 'عرض المنحنيات',
     'view_chart' => 'عرض المنحنى',
+    'months_abbr' => 'ش',
+    'years_abbr' => 'س',
+    'weight_for_age' => 'الوزن مقابل العمر',
+    'height_for_age' => 'الطول مقابل العمر',
+    'bmi_for_age' => 'مؤشر كتلة الجسم مقابل العمر',
+    'head_circumference_for_age' => 'محيط الرأس مقابل العمر',
+    
+    // Growth Chart Zones
+    'growth' => [
+        'zone_extreme' => 'يحتاج اهتمام',
+        'zone_caution' => 'يحتاج مراقبة',
+        'zone_normal' => 'المعدل الطبيعي',
+        'patient_data' => 'بيانات المريض',
+        'median' => 'الوسيط',
+        'about_who_standards' => 'حول معايير منظمة الصحة العالمية',
+        'who_standards_description' => 'تستخدم هذه المنحنيات معايير نمو الطفل لمنظمة الصحة العالمية التي تصف نمو الطفل الطبيعي منذ الولادة حتى 5 سنوات. المناطق الملونة تشير إلى: الأخضر (15-85%) = طبيعي، الأصفر (3-15% و 85-97%) = يحتاج مراقبة، الأحمر (<3% و >97%) = يحتاج اهتمام.',
+        'below_3rd' => 'أقل من المئين الثالث',
+        'below_15th' => 'أقل من المئين الخامس عشر',
+        'above_97th' => 'أعلى من المئين السابع والتسعين',
+        'above_85th' => 'أعلى من المئين الخامس والثمانين',
+        'normal_range' => 'المعدل الطبيعي',
+    ],
     
     // Chronic Diseases
     'chronic_diseases' => 'الأمراض المزمنة',
-    'chronic_disease' => 'مرض مزمن',
+    'all_chronic_diseases' => 'جميع الأمراض المزمنة',
+    'chronic_disease' => [
+        'name' => 'اسم المرض',
+        'diagnosed_at' => 'تاريخ التشخيص',
+        'status' => 'الحالة',
+        'notes' => 'ملاحظات',
+        'status_active' => 'نشط',
+        'status_in_remission' => 'في طور الهدوء',
+        'status_resolved' => 'تم الشفاء',
+        'status_controlled' => 'مسيطر عليه',
+        'status_uncontrolled' => 'غير مسيطر عليه',
+    ],
     'add_chronic_disease' => 'إضافة مرض مزمن',
     'edit_chronic_disease' => 'تعديل مرض مزمن',
     'chronic_disease_details' => 'تفاصيل المرض',
@@ -3163,6 +3212,11 @@ return [
     'based_on_who_growth_standards' => 'بناءً على معايير النمو لمنظمة الصحة العالمية',
     'male' => 'ذكر',
     'female' => 'أنثى',
+
+    // Comprehensive Report
+    'comprehensive_report' => 'التقرير الطبي الشامل',
+    'print_comprehensive_report' => 'طباعة التقرير الشامل',
+    'last_10' => 'آخر 10',
 
     'months_list' => [
         'january' => 'كانون الثاني',

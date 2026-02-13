@@ -57,9 +57,6 @@
                                         <button class="btn btn-outline-success" onclick="viewExamination({{ $examination->id }})" title="{{ __('translation.common.view') }}">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <a href="{{ route('clinic.examinations.show', $examination->id) }}" class="btn btn-outline-primary" title="{{ __('translation.examination.full_details') }}">
-                                            <i class="fas fa-external-link-alt"></i>
-                                        </a>
                                         <a href="{{ route('clinic.examinations.print', $examination->id) }}" class="btn btn-outline-secondary" target="_blank" title="{{ __('translation.common.print') }}">
                                             <i class="fas fa-print"></i>
                                         </a>
@@ -72,10 +69,11 @@
             </div>
             
             @if($patient->examinations->count() > 10)
-                <div class="card-footer bg-white border-0 text-center py-2">
-                    <small class="text-muted">
-                        {{ __('translation.showing_latest_of_total', ['count' => 10, 'total' => $patient->examinations->count()]) }}
-                    </small>
+                <div class="card-footer bg-white border-0 text-center py-3">
+                    <a href="{{ route('clinic.patients.all-examinations', $patient->file_number) }}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-list me-2"></i>
+                        {{ __('translation.view_all') }} ({{ $patient->examinations->count() }})
+                    </a>
                 </div>
             @endif
         @else

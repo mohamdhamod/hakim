@@ -97,6 +97,23 @@ class Clinic extends Model
     }
 
     /**
+     * Get the services enabled for this clinic.
+     */
+    public function services()
+    {
+        return $this->belongsToMany(ClinicService::class, 'clinic_clinic_service')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if clinic has a specific service enabled.
+     */
+    public function hasService(string $serviceKey): bool
+    {
+        return $this->services()->where('key', $serviceKey)->exists();
+    }
+
+    /**
      * Get logo full path.
      */
     public function getLogoPathAttribute()

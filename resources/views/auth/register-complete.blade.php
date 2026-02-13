@@ -107,6 +107,24 @@
                                     @enderror
                                 </div>
 
+                                <!-- Clinic Services (Only for Doctors) -->
+                                <div class="mb-3" id="clinic_services_container" style="display: none;">
+                                    <label for="clinic_services" class="form-label">
+                                        {{ __('translation.clinic.services') }}
+                                    </label>
+                                    <select id="clinic_services" name="clinic_services[]" class="form-select" multiple>
+                                        @foreach(\App\Models\ClinicService::active()->ordered()->get() as $service)
+                                            <option value="{{ $service->id }}" {{ in_array($service->id, old('clinic_services', [])) ? 'selected' : '' }}>
+                                                {{ $service->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">{{ __('translation.clinic.services_hint') }}</small>
+                                    @error('clinic_services')
+                                    <span class="invalid-feedback d-block"><strong>{{ $message }}</strong></span>
+                                    @enderror
+                                </div>
+
                                 <div class="mb-4">
                                     <div class="form-check">
                                         <input type="checkbox" id="term_and_policy" name="term_and_policy" class="form-check-input fs-16" value="1" required>
@@ -162,17 +180,21 @@
             const userTypeSelect = document.getElementById('user_type');
             const specialtyContainer = document.getElementById('specialty_container');
             const clinicAddressContainer = document.getElementById('clinic_address_container');
+            const clinicServicesContainer = document.getElementById('clinic_services_container');
             const specialtyInput = document.getElementById('specialty_id');
+            const servicesInput = document.getElementById('clinic_services');
 
             function toggleClinicFields() {
                 const value = userTypeSelect.value;
                 if (value === 'doctor') {
                     specialtyContainer.style.display = 'block';
                     clinicAddressContainer.style.display = 'block';
+                    clinicServicesContainer.style.display = 'block';
                     specialtyInput.setAttribute('required', 'required');
                 } else {
                     specialtyContainer.style.display = 'none';
                     clinicAddressContainer.style.display = 'none';
+                    clinicServicesContainer.style.display = 'none';
                     specialtyInput.removeAttribute('required');
                 }
             }
@@ -192,6 +214,16 @@
                     itemSelectText: '',
                     shouldSort: false,
                     allowHTML: true,
+                    searchPlaceholderValue: '{{ __("translation.common.search") }}'
+                });
+
+                // Initialize Choices.js for services dropdown
+                new Choices(servicesInput, {
+                    searchEnabled: true,
+                    itemSelectText: '',
+                    shouldSort: false,
+                    allowHTML: true,
+                    removeItemButton: true,
                     searchPlaceholderValue: '{{ __("translation.common.search") }}'
                 });
 

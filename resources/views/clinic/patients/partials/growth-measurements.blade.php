@@ -108,10 +108,11 @@
                     </div>
                     
                     @if($patient->growthMeasurements->count() > 5)
-                        <div class="card-footer bg-white border-0 text-center py-2">
-                            <small class="text-muted">
-                                {{ __('translation.showing_latest_of_total', ['count' => 5, 'total' => $patient->growthMeasurements->count()]) }}
-                            </small>
+                        <div class="card-footer bg-white border-0 text-center py-3">
+                            <a href="{{ route('clinic.patients.all-growth-measurements', $patient->file_number) }}" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-list me-2"></i>
+                                {{ __('translation.view_all') }} ({{ $patient->growthMeasurements->count() }})
+                            </a>
                         </div>
                     @endif
                 </div>
@@ -120,71 +121,115 @@
                 @if($patient->growthMeasurements->count() >= 2)
                 <div class="tab-pane fade" id="growthChartsPane" role="tabpanel">
                     <div class="p-3">
+                        {{-- Chart Legend --}}
+                        <div class="d-flex flex-wrap justify-content-center gap-3 mb-3 p-2 bg-light rounded">
+                            <div class="d-flex align-items-center">
+                                <span class="badge me-1" style="background: linear-gradient(180deg, #dc3545 0%, #dc3545 100%); width: 14px; height: 14px;"></span>
+                                <small class="text-muted">{{ __('translation.growth.zone_extreme') }} (&lt;3% / &gt;97%)</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge me-1" style="background: linear-gradient(180deg, #ffc107 0%, #ffc107 100%); width: 14px; height: 14px;"></span>
+                                <small class="text-muted">{{ __('translation.growth.zone_caution') }} (3-15% / 85-97%)</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge me-1" style="background: linear-gradient(180deg, #28a745 0%, #28a745 100%); width: 14px; height: 14px;"></span>
+                                <small class="text-muted">{{ __('translation.growth.zone_normal') }} (15-85%)</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="rounded-circle me-1" style="background: #1a237e; width: 12px; height: 12px; display: inline-block;"></span>
+                                <small class="text-muted">{{ __('translation.growth.patient_data') }}</small>
+                            </div>
+                        </div>
+
                         <div class="row">
                             {{-- Weight Chart --}}
-                            <div class="col-md-6 mb-3">
-                                <div class="card border">
-                                    <div class="card-header bg-primary bg-opacity-10 py-2">
-                                        <h6 class="mb-0 small fw-bold text-primary">
-                                            <i class="fas fa-weight me-1"></i>{{ __('translation.weight') }} (kg)
-                                        </h6>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-white fw-bold">
+                                                <i class="fas fa-weight me-2"></i>{{ __('translation.weight_for_age') }}
+                                            </h6>
+                                            <span class="badge bg-white text-dark">WHO</span>
+                                        </div>
                                     </div>
-                                    <div class="card-body p-2">
-                                        <canvas id="inlineWeightChart" height="220"></canvas>
+                                    <div class="card-body p-3">
+                                        <div style="height: 280px; position: relative;">
+                                            <canvas id="inlineWeightChart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Height Chart --}}
-                            <div class="col-md-6 mb-3">
-                                <div class="card border">
-                                    <div class="card-header bg-success bg-opacity-10 py-2">
-                                        <h6 class="mb-0 small fw-bold text-success">
-                                            <i class="fas fa-ruler-vertical me-1"></i>{{ __('translation.height') }} (cm)
-                                        </h6>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-white fw-bold">
+                                                <i class="fas fa-ruler-vertical me-2"></i>{{ __('translation.height_for_age') }}
+                                            </h6>
+                                            <span class="badge bg-white text-dark">WHO</span>
+                                        </div>
                                     </div>
-                                    <div class="card-body p-2">
-                                        <canvas id="inlineHeightChart" height="220"></canvas>
+                                    <div class="card-body p-3">
+                                        <div style="height: 280px; position: relative;">
+                                            <canvas id="inlineHeightChart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- BMI Chart --}}
-                            <div class="col-md-6 mb-3">
-                                <div class="card border">
-                                    <div class="card-header bg-warning bg-opacity-10 py-2">
-                                        <h6 class="mb-0 small fw-bold text-warning">
-                                            <i class="fas fa-chart-area me-1"></i>{{ __('translation.bmi') }}
-                                        </h6>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-white fw-bold">
+                                                <i class="fas fa-calculator me-2"></i>{{ __('translation.bmi_for_age') }}
+                                            </h6>
+                                            <span class="badge bg-white text-dark">WHO</span>
+                                        </div>
                                     </div>
-                                    <div class="card-body p-2">
-                                        <canvas id="inlineBmiChart" height="220"></canvas>
+                                    <div class="card-body p-3">
+                                        <div style="height: 280px; position: relative;">
+                                            <canvas id="inlineBmiChart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Head Circumference Chart (under 6 years) --}}
                             @if($patient->age < 6)
-                            <div class="col-md-6 mb-3">
-                                <div class="card border">
-                                    <div class="card-header bg-danger bg-opacity-10 py-2">
-                                        <h6 class="mb-0 small fw-bold text-danger">
-                                            <i class="fas fa-circle-notch me-1"></i>{{ __('translation.head_circumference') }} (cm)
-                                        </h6>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-white fw-bold">
+                                                <i class="fas fa-circle-notch me-2"></i>{{ __('translation.head_circumference_for_age') }}
+                                            </h6>
+                                            <span class="badge bg-white text-dark">WHO</span>
+                                        </div>
                                     </div>
-                                    <div class="card-body p-2">
-                                        <canvas id="inlineHeadChart" height="220"></canvas>
+                                    <div class="card-body p-3">
+                                        <div style="height: 280px; position: relative;">
+                                            <canvas id="inlineHeadChart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             @endif
                         </div>
 
-                        <div class="text-center mt-1">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                {{ __('translation.who_percentile_lines_note') }}
-                            </small>
+                        {{-- Chart Information --}}
+                        <div class="alert alert-light border mt-2" style="font-size: 0.8rem;">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-info-circle text-primary me-2 mt-1"></i>
+                                <div>
+                                    <strong>{{ __('translation.growth.about_who_standards') }}</strong><br>
+                                    {{ __('translation.growth.who_standards_description') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

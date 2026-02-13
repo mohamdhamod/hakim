@@ -140,7 +140,7 @@
             @if($patient->examinations->count() > 0)
                 <div class="list-group list-group-flush">
                     @foreach($patient->examinations as $examination)
-                        <a href="{{ route('clinic.examinations.show', $examination) }}" 
+                        <a href="{{ route('clinic.patients.show', ['patient' => $patient->file_number, 'tab' => 'examinations', 'examination' => $examination->id]) }}" 
                            class="list-group-item list-group-item-action px-0">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>

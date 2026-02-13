@@ -157,6 +157,7 @@ class GrowthMeasurement extends Model
 
     /**
      * Get overall growth interpretation.
+     * Enum values: underweight, normal, overweight, obese
      */
     private function getOverallInterpretation($calculator)
     {
@@ -174,14 +175,27 @@ class GrowthMeasurement extends Model
             $interpretations[] = $calculator->getInterpretation($this->bmi_percentile, 'bmi');
         }
 
-        // Return most concerning interpretation
-        if (in_array('severely_low', $interpretations) || in_array('severely_high', $interpretations)) {
-            return 'attention_needed';
-        } elseif (in_array('low', $interpretations) || in_array('high', $interpretations)) {
-            return 'monitor';
-        } else {
-            return 'normal';
+        // Return interpretation based on BMI percentile primarily
+        if ($this->bmi_percentile !== null) {
+            if ($this->bmi_percentile < 5) {
+                return 'underweight';
+            } elseif ($this->bmi_percentile >= 85 && $this->bmi_percentile < 95) {
+                return 'overweight';
+            } elseif ($this->bmi_percentile >= 95) {
+                return 'obese';
+            }
         }
+
+        // Fallback to weight percentile
+        if ($this->weight_percentile !== null) {
+            if ($this->weight_percentile < 5) {
+                return 'underweight';
+            } elseif ($this->weight_percentile >= 95) {
+                return 'overweight';
+            }
+        }
+
+        return 'normal';
     }
 
     /**

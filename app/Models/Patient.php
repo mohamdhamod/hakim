@@ -121,8 +121,8 @@ class Patient extends Model
     public function getGenderLabelAttribute()
     {
         return match($this->gender) {
-            'male' => __('translation.patient.gender.male'),
-            'female' => __('translation.patient.gender.female'),
+            'male' => __('translation.patient.male'),
+            'female' => __('translation.patient.female'),
             default => '-',
         };
     }

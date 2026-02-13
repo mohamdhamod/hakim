@@ -39,6 +39,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             $rules['specialty_id'] = ['required', 'integer', 'exists:specialties,id'];
             $rules['clinic_address'] = ['nullable', 'string', 'max:500'];
             $rules['clinic_logo'] = ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'];
+            $rules['clinic_services'] = ['nullable', 'array'];
+            $rules['clinic_services.*'] = ['integer', 'exists:clinic_services,id'];
         }
 
         Validator::make($input, $rules)->validateWithBag('updateProfileInformation');
@@ -71,6 +73,11 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             );
 
             $user->clinic->update($clinicData);
+
+            // Sync clinic services
+            if (isset($input['clinic_services'])) {
+                $user->clinic->services()->sync($input['clinic_services']);
+            }
         }
     }
 

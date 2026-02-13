@@ -42,9 +42,14 @@ class ExaminationController extends Controller
                     return '<span class="badge ' . $exam->status_badge_class . '">' . $exam->status_label . '</span>';
                 })
                 ->addColumn('actions', function ($exam) {
+                    $patientUrl = route('clinic.patients.show', [
+                        'patient' => $exam->patient->file_number,
+                        'tab' => 'examinations',
+                        'examination' => $exam->id
+                    ]);
                     return '
                         <div class="btn-group">
-                            <a href="' . route('clinic.examinations.show', $exam->id) . '" class="btn btn-sm btn-info" title="' . __('translation.common.view') . '">
+                            <a href="' . $patientUrl . '" class="btn btn-sm btn-info" title="' . __('translation.common.view') . '">
                                 <i class="bi bi-eye"></i>
                             </a>
                             <a href="' . route('clinic.examinations.edit', $exam->id) . '" class="btn btn-sm btn-warning" title="' . __('translation.common.edit') . '">
@@ -131,29 +136,39 @@ class ExaminationController extends Controller
 
         $examination = Examination::create($validated);
 
+        $redirectUrl = route('clinic.patients.show', [
+            'patient' => $examination->patient->file_number,
+            'tab' => 'examinations',
+            'examination' => $examination->id
+        ]);
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => __('translation.examination.created_successfully'),
                 'examination' => $examination,
-                'redirect' => route('clinic.examinations.show', $examination->id),
+                'redirect' => $redirectUrl,
             ]);
         }
 
-        return redirect()->route('clinic.examinations.show', $examination->id)
+        return redirect($redirectUrl)
             ->with('success', __('translation.examination.created_successfully'));
     }
 
     /**
      * Display the specified examination.
+     * Redirects to patient page with examination view modal.
      */
-    public function show($lang ,Examination $examination)
+    public function show($lang, Examination $examination)
     {
         $this->authorizeClinicModel($examination);
 
-        $examination->load(['patient', 'attachments']);
-
-        return view('clinic.examinations.show', compact('examination'));
+        // Redirect to patient page with examination parameter to open modal
+        return redirect()->route('clinic.patients.show', [
+            'patient' => $examination->patient->file_number,
+            'tab' => 'examinations',
+            'examination' => $examination->id
+        ]);
     }
 
     /**
@@ -204,16 +219,22 @@ class ExaminationController extends Controller
 
         $examination->update($validated);
 
+        $redirectUrl = route('clinic.patients.show', [
+            'patient' => $examination->patient->file_number,
+            'tab' => 'examinations',
+            'examination' => $examination->id
+        ]);
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => __('translation.examination.updated_successfully'),
                 'examination' => $examination,
-                'redirect' => route('clinic.examinations.show', $examination->id),
+                'redirect' => $redirectUrl,
             ]);
         }
 
-        return redirect()->route('clinic.examinations.show', $examination->id)
+        return redirect($redirectUrl)
             ->with('success', __('translation.examination.updated_successfully'));
     }
 

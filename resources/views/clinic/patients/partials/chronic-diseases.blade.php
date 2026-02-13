@@ -84,10 +84,10 @@
             </div>
             @if($patient->chronicDiseases->count() > 5)
                 <div class="p-3 text-center border-top">
-                    <span class="text-muted small">
-                        <i class="fas fa-info-circle me-1"></i>
-                        {{ __('translation.showing_latest_of_total', ['shown' => 5, 'total' => $patient->chronicDiseases->count()]) }}
-                    </span>
+                    <a href="{{ route('clinic.patients.all-chronic-diseases', $patient->file_number) }}" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-list me-2"></i>
+                        {{ __('translation.view_all') }} ({{ $patient->chronicDiseases->count() }})
+                    </a>
                 </div>
             @endif
         @else

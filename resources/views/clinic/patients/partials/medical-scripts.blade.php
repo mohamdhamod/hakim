@@ -520,7 +520,7 @@ function viewDiseaseDetails(diseaseId) {
     const disease = diseases.find(d => d.id === diseaseId);
     
     if (!disease) {
-        SwalUtil.toast('{{ __("translation.chronic_disease") }} {{ __("translation.common.not_found") }}', 'error');
+        SwalUtil.toast('{{ __("translation.chronic_diseases") }} {{ __("translation.common.not_found") }}', 'error');
         return;
     }
     
@@ -675,7 +675,7 @@ function addMonitoring(diseaseId) {
     const disease = diseases.find(d => d.id === diseaseId);
     
     if (!disease) {
-        SwalUtil.toast('{{ __("translation.chronic_disease") }} {{ __("translation.common.not_found") }}', 'error');
+        SwalUtil.toast('{{ __("translation.chronic_diseases") }} {{ __("translation.common.not_found") }}', 'error');
         return;
     }
     
@@ -1025,111 +1025,133 @@ function viewGrowthMeasurement(id) {
         const validData = measurements.filter(m => m[field] !== null && m[field] !== undefined);
         if (validData.length === 0) return;
 
-        const labels = validData.map(m => {
-            if (m.age_months !== null) {
-                if (m.age_months < 24) return m.age_months + ' {{ __("translation.months") }}';
-                return Math.floor(m.age_months / 12) + ' {{ __("translation.years") }}';
-            }
-            return new Date(m.measurement_date).toLocaleDateString('{{ app()->getLocale() }}', {month: 'short', year: '2-digit'});
+        // Get age range for full WHO curve display
+        const patientAges = validData.map(m => m.age_months || 0);
+        const minPatientAge = Math.min(...patientAges);
+        const maxPatientAge = Math.max(...patientAges);
+        
+        // Extend range for context (show more of the curve)
+        const chartMinAge = Math.max(0, minPatientAge - 3);
+        const chartMaxAge = Math.min(whoRef && whoRef.length > 0 ? whoRef[whoRef.length - 1].age : 216, maxPatientAge + 6);
+
+        // Generate WHO percentile data points for the full age range
+        const whoAgePoints = [];
+        for (let age = chartMinAge; age <= chartMaxAge; age += (chartMaxAge - chartMinAge > 60 ? 3 : 1)) {
+            whoAgePoints.push(age);
+        }
+        // Ensure patient ages are included
+        patientAges.forEach(age => {
+            if (!whoAgePoints.includes(age)) whoAgePoints.push(age);
         });
-        const ageMonths = validData.map(m => m.age_months);
-        const values = validData.map(m => parseFloat(m[field]));
+        whoAgePoints.sort((a, b) => a - b);
 
-        // Build datasets
+        // Format age labels
+        const formatAge = (months) => {
+            if (months < 24) return months + '{{ __("translation.months_abbr") }}';
+            return Math.floor(months / 12) + '{{ __("translation.years_abbr") }}';
+        };
+
+        const labels = whoAgePoints.map(age => formatAge(age));
+
+        // Build WHO percentile datasets with colored fill bands
         const datasets = [];
+        
+        if (whoRef && whoRef.length > 0) {
+            // Get percentile values at each age point
+            const p3 = whoAgePoints.map(a => interpolateWho(whoRef, a, 'p3'));
+            const p15 = whoAgePoints.map(a => interpolateWho(whoRef, a, 'p15'));
+            const p50 = whoAgePoints.map(a => interpolateWho(whoRef, a, 'p50'));
+            const p85 = whoAgePoints.map(a => interpolateWho(whoRef, a, 'p85'));
+            const p97 = whoAgePoints.map(a => interpolateWho(whoRef, a, 'p97'));
 
-        // WHO percentile bands (filled areas)
-        if (whoRef && ageMonths[0] !== null) {
-            const minAge = Math.max(0, Math.min(...ageMonths));
-            const maxAge = Math.max(...ageMonths);
-            
-            // Get percentile values at patient's age points
-            const p3 = ageMonths.map(a => interpolateWho(whoRef, a, 'p3'));
-            const p15 = ageMonths.map(a => interpolateWho(whoRef, a, 'p15'));
-            const p50 = ageMonths.map(a => interpolateWho(whoRef, a, 'p50'));
-            const p85 = ageMonths.map(a => interpolateWho(whoRef, a, 'p85'));
-            const p97 = ageMonths.map(a => interpolateWho(whoRef, a, 'p97'));
-
-            // 3rd percentile line
+            // Zone: Below 3rd percentile (danger - fill from bottom to p3)
             datasets.push({
-                label: '3%',
+                label: '< 3%',
                 data: p3,
-                borderColor: 'rgba(220, 53, 69, 0.4)',
-                borderWidth: 1,
-                borderDash: [4, 4],
+                borderColor: 'rgba(220, 53, 69, 0.8)',
+                backgroundColor: 'rgba(220, 53, 69, 0.15)',
+                borderWidth: 1.5,
                 pointRadius: 0,
-                fill: false,
+                fill: 'origin',
                 tension: 0.4,
-                order: 5
+                order: 10
             });
 
-            // 15th percentile line
+            // Zone: 3-15% (caution - yellow band)
             datasets.push({
-                label: '15%',
+                label: '3-15%',
                 data: p15,
-                borderColor: 'rgba(255, 193, 7, 0.4)',
-                borderWidth: 1,
-                borderDash: [4, 4],
+                borderColor: 'rgba(255, 193, 7, 0.8)',
+                backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                borderWidth: 1.5,
                 pointRadius: 0,
-                fill: false,
+                fill: '-1',
                 tension: 0.4,
-                order: 4
+                order: 9
             });
 
-            // 50th percentile (median) - solid
+            // Zone: 15-50% (normal lower - light green)
             datasets.push({
-                label: '50%',
+                label: '15-50%',
                 data: p50,
-                borderColor: 'rgba(40, 167, 69, 0.5)',
+                borderColor: 'rgba(40, 167, 69, 0.9)',
+                backgroundColor: 'rgba(40, 167, 69, 0.15)',
                 borderWidth: 2,
-                borderDash: [6, 3],
                 pointRadius: 0,
-                fill: false,
+                fill: '-1',
                 tension: 0.4,
-                order: 3
+                order: 8
             });
 
-            // 85th percentile line
+            // Zone: 50-85% (normal upper - light green)
             datasets.push({
-                label: '85%',
+                label: '50-85%',
                 data: p85,
-                borderColor: 'rgba(255, 193, 7, 0.4)',
-                borderWidth: 1,
-                borderDash: [4, 4],
+                borderColor: 'rgba(255, 193, 7, 0.8)',
+                backgroundColor: 'rgba(40, 167, 69, 0.15)',
+                borderWidth: 1.5,
                 pointRadius: 0,
-                fill: false,
+                fill: '-1',
                 tension: 0.4,
-                order: 2
+                order: 7
             });
 
-            // 97th percentile line
+            // Zone: 85-97% (caution - yellow band)
             datasets.push({
-                label: '97%',
+                label: '85-97%',
                 data: p97,
-                borderColor: 'rgba(220, 53, 69, 0.4)',
-                borderWidth: 1,
-                borderDash: [4, 4],
+                borderColor: 'rgba(220, 53, 69, 0.8)',
+                backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                borderWidth: 1.5,
                 pointRadius: 0,
-                fill: false,
+                fill: '-1',
                 tension: 0.4,
-                order: 1
+                order: 6
             });
         }
 
-        // Patient data (on top)
+        // Prepare patient data - map to WHO age points
+        const patientDataPoints = whoAgePoints.map(age => {
+            const measurement = validData.find(m => m.age_months === age);
+            return measurement ? parseFloat(measurement[field]) : null;
+        });
+
+        // Patient data line (on top of everything)
         datasets.push({
             label: label + (unit ? ` (${unit})` : ''),
-            data: values,
-            borderColor: borderColor,
-            backgroundColor: bgColor,
-            borderWidth: 2.5,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointBackgroundColor: borderColor,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
+            data: patientDataPoints,
+            borderColor: '#1a237e',
+            backgroundColor: '#1a237e',
+            borderWidth: 3,
+            pointRadius: 7,
+            pointHoverRadius: 10,
+            pointBackgroundColor: '#1a237e',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 3,
+            pointStyle: 'circle',
             fill: false,
             tension: 0.3,
+            spanGaps: true,
             order: 0
         });
 
@@ -1145,27 +1167,55 @@ function viewGrowthMeasurement(id) {
                 },
                 plugins: {
                     legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 8,
-                            font: { size: 10 },
-                            filter: function(item) {
-                                // Show patient data + percentile labels
-                                return true;
-                            }
-                        }
+                        display: false
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleFont: { size: 11 },
-                        bodyFont: { size: 11 },
+                        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                        titleColor: '#1a237e',
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyColor: '#333',
+                        bodyFont: { size: 12 },
+                        borderColor: '#e0e0e0',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        boxPadding: 4,
+                        filter: function(item) {
+                            // Only show patient data and key percentiles
+                            return item.datasetIndex === datasets.length - 1 || 
+                                   item.dataset.label === '50%' ||
+                                   item.dataset.label === '< 3%' ||
+                                   item.dataset.label === '85-97%';
+                        },
                         callbacks: {
+                            title: function(items) {
+                                const age = whoAgePoints[items[0].dataIndex];
+                                return '{{ __("translation.age") }}: ' + formatAge(age);
+                            },
                             label: function(ctx) {
                                 const val = ctx.parsed.y;
                                 if (val === null || val === undefined) return null;
-                                return `${ctx.dataset.label}: ${val.toFixed(1)}`;
+                                
+                                // For patient data, show interpretation
+                                if (ctx.datasetIndex === datasets.length - 1) {
+                                    const age = whoAgePoints[ctx.dataIndex];
+                                    let interpretation = '';
+                                    if (whoRef) {
+                                        const p3 = interpolateWho(whoRef, age, 'p3');
+                                        const p15 = interpolateWho(whoRef, age, 'p15');
+                                        const p85 = interpolateWho(whoRef, age, 'p85');
+                                        const p97 = interpolateWho(whoRef, age, 'p97');
+                                        
+                                        if (val < p3) interpretation = ' ⚠️ {{ __("translation.growth.below_3rd") }}';
+                                        else if (val < p15) interpretation = ' ⚡ {{ __("translation.growth.below_15th") }}';
+                                        else if (val > p97) interpretation = ' ⚠️ {{ __("translation.growth.above_97th") }}';
+                                        else if (val > p85) interpretation = ' ⚡ {{ __("translation.growth.above_85th") }}';
+                                        else interpretation = ' ✓ {{ __("translation.growth.normal_range") }}';
+                                    }
+                                    return `📊 ${val.toFixed(1)} ${unit}${interpretation}`;
+                                }
+                                return null;
                             }
                         }
                     }
@@ -1173,12 +1223,37 @@ function viewGrowthMeasurement(id) {
                 scales: {
                     y: {
                         beginAtZero: false,
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: { font: { size: 10 } }
+                        grid: { 
+                            color: 'rgba(0,0,0,0.06)',
+                            drawBorder: false
+                        },
+                        ticks: { 
+                            font: { size: 11 },
+                            color: '#666',
+                            padding: 8
+                        },
+                        title: {
+                            display: true,
+                            text: unit ? `${label} (${unit})` : label,
+                            font: { size: 11, weight: 'bold' },
+                            color: '#666'
+                        }
                     },
                     x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 9 }, maxRotation: 45 }
+                        grid: { 
+                            display: false 
+                        },
+                        ticks: { 
+                            font: { size: 10 }, 
+                            maxRotation: 45,
+                            color: '#666'
+                        },
+                        title: {
+                            display: true,
+                            text: '{{ __("translation.age") }}',
+                            font: { size: 11, weight: 'bold' },
+                            color: '#666'
+                        }
                     }
                 }
             }
@@ -1509,9 +1584,9 @@ function viewExamination(id) {
 
     document.getElementById('examinationDetailsContent').innerHTML = content;
     
-    // Update footer links
-    document.getElementById('examinationFullLink').href = '{{ url("clinic/examinations") }}/' + exam.id;
-    document.getElementById('examinationPrintLink').href = '{{ url("clinic/examinations") }}/' + exam.id + '/print';
+
+     document.getElementById('examinationFullLink').href = '{{ route("clinic.examinations.index") }}/' + exam.id;
+    document.getElementById('examinationPrintLink').href = '{{ route("clinic.examinations.index") }}/' + exam.id + '/print';
     
     const modal = new bootstrap.Modal(document.getElementById('viewExaminationModal'));
     modal.show();

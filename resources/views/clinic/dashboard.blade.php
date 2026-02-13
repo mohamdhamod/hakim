@@ -110,7 +110,7 @@
                         @else
                             <div class="list-group list-group-flush">
                                 @foreach($todayExaminations as $exam)
-                                    <a href="{{ route('clinic.examinations.show', $exam->id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <a href="{{ route('clinic.patients.show', ['patient' => $exam->patient->file_number, 'tab' => 'examinations', 'examination' => $exam->id]) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ $exam->patient->full_name }}</strong>
                                             <br>

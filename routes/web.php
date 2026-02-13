@@ -79,6 +79,14 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::patch('/patients/{patient}/medical-history', [Clinic\PatientController::class, 'updateMedicalHistory'])->name('clinic.patients.update-medical-history');
         Route::patch('/patients/{patient}/emergency-contact', [Clinic\PatientController::class, 'updateEmergencyContact'])->name('clinic.patients.update-emergency-contact');
         Route::patch('/patients/{patient}/notes', [Clinic\PatientController::class, 'updateNotes'])->name('clinic.patients.update-notes');
+        
+        // Patient All Records Pages
+        Route::get('/patients/{patient}/all-examinations', [Clinic\PatientController::class, 'allExaminations'])->name('clinic.patients.all-examinations');
+        Route::get('/patients/{patient}/all-lab-tests', [Clinic\PatientController::class, 'allLabTests'])->name('clinic.patients.all-lab-tests');
+        Route::get('/patients/{patient}/all-vaccinations', [Clinic\PatientController::class, 'allVaccinations'])->name('clinic.patients.all-vaccinations');
+        Route::get('/patients/{patient}/all-chronic-diseases', [Clinic\PatientController::class, 'allChronicDiseases'])->name('clinic.patients.all-chronic-diseases');
+        Route::get('/patients/{patient}/all-growth-measurements', [Clinic\PatientController::class, 'allGrowthMeasurements'])->name('clinic.patients.all-growth-measurements');
+        
         Route::resource('patients', Clinic\PatientController::class)->names('clinic.patients');
 
         // Lab Tests Management
@@ -97,10 +105,7 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::delete('/patients/{patient}/growth-charts/{growth_chart}', [Clinic\GrowthChartController::class, 'destroy'])->name('patients.growth-charts.destroy');
 
         // PDF Export Routes
-        Route::get('/patients/{patient}/export/medical-record', [Clinic\PatientExportController::class, 'exportMedicalRecord'])->name('patients.export.medical-record');
-        Route::get('/patients/{patient}/export/lab-tests', [Clinic\PatientExportController::class, 'exportLabTests'])->name('patients.export.lab-tests');
-        Route::get('/patients/{patient}/export/vaccinations', [Clinic\PatientExportController::class, 'exportVaccinations'])->name('patients.export.vaccinations');
-        Route::get('/patients/{patient}/export/growth-chart', [Clinic\PatientExportController::class, 'exportGrowthChart'])->name('patients.export.growth-chart');
+        Route::get('/patients/{patient}/print/comprehensive', [Clinic\PatientExportController::class, 'printComprehensiveReport'])->name('patients.print.comprehensive');
 
         // Chronic Diseases Management
         Route::post('/patients/{patient}/chronic-diseases', [Clinic\ChronicDiseaseController::class, 'store'])->name('patients.chronic-diseases.store');

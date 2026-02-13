@@ -359,4 +359,77 @@ class PatientController extends Controller
         return redirect()->route('clinic.patients.show', $patient->id)
             ->with('success', __('translation.patient.notes_updated'));
     }
+
+    /**
+     * Display all examinations for a patient.
+     */
+    public function allExaminations($lang, Patient $patient)
+    {
+        $this->authorizePatientAccess($patient);
+
+        $examinations = $patient->examinations()
+            ->orderBy('examination_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-examinations', compact('patient', 'examinations'));
+    }
+
+    /**
+     * Display all lab tests for a patient.
+     */
+    public function allLabTests($lang, Patient $patient)
+    {
+        $this->authorizePatientAccess($patient);
+
+        $labTests = $patient->labTestResults()
+            ->with('labTestType.translations')
+            ->orderBy('test_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-lab-tests', compact('patient', 'labTests'));
+    }
+
+    /**
+     * Display all vaccinations for a patient.
+     */
+    public function allVaccinations($lang, Patient $patient)
+    {
+        $this->authorizePatientAccess($patient);
+
+        $vaccinations = $patient->vaccinationRecords()
+            ->with('vaccinationType.translations')
+            ->orderBy('vaccination_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-vaccinations', compact('patient', 'vaccinations'));
+    }
+
+    /**
+     * Display all chronic diseases for a patient.
+     */
+    public function allChronicDiseases($lang, Patient $patient)
+    {
+        $this->authorizePatientAccess($patient);
+
+        $chronicDiseases = $patient->chronicDiseases()
+            ->with('chronicDiseaseType.translations')
+            ->orderBy('diagnosis_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-chronic-diseases', compact('patient', 'chronicDiseases'));
+    }
+
+    /**
+     * Display all growth measurements for a patient.
+     */
+    public function allGrowthMeasurements($lang, Patient $patient)
+    {
+        $this->authorizePatientAccess($patient);
+
+        $measurements = $patient->growthMeasurements()
+            ->orderBy('measurement_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-growth-measurements', compact('patient', 'measurements'));
+    }
 }

@@ -39,6 +39,8 @@ class CreateNewUser implements CreatesNewUsers
         if (isset($input['user_type']) && $input['user_type'] === 'doctor') {
             $rules['specialty_id'] = ['required', 'integer', 'exists:specialties,id'];
             $rules['clinic_address'] = ['nullable', 'string', 'max:500'];
+            $rules['clinic_services'] = ['nullable', 'array'];
+            $rules['clinic_services.*'] = ['integer', 'exists:clinic_services,id'];
         }
 
         $validator = Validator::make($input, $rules);
@@ -96,13 +98,18 @@ class CreateNewUser implements CreatesNewUsers
 
             // Create clinic for doctor
             if ($userType === 'doctor') {
-                Clinic::create([
+                $clinic = Clinic::create([
                     'user_id' => $user->id,
                     'specialty_id' => $input['specialty_id'],
                     'name' => $input['name'], // استخدام اسم المستخدم كاسم للعيادة
                     'address' => $input['clinic_address'] ?? null,
                     'status' => 'pending',
                 ]);
+
+                // Attach services if provided
+                if (!empty($input['clinic_services'])) {
+                    $clinic->services()->attach($input['clinic_services']);
+                }
             }
 
             DB::table('registration_links')

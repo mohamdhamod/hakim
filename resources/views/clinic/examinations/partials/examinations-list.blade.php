@@ -55,7 +55,7 @@
                             </td>
                             <td class="py-3 text-end pe-4">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('clinic.examinations.show', $examination->id) }}" class="btn btn-outline-primary" title="{{ __('translation.common.view') }}">
+                                    <a href="{{ route('clinic.patients.show', ['patient' => $examination->patient->file_number, 'tab' => 'examinations', 'examination' => $examination->id]) }}" class="btn btn-outline-primary" title="{{ __('translation.common.view') }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     @if($examination->status !== 'completed')
