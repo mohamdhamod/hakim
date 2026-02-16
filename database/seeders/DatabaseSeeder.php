@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             
             // Clinic system seeders
-            ClinicServiceSeeder::class,
+            ClinicServicesSeeder::class,
             SpecialtiesSeeder::class,
             ClinicPermissionsSeeder::class,
             LabTestTypeSeeder::class,
