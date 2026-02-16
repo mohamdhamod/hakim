@@ -1,8 +1,8 @@
 {{-- New Examination Modal --}}
 <div class="modal fade" id="newExaminationModal" tabindex="-1" aria-labelledby="newExaminationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <form action="{{ route('clinic.examinations.store') }}" method="POST" id="newExaminationForm">
+            <form action="{{ route('clinic.examinations.store') }}" method="POST" id="newExaminationForm" class="add-examination-form">
                 @csrf
                 <input type="hidden" name="patient_id" value="{{ $patient->id }}">
                 
@@ -13,9 +13,26 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                    <input type="hidden" name="status" value="completed">
+
+                {{-- Tabs Navigation --}}
+                <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="examinationTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="manual-exam-tab" data-bs-toggle="tab" data-bs-target="#manualExamPane" type="button" role="tab" aria-controls="manualExamPane" aria-selected="true">
+                            <i class="fas fa-edit me-1"></i>{{ __('translation.examination.manual_entry') }}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ai-exam-tab" data-bs-toggle="tab" data-bs-target="#aiExamPane" type="button" role="tab" aria-controls="aiExamPane" aria-selected="false">
+                            <i class="fas fa-robot me-1"></i>{{ __('translation.examination.ai_examination') }}
+                            <span class="badge bg-info ms-1">{{ __('translation.examination.coming_soon') }}</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
+                    <div class="tab-content" id="examinationTabContent">
+                    {{-- Tab 1: Manual Examination Form --}}
+                    <div class="tab-pane fade show active" id="manualExamPane" role="tabpanel" aria-labelledby="manual-exam-tab">
                     <div class="row g-4">
                         {{-- Basic Info --}}
                         <div class="col-12">
@@ -179,11 +196,30 @@
                             <textarea name="doctor_notes" class="form-control" rows="2" placeholder="{{ __('translation.examination.doctor_notes_placeholder') }}"></textarea>
                         </div>
                     </div>
+                    </div>{{-- end manualExamPane --}}
+
+                    {{-- Tab 2: AI Examination (Coming Soon) --}}
+                    <div class="tab-pane fade" id="aiExamPane" role="tabpanel" aria-labelledby="ai-exam-tab">
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-robot text-info" style="font-size: 5rem; opacity: 0.3;"></i>
+                            </div>
+                            <h4 class="text-muted mb-3">{{ __('translation.examination.ai_examination') }}</h4>
+                            <p class="text-muted mb-4 px-5">
+                                {{ __('translation.examination.ai_examination_description') }}
+                            </p>
+                            <span class="badge bg-info fs-6 px-4 py-2">
+                                <i class="fas fa-clock me-2"></i>{{ __('translation.examination.coming_soon') }}
+                            </span>
+                        </div>
+                    </div>{{-- end aiExamPane --}}
+
+                    </div>{{-- end tab-content --}}
                 </div>
                 
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('translation.common.cancel') }}</button>
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" id="examinationSaveBtn" class="btn btn-success">
                         <i class="fas fa-save me-2"></i>{{ __('translation.examination.save') }}
                     </button>
                 </div>
@@ -202,7 +238,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="examinationDetailsContent">
+            <div class="modal-body" id="examinationDetailsContent" style="max-height: 50vh; overflow-y: auto;">
                 <div class="text-center py-4">
                     <div class="spinner-border text-success" role="status">
                         <span class="visually-hidden">{{ __('translation.common.loading') }}</span>
@@ -210,9 +246,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="#" id="examinationFullLink" class="btn btn-outline-primary">
-                    <i class="fas fa-external-link-alt me-1"></i>{{ __('translation.examination.full_details') }}
-                </a>
                 <a href="#" id="examinationPrintLink" class="btn btn-outline-secondary" target="_blank">
                     <i class="fas fa-print me-1"></i>{{ __('translation.common.print') }}
                 </a>

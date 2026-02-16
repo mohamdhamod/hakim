@@ -15,6 +15,21 @@ class ChronicDiseaseController extends Controller
     use ClinicAuthorization;
 
     /**
+     * Build redirect URL: append section hash if previous URL is the patient show page.
+     */
+    private function buildRedirectUrl(Patient $patient, string $section = '#chronic-diseases-section'): string
+    {
+        $previous = url()->previous();
+        $showUrl = route('clinic.patients.show', $patient);
+
+        if ($previous && str_starts_with(strtok($previous, '#?'), strtok($showUrl, '#?'))) {
+            return strtok($previous, '#') . $section;
+        }
+
+        return $previous ?: $showUrl . $section;
+    }
+
+    /**
      * Display the specified chronic disease.
      */
     public function show($lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
@@ -51,7 +66,7 @@ class ChronicDiseaseController extends Controller
      */
     public function store(Request $request, $lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient, true);
+        $clinic = $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'chronic_disease_type_id' => 'required|exists:chronic_disease_types,id',
@@ -79,6 +94,7 @@ class ChronicDiseaseController extends Controller
         }
 
         $validated['patient_id'] = $patient->id;
+        $validated['clinic_id'] = $clinic->id;
         $validated['diagnosed_by_user_id'] = Auth::id();
         $validated['status'] = $validated['status'] ?? 'active';
 
@@ -88,6 +104,7 @@ class ChronicDiseaseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.chronic_disease_added_successfully'),
+                'redirect' => $this->buildRedirectUrl($patient),
                 'data' => $disease
             ]);
         }
@@ -103,11 +120,7 @@ class ChronicDiseaseController extends Controller
     public function update(Request $request, $lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
         $this->authorizePatientAccess($patient, true);
-
-        // Verify the disease belongs to this patient
-        if ($patientChronicDisease->patient_id !== $patient->id) {
-            abort(404);
-        }
+        $this->authorizeClinicModel($patientChronicDisease, true);
 
         $validated = $request->validate([
             'chronic_disease_type_id' => 'required|exists:chronic_disease_types,id',
@@ -126,6 +139,7 @@ class ChronicDiseaseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.chronic_disease_updated_successfully'),
+                'redirect' => $this->buildRedirectUrl($patient),
                 'data' => $patientChronicDisease
             ]);
         }
@@ -141,23 +155,21 @@ class ChronicDiseaseController extends Controller
     public function destroy($lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
         $this->authorizePatientAccess($patient, true);
-
-        // Verify the disease belongs to this patient
-        if ($patientChronicDisease->patient_id !== $patient->id) {
-            abort(404);
-        }
+        $this->authorizeClinicModel($patientChronicDisease, true);
 
         $patientChronicDisease->delete();
+
+        $redirectUrl = $this->buildRedirectUrl($patient);
 
         if (request()->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => __('translation.chronic_disease_deleted_successfully'),
+                'redirect' => $redirectUrl,
             ]);
         }
 
-        return redirect()
-            ->route('clinic.patients.show', $patient)
+        return redirect($redirectUrl)
             ->with('success', __('translation.chronic_disease_deleted_successfully'));
     }
 
@@ -166,12 +178,8 @@ class ChronicDiseaseController extends Controller
      */
     public function storeMonitoring(Request $request, $lang, Patient $patient, PatientChronicDisease $patientChronicDisease)
     {
-        $this->authorizePatientAccess($patient, true);
-
-        // Verify the disease belongs to this patient
-        if ($patientChronicDisease->patient_id !== $patient->id) {
-            abort(404);
-        }
+        $clinic = $this->authorizePatientAccess($patient, true);
+        $this->authorizeClinicModel($patientChronicDisease, true);
 
         $validated = $request->validate([
             'monitoring_date' => 'required|date',
@@ -183,6 +191,7 @@ class ChronicDiseaseController extends Controller
         ]);
 
         $validated['patient_chronic_disease_id'] = $patientChronicDisease->id;
+        $validated['clinic_id'] = $clinic->id;
         $validated['recorded_by_user_id'] = Auth::id();
 
         ChronicDiseaseMonitoring::create($validated);
@@ -196,6 +205,7 @@ class ChronicDiseaseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.monitoring_record_added_successfully'),
+                'redirect' => $this->buildRedirectUrl($patient),
             ]);
         }
 

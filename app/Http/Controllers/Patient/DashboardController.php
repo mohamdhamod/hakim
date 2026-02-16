@@ -47,7 +47,7 @@ class DashboardController extends Controller
             ->get();
 
         // Get patient record if exists (linked to a clinic)
-        $patientRecords = Patient::with(['clinic.user', 'clinic.specialty'])
+        $patientRecords = Patient::with(['clinics.user', 'clinics.specialty'])
             ->where('email', $user->email)
             ->orWhere('user_id', $user->id)
             ->get();

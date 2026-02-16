@@ -36,6 +36,11 @@ class ClinicHomeController extends Controller
         }
 
         $clinics = $query->orderBy('created_at', 'desc')->paginate(12);
+
+        if ($request->ajax()) {
+            return view('home.partials.clinics-grid', compact('clinics'))->render();
+        }
+
         $specialties = Specialty::active()->ordered()->get();
 
         return view('home.clinics', compact('clinics', 'specialties'));

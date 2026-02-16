@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Examination extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'patient_id',
@@ -38,7 +37,6 @@ class Examination extends Model
         'follow_up_date',
         'follow_up_notes',
         'doctor_notes',
-        'status',
     ];
 
     protected $casts = [
@@ -49,7 +47,7 @@ class Examination extends Model
         'height' => 'decimal:2',
     ];
 
-    protected $appends = ['status_label', 'status_badge_class', 'bmi', 'blood_pressure'];
+    protected $appends = ['bmi', 'blood_pressure'];
 
     /**
      * Get the patient.
@@ -84,34 +82,6 @@ class Examination extends Model
     }
 
     /**
-     * Get status label.
-     */
-    public function getStatusLabelAttribute()
-    {
-        return match($this->status) {
-            'scheduled' => __('translation.examination.status.scheduled'),
-            'in_progress' => __('translation.examination.status.in_progress'),
-            'completed' => __('translation.examination.status.completed'),
-            'cancelled' => __('translation.examination.status.cancelled'),
-            default => $this->status,
-        };
-    }
-
-    /**
-     * Get status badge class.
-     */
-    public function getStatusBadgeClassAttribute()
-    {
-        return match($this->status) {
-            'scheduled' => 'bg-info',
-            'in_progress' => 'bg-warning',
-            'completed' => 'bg-success',
-            'cancelled' => 'bg-danger',
-            default => 'bg-secondary',
-        };
-    }
-
-    /**
      * Calculate BMI.
      */
     public function getBmiAttribute()
@@ -135,25 +105,27 @@ class Examination extends Model
     }
 
     /**
-     * Generate unique examination number.
+     * Generate unique examination number based on patient file number.
+     * Format: {file_number}-{counter} e.g. D5-46068-1-1, D5-46068-1-2
      */
-    public static function generateExaminationNumber(int $clinicId): string
+    public static function generateExaminationNumber(int $patientId): string
     {
-        $year = date('Y');
-        $month = date('m');
-        $lastExamination = self::where('clinic_id', $clinicId)
-            ->where('examination_number', 'like', "E{$year}{$month}%")
-            ->orderBy('examination_number', 'desc')
+        $patient = Patient::findOrFail($patientId);
+        $fileNumber = $patient->file_number;
+
+        $lastExamination = self::where('patient_id', $patientId)
+            ->where('examination_number', 'like', "{$fileNumber}-%")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(examination_number, '-', -1) AS UNSIGNED) DESC")
             ->first();
 
         if ($lastExamination) {
-            $lastNumber = (int) substr($lastExamination->examination_number, -5);
-            $newNumber = $lastNumber + 1;
+            $lastCounter = (int) collect(explode('-', $lastExamination->examination_number))->last();
+            $newCounter = $lastCounter + 1;
         } else {
-            $newNumber = 1;
+            $newCounter = 1;
         }
 
-        return sprintf('E%s%s%05d', $year, $month, $newNumber);
+        return $fileNumber . '-' . $newCounter;
     }
 
     /**
@@ -162,46 +134,5 @@ class Examination extends Model
     public function scopeToday($query)
     {
         return $query->whereDate('examination_date', today());
-    }
-
-    /**
-     * Scope for upcoming examinations.
-     */
-    public function scopeUpcoming($query)
-    {
-        return $query->where('examination_date', '>=', now())
-            ->where('status', 'scheduled');
-    }
-
-    /**
-     * Scope for completed examinations.
-     */
-    public function scopeCompleted($query)
-    {
-        return $query->where('status', 'completed');
-    }
-
-    /**
-     * Check if examination is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === 'completed';
-    }
-
-    /**
-     * Mark examination as completed.
-     */
-    public function markAsCompleted(): bool
-    {
-        return $this->update(['status' => 'completed']);
-    }
-
-    /**
-     * Mark examination as in progress.
-     */
-    public function markAsInProgress(): bool
-    {
-        return $this->update(['status' => 'in_progress']);
     }
 }

@@ -504,17 +504,6 @@ window.SwalUtil = SwalHelper;
 
 const Utils = {
     /**
-     * Debounce function execution
-     */
-    debounce(func, delay = CONFIG.DEBOUNCE_DELAY) {
-        let timeoutId;
-        return function(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func.apply(this, args), delay);
-        };
-    },
-
-    /**
      * Get CSRF token
      */
     getCSRFToken() {
@@ -1045,7 +1034,18 @@ const FormManager = {
                         }
                         // Use setTimeout to ensure the redirect happens after current execution
                         setTimeout(() => {
-                            window.location.assign(result.redirect);
+                            const target = new URL(result.redirect, window.location.origin);
+                            const current = new URL(window.location.href);
+                            // Strip hash from both to compare base URLs
+                            current.hash = '';
+                            const targetBase = target.href.replace(target.hash, '');
+                            // If same page with a hash fragment, set hash then reload to stay at section
+                            if (targetBase === current.href && target.hash) {
+                                window.location.hash = target.hash;
+                                window.location.reload();
+                            } else {
+                                window.location.assign(result.redirect);
+                            }
                         }, 10);
                         return;
                     }
@@ -1166,11 +1166,27 @@ window.FormManager = FormManager;
 
 const ModalManager = {
     /**
-     * Show modal with backdrop and keyboard handling
+     * Show modal using Bootstrap Modal API (fires shown.bs.modal event)
+     * @param {HTMLElement|string} modal - DOM element or element ID
      */
     show(modal) {
+        // Resolve string ID to DOM element
+        if (typeof modal === 'string') {
+            modal = document.getElementById(modal);
+        }
         if (!modal) return;
 
+        // Use Bootstrap Modal API if available (fires shown.bs.modal properly)
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            let bsModal = bootstrap.Modal.getInstance(modal);
+            if (!bsModal) {
+                bsModal = new bootstrap.Modal(modal);
+            }
+            bsModal.show();
+            return;
+        }
+
+        // Fallback: manual show + dispatch event
         modal.style.display = 'block';
         modal.classList.add('show', 'in');
         modal.classList.remove('out');
@@ -1198,14 +1214,32 @@ const ModalManager = {
         modal._cleanup = () => {
             document.removeEventListener('keydown', handleEsc);
         };
+
+        // Dispatch shown event for listeners (autoInitModalChoices, etc.)
+        modal.dispatchEvent(new Event('shown.bs.modal', { bubbles: true }));
     },
 
     /**
      * Hide modal and clean up
+     * @param {HTMLElement|string} modal - DOM element or element ID
      */
     hide(modal) {
+        // Resolve string ID to DOM element
+        if (typeof modal === 'string') {
+            modal = document.getElementById(modal);
+        }
         if (!modal) return;
 
+        // Use Bootstrap Modal API if available
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+                return;
+            }
+        }
+
+        // Fallback: manual hide
         modal.style.display = 'none';
         modal.classList.remove('show', 'in');
         modal.classList.add('out');
@@ -1613,21 +1647,47 @@ const CRUDManager = {
             }
 
             if (response.ok) {
+                // Store toast message in sessionStorage so it survives page reload/redirect
+                const storeToast = (msg) => {
+                    if (!msg) return;
+                    try {
+                        sessionStorage.setItem('toastMessage', JSON.stringify({ message: msg, type: 'success' }));
+                    } catch (_) { /* storage not available */ }
+                };
+
+                // Helper: navigate to URL, handling same-page hash redirects
+                const navigateTo = (url, msg) => {
+                    storeToast(msg);
+                    try {
+                        const target = new URL(url, window.location.origin);
+                        const current = new URL(window.location.href);
+                        // Same page with hash → set hash + reload so page refreshes
+                        if (target.hash && target.origin === current.origin && target.pathname === current.pathname) {
+                            window.location.hash = target.hash;
+                            window.location.reload();
+                            return;
+                        }
+                    } catch (_) { /* fall through */ }
+                    window.location.href = url;
+                };
+
+                const toastMsg = (result && result.message) || successMessage;
+
                 // If server issued a redirect (e.g., non-AJAX flow), follow it in the browser
                 if (wasRedirected && finalUrl) {
-                    window.location.href = finalUrl;
+                    navigateTo(finalUrl, toastMsg);
                     return true;
                 }
 
                 // If server returned a redirect URL inside JSON result, follow it
                 if (result && result.redirect) {
-                    window.location.href = result.redirect;
+                    navigateTo(result.redirect, toastMsg);
                     return true;
                 }
 
                 // If caller requested a redirect on success, do it
                 if (redirectOnSuccess && redirectUrl) {
-                    window.location.href = redirectUrl;
+                    navigateTo(redirectUrl, toastMsg);
                     return true;
                 }
 
@@ -2920,7 +2980,7 @@ window.FormHelper = {
 
 // Use Utils.formatDate and Utils.debounce - avoid duplicates
 window.formatDate = Utils.formatDate;
-window.debounce = Utils.debounce;
+
 
 // ============================================================================
 // CHOICES.JS AUTO-INITIALIZATION
@@ -2966,7 +3026,7 @@ window.initChoicesSelect = async function(selector = '.choices-select', customOp
             allowHTML: true,
             searchPlaceholderValue: window.i18n?.common?.search || 'Search...',
             noResultsText: window.i18n?.common?.no_results || 'No results found',
-            noChoicesText: window.i18n?.common?.no_results || 'No results found',
+            noChoicesText: window.i18n?.common?.no_choices || 'No choices available',
             removeItemButton: element.hasAttribute('multiple'),
             placeholder: true,
             placeholderValue: element.getAttribute('placeholder') || ''
@@ -2985,13 +3045,63 @@ window.initChoicesSelect = async function(selector = '.choices-select', customOp
 };
 
 /**
+ * Set a Choices.js-wrapped select element's value.
+ * Handles tracked instances (passed via instanceMap) and auto-initialized selects.
+ * @param {string} selectId - The ID of the select element
+ * @param {*} value - The value to set
+ * @param {Object} [instanceMap={}] - Map of selectId → Choices instance for tracked selects
+ */
+window.setChoicesSelectValue = async function(selectId, value, instanceMap = {}) {
+    const selectEl = document.getElementById(selectId);
+    if (!selectEl) return;
+    const strValue = String(value);
+
+    // Check tracked instances first
+    if (instanceMap[selectId]) {
+        return instanceMap[selectId].setChoiceByValue(strValue);
+    }
+
+    // Auto-initialized selects: unwrap, set raw value, re-init
+    const wrapper = selectEl.closest('.choices');
+    if (wrapper) {
+        const parent = wrapper.parentNode;
+        selectEl.hidden = false;
+        selectEl.removeAttribute('tabindex');
+        selectEl.removeAttribute('data-choice');
+        selectEl.classList.remove('choices__input');
+        parent.insertBefore(selectEl, wrapper);
+        wrapper.remove();
+        delete selectEl.dataset.choicesInitialized;
+    }
+    selectEl.value = strValue;
+    if (window.initChoicesSelect) await window.initChoicesSelect(selectEl);
+};
+
+/**
  * Auto-initialize all .choices-select and .select2 elements on page load
+ * Skips elements inside .modal (those get initialized automatically when the modal opens)
  */
 function autoInitChoices() {
     const elements = document.querySelectorAll('.choices-select:not([data-choices-initialized]), .select2:not([data-choices-initialized])');
-    if (elements.length > 0) {
-        window.initChoicesSelect(elements);
+    const filtered = Array.from(elements).filter(el => !el.closest('.modal'));
+    if (filtered.length > 0) {
+        window.initChoicesSelect(filtered);
     }
+}
+
+/**
+ * Auto-initialize Choices.js inside modals when they become visible.
+ * Listens globally on document for Bootstrap 'shown.bs.modal' events.
+ */
+function autoInitModalChoices() {
+    document.addEventListener('shown.bs.modal', function(e) {
+        const modal = e.target;
+        if (!modal || !window.initChoicesSelect) return;
+        const selects = modal.querySelectorAll('.choices-select:not([data-choices-initialized]), .select2:not([data-choices-initialized])');
+        if (selects.length > 0) {
+            window.initChoicesSelect(selects);
+        }
+    });
 }
 
 // ============================================================================
@@ -3006,6 +3116,9 @@ document.addEventListener('DOMContentLoaded', function() {
         FormHelper: typeof window.FormHelper !== 'undefined'
     });
 
-    // Auto-initialize Choices.js on .choices-select and .select2 elements
+    // Auto-initialize Choices.js on .choices-select and .select2 elements (outside modals)
     autoInitChoices();
+
+    // Auto-initialize Choices.js inside modals when they open
+    autoInitModalChoices();
 });

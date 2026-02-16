@@ -10,6 +10,7 @@ class PatientChronicDisease extends Model
     use HasFactory;
 
     protected $fillable = [
+        'clinic_id',
         'patient_id',
         'chronic_disease_type_id',
         'diagnosed_by_user_id',
@@ -27,6 +28,14 @@ class PatientChronicDisease extends Model
         'last_followup_date' => 'date',
         'next_followup_date' => 'date',
     ];
+
+    /**
+     * Get the clinic that owns this chronic disease record.
+     */
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
 
     /**
      * Get the patient that owns this chronic disease.

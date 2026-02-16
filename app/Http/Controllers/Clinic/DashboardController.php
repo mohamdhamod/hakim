@@ -40,7 +40,7 @@ class DashboardController extends Controller
 
         // Get dashboard statistics
         $stats = [
-            'total_patients' => Patient::where('clinic_id', $clinic->id)->count(),
+            'total_patients' => Patient::forClinic($clinic->id)->count(),
             'today_examinations' => Examination::where('clinic_id', $clinic->id)
                 ->today()
                 ->count(),
@@ -57,7 +57,7 @@ class DashboardController extends Controller
         ];
 
         // Get recent patients
-        $recentPatients = Patient::where('clinic_id', $clinic->id)
+        $recentPatients = Patient::forClinic($clinic->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

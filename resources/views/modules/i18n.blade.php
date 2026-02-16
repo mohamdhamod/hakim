@@ -72,6 +72,17 @@
             'cash_vault' => __('translation.models.cash_vault'),
             'client_transaction' => __('translation.models.client_transaction'),
         ],
+
+        'common' => [
+            'search' => __('translation.common.search'),
+            'no_results' => __('translation.common.no_results'),
+            'no_choices' => __('translation.common.no_choices'),
+            'close' => __('translation.common.close'),
+            'save' => __('translation.common.save'),
+            'cancel' => __('translation.common.cancel'),
+            'loading' => __('translation.common.loading'),
+            'error_occurred' => __('translation.common.error_occurred'),
+        ],
     ];
 
     $page = $page ?? '';
@@ -523,6 +534,115 @@ case 'links':
                     'title_add' => __('translation.subscription_features.form.title_add'),
                     'btn_update' => __('translation.subscription_features.form.btn_update'),
                     'btn_save' => __('translation.subscription_features.form.btn_save'),
+                ],
+            ];
+            break;
+        case 'chronic_disease_types':
+            $i18n_page = [
+                'table' => [
+                    'id' => __('translation.chronic_disease_types.labels.id'),
+                    'name' => __('translation.chronic_disease_types.name'),
+                    'key' => __('translation.chronic_disease_types.key'),
+                    'category' => __('translation.chronic_disease_types.category'),
+                    'icd11_code' => __('translation.chronic_disease_types.icd11_code'),
+                    'followup_days' => __('translation.chronic_disease_types.followup_days'),
+                    'status' => __('translation.chronic_disease_types.status'),
+                    'actions' => __('translation.chronic_disease_types.actions'),
+                ],
+                'labels' => [
+                    'id' => __('translation.chronic_disease_types.labels.id'),
+                    'name' => __('translation.chronic_disease_types.labels.name'),
+                    'key' => __('translation.chronic_disease_types.labels.key'),
+                    'description' => __('translation.chronic_disease_types.labels.description'),
+                    'category' => __('translation.chronic_disease_types.labels.category'),
+                    'icd11_code' => __('translation.chronic_disease_types.labels.icd11_code'),
+                    'followup_days' => __('translation.chronic_disease_types.labels.followup_days'),
+                    'status' => __('translation.chronic_disease_types.labels.status'),
+                    'active' => __('translation.chronic_disease_types.labels.active'),
+                    'inactive' => __('translation.chronic_disease_types.labels.inactive'),
+                    'created_at' => __('translation.chronic_disease_types.labels.created_at'),
+                ],
+                'common' => [
+                    'days' => __('translation.common.days'),
+                ],
+                'form' => [
+                    'title_edit' => __('translation.chronic_disease_types.form.title_edit'),
+                    'title_add' => __('translation.chronic_disease_types.form.title_add'),
+                    'btn_update' => __('translation.chronic_disease_types.form.btn_update'),
+                    'btn_save' => __('translation.chronic_disease_types.form.btn_save'),
+                ],
+            ];
+            break;
+        case 'lab_test_types':
+            $i18n_page = [
+                'table' => [
+                    'id' => __('translation.lab_test_types.labels.id'),
+                    'name' => __('translation.lab_test_types.name'),
+                    'key' => __('translation.lab_test_types.key'),
+                    'category' => __('translation.lab_test_types.category'),
+                    'unit' => __('translation.lab_test_types.unit'),
+                    'normal_range' => __('translation.lab_test_types.normal_range'),
+                    'order' => __('translation.lab_test_types.order'),
+                    'status' => __('translation.lab_test_types.status'),
+                    'actions' => __('translation.lab_test_types.actions'),
+                ],
+                'labels' => [
+                    'id' => __('translation.lab_test_types.labels.id'),
+                    'name' => __('translation.lab_test_types.labels.name'),
+                    'key' => __('translation.lab_test_types.labels.key'),
+                    'description' => __('translation.lab_test_types.labels.description'),
+                    'category' => __('translation.lab_test_types.labels.category'),
+                    'unit' => __('translation.lab_test_types.labels.unit'),
+                    'normal_range' => __('translation.lab_test_types.labels.normal_range'),
+                    'order' => __('translation.lab_test_types.labels.order'),
+                    'status' => __('translation.lab_test_types.labels.status'),
+                    'active' => __('translation.lab_test_types.labels.active'),
+                    'inactive' => __('translation.lab_test_types.labels.inactive'),
+                    'created_at' => __('translation.lab_test_types.labels.created_at'),
+                ],
+                'form' => [
+                    'title_edit' => __('translation.lab_test_types.form.title_edit'),
+                    'title_add' => __('translation.lab_test_types.form.title_add'),
+                    'btn_update' => __('translation.lab_test_types.form.btn_update'),
+                    'btn_save' => __('translation.lab_test_types.form.btn_save'),
+                ],
+            ];
+            break;
+        case 'vaccination_types':
+            $i18n_page = [
+                'table' => [
+                    'id' => __('translation.vaccination_types.labels.id'),
+                    'name' => __('translation.vaccination_types.name'),
+                    'key' => __('translation.vaccination_types.key'),
+                    'disease_prevented' => __('translation.vaccination_types.disease_prevented'),
+                    'age_group' => __('translation.vaccination_types.age_group'),
+                    'doses' => __('translation.vaccination_types.doses'),
+                    'mandatory' => __('translation.vaccination_types.mandatory'),
+                    'status' => __('translation.vaccination_types.status'),
+                    'actions' => __('translation.vaccination_types.actions'),
+                ],
+                'labels' => [
+                    'id' => __('translation.vaccination_types.labels.id'),
+                    'name' => __('translation.vaccination_types.labels.name'),
+                    'key' => __('translation.vaccination_types.labels.key'),
+                    'description' => __('translation.vaccination_types.labels.description'),
+                    'disease_prevented' => __('translation.vaccination_types.labels.disease_prevented'),
+                    'age_group' => __('translation.vaccination_types.labels.age_group'),
+                    'doses' => __('translation.vaccination_types.labels.doses'),
+                    'interval_days' => __('translation.vaccination_types.labels.interval_days'),
+                    'mandatory' => __('translation.vaccination_types.labels.mandatory'),
+                    'yes' => __('translation.vaccination_types.labels.yes'),
+                    'no' => __('translation.vaccination_types.labels.no'),
+                    'status' => __('translation.vaccination_types.labels.status'),
+                    'active' => __('translation.vaccination_types.labels.active'),
+                    'inactive' => __('translation.vaccination_types.labels.inactive'),
+                    'created_at' => __('translation.vaccination_types.labels.created_at'),
+                ],
+                'form' => [
+                    'title_edit' => __('translation.vaccination_types.form.title_edit'),
+                    'title_add' => __('translation.vaccination_types.form.title_add'),
+                    'btn_update' => __('translation.vaccination_types.form.btn_update'),
+                    'btn_save' => __('translation.vaccination_types.form.btn_save'),
                 ],
             ];
             break;

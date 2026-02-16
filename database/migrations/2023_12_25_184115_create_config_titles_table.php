@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('key')->nullable();
             $table->string('page')->nullable();
-            $table->softDeletes();
             $table->timestamps();
         });
     }

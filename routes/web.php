@@ -66,9 +66,17 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
     
     // Workspace (main chat-style interface)
     Route::get('/', [Clinic\WorkspaceController::class, 'index'])->name('clinic.workspace');
+
+    // AI Assistant page
+    Route::get('/ai-assistant', [Clinic\WorkspaceController::class, 'aiAssistant'])->name('clinic.ai-assistant');
     
     // Routes requiring approved clinic (doctor only)
     Route::middleware(['clinic.approved'])->group(function () {
+        // Workspace AJAX endpoints
+        Route::get('/workspace/patients', [Clinic\WorkspaceController::class, 'searchPatients'])->name('clinic.workspace.patients');
+        Route::get('/workspace/appointments', [Clinic\WorkspaceController::class, 'searchAppointments'])->name('clinic.workspace.appointments');
+        Route::post('/patients/request-access', [Clinic\PatientController::class, 'requestAccess'])->name('clinic.patients.request-access');
+
         // Clinic Settings
         Route::get('/settings', [Clinic\DashboardController::class, 'settings'])->name('clinic.settings');
         Route::put('/settings', [Clinic\DashboardController::class, 'updateSettings'])->name('clinic.settings.update');
@@ -84,7 +92,6 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
     Route::middleware(['clinic.staff'])->group(function () {
         // Patients Management
         Route::get('/patients/search', [Clinic\PatientController::class, 'search'])->name('clinic.patients.search');
-        Route::get('/patients/{patient}/details', [Clinic\WorkspaceController::class, 'patientDetails'])->name('clinic.patients.details');
         Route::patch('/patients/{patient}/medical-history', [Clinic\PatientController::class, 'updateMedicalHistory'])->name('clinic.patients.update-medical-history');
         Route::patch('/patients/{patient}/emergency-contact', [Clinic\PatientController::class, 'updateEmergencyContact'])->name('clinic.patients.update-emergency-contact');
         Route::patch('/patients/{patient}/notes', [Clinic\PatientController::class, 'updateNotes'])->name('clinic.patients.update-notes');
@@ -96,7 +103,7 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/patients/{patient}/all-chronic-diseases', [Clinic\PatientController::class, 'allChronicDiseases'])->name('clinic.patients.all-chronic-diseases');
         Route::get('/patients/{patient}/all-growth-measurements', [Clinic\PatientController::class, 'allGrowthMeasurements'])->name('clinic.patients.all-growth-measurements');
         
-        Route::resource('patients', Clinic\PatientController::class)->names('clinic.patients');
+        Route::resource('patients', Clinic\PatientController::class)->except(['edit'])->names('clinic.patients');
 
         // Lab Tests Management
         Route::post('/patients/{patient}/lab-tests', [Clinic\LabTestController::class, 'store'])->name('patients.lab-tests.store');
@@ -137,12 +144,8 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::post('/appointments/{appointment}/register-patient', [Clinic\WorkspaceController::class, 'registerPatientFromAppointment'])->name('clinic.appointments.register-patient');
 
         // Examinations Management (doctor only for create/edit)
-        Route::get('/examinations/today', [Clinic\ExaminationController::class, 'today'])->name('clinic.examinations.today');
-        Route::post('/examinations/{examination}/complete', [Clinic\ExaminationController::class, 'complete'])->name('clinic.examinations.complete');
         Route::get('/examinations/{examination}/print', [Clinic\ExaminationController::class, 'print'])->name('clinic.examinations.print');
-        Route::post('/examinations/{examination}/attachments', [Clinic\ExaminationController::class, 'uploadAttachment'])->name('clinic.examinations.attachments.upload');
-        Route::delete('/attachments/{attachment}', [Clinic\ExaminationController::class, 'deleteAttachment'])->name('clinic.attachments.delete');
-        Route::resource('examinations', Clinic\ExaminationController::class)->except(['create'])->names('clinic.examinations');
+        Route::resource('examinations', Clinic\ExaminationController::class)->only(['store', 'update', 'destroy'])->names('clinic.examinations');
     });
 });
 

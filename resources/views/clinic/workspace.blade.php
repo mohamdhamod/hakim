@@ -78,14 +78,11 @@
                         <a href="{{ route('clinic.patients.create') }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-user-plus me-1"></i>{{ __('translation.clinic.new_patient') }}
                         </a>
-                        <a href="{{ route('clinic.patients.index') }}" class="btn btn-sm btn-outline-success">
-                            <i class="fas fa-notes-medical me-1"></i>{{ __('translation.clinic.new_examination') }}
-                        </a>
                         <a href="{{ route('clinic.patients.index') }}" class="btn btn-sm btn-outline-info">
                             <i class="fas fa-users me-1"></i>{{ __('translation.clinic.view_all_patients') }}
                         </a>
-                        <a href="{{ route('clinic.examinations.index') }}" class="btn btn-sm btn-outline-warning">
-                            <i class="fas fa-clipboard-list me-1"></i>{{ __('translation.clinic.examinations') }}
+                        <a href="{{ route('clinic.ai-assistant') }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-robot me-1"></i>{{ __('translation.ai_assistant.title') }}
                         </a>
                     </div>
                 </div>
@@ -114,128 +111,19 @@
 
         {{-- Main Content --}}
         <div class="col-12 col-lg-9 col-xl-9">
-            {{-- Search Bar --}}
-            <div class="card border-0 shadow-sm mb-3 mb-lg-4">
-                <div class="card-body p-2 p-lg-3">
-                    <form id="searchForm" class="d-flex gap-2">
-                        <div class="flex-grow-1 position-relative">
-                            <i class="fas fa-search position-absolute top-50 translate-middle-y text-muted" style="{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}: 12px;"></i>
-                            <input type="text" 
-                                   id="searchInput" 
-                                   class="form-control {{ app()->getLocale() === 'ar' ? 'pe-5' : 'ps-5' }}"
-                                   placeholder="{{ __('translation.clinic_chat.search_placeholder') }}"
-                                   autocomplete="off">
-                        </div>
-                        <button type="submit" class="btn btn-primary px-3">
-                            <i class="fas fa-search d-md-none"></i>
-                            <span class="d-none d-md-inline">{{ __('translation.common.search') }}</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
             {{-- Main Content Area --}}
             <div class="row g-3 g-lg-4">
-                {{-- Today's Appointments --}}
-                <div class="col-12 col-lg-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between py-3">
-                            <h6 class="mb-0 fw-semibold">
-                                <i class="fas fa-calendar-day text-primary me-2"></i>{{ __('translation.clinic_chat.today_appointments') }}
-                            </h6>
-                            <span class="badge bg-primary rounded-pill">{{ $totalTodayAppointments }}</span>
-                        </div>
-                        <div class="card-body p-0" style="max-height: 450px; overflow-y: auto;">
-                            @forelse($todayAppointments as $appointment)
-                                <div class="appointment-row p-3 border-bottom" data-appointment-id="{{ $appointment->id }}">
-                                    {{-- Appointment Info Row --}}
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="rounded-circle bg-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'completed' ? 'info' : 'warning') }} bg-opacity-10 p-2 me-3">
-                                            <i class="fas fa-user text-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'completed' ? 'info' : 'warning') }}"></i>
-                                        </div>
-                                        <div class="flex-grow-1" style="min-width: 0;">
-                                            <div class="fw-medium text-dark text-truncate">{{ $appointment->patient_display_name }}</div>
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}
-                                                @if($appointment->patient_phone)
-                                                    <span class="mx-1">•</span><i class="fas fa-phone me-1"></i>{{ $appointment->patient_phone }}
-                                                @endif
-                                            </small>
-                                            @if($appointment->reason)
-                                                <div class="small text-muted mt-1">
-                                                    <i class="fas fa-comment-medical me-1"></i>{{ Str::limit($appointment->reason, 50) }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <span class="badge bg-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'pending' ? 'warning' : ($appointment->status === 'completed' ? 'info' : 'secondary')) }} bg-opacity-10 text-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'pending' ? 'warning' : ($appointment->status === 'completed' ? 'info' : 'secondary')) }}">
-                                            {{ __('translation.clinic_chat.status_' . $appointment->status) }}
-                                        </span>
-                                    </div>
-                                    
-                                    {{-- Action Buttons Row --}}
-                                    @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
-                                    <div class="d-flex gap-2 ms-5 ps-2">
-                                        @if($appointment->status === 'pending')
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-outline-success" 
-                                                    onclick="confirmAppointment({{ $appointment->id }})"
-                                                    title="{{ __('translation.clinic_chat.confirm_appointment') }}">
-                                                <i class="fas fa-check me-1"></i>{{ __('translation.clinic_chat.confirm') }}
-                                            </button>
-                                        @endif
-                                        
-                                        @if($appointment->status === 'confirmed')
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-outline-info" 
-                                                    onclick="completeAppointment({{ $appointment->id }})"
-                                                    title="{{ __('translation.clinic_chat.complete_appointment') }}">
-                                                <i class="fas fa-check-double me-1"></i>{{ __('translation.clinic_chat.complete') }}
-                                            </button>
-                                        @endif
-                                        
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-danger" 
-                                                onclick="cancelAppointmentModal({{ $appointment->id }})"
-                                                title="{{ __('translation.clinic_chat.cancel_appointment') }}">
-                                            <i class="fas fa-times me-1"></i>{{ __('translation.clinic_chat.cancel') }}
-                                        </button>
-                                        
-                                        @if(!$appointment->patient_id)
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-outline-primary" 
-                                                    onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')"
-                                                    title="{{ __('translation.clinic_chat.register_as_patient') }}">
-                                                <i class="fas fa-user-plus me-1"></i>{{ __('translation.clinic_chat.register_patient') }}
-                                            </button>
-                                        @else
-                                            <a href="{{ route('clinic.patients.show', $appointment->patient) }}" 
-                                               class="btn btn-sm btn-outline-secondary"
-                                               title="{{ __('translation.clinic.view_patient') }}">
-                                                <i class="fas fa-eye me-1"></i>{{ __('translation.clinic.view_patient') }}
-                                            </a>
-                                        @endif
-                                    </div>
-                                    @elseif($appointment->status === 'completed' && $appointment->patient_id)
-                                    <div class="d-flex gap-2 ms-5 ps-2">
-                                        <a href="{{ route('clinic.patients.show', $appointment->patient) }}" 
-                                           class="btn btn-sm btn-outline-secondary"
-                                           title="{{ __('translation.clinic.view_patient') }}">
-                                            <i class="fas fa-eye me-1"></i>{{ __('translation.clinic.view_patient') }}
-                                        </a>
-                                    </div>
-                                    @endif
-                                </div>
-                            @empty
-                                <div class="text-center py-5">
-                                    <i class="fas fa-calendar-times text-muted fs-1 mb-3" style="opacity: 0.3;"></i>
-                                    <p class="text-muted mb-0">{{ __('translation.clinic_chat.no_appointments_today') }}</p>
-                                </div>
-                            @endforelse
-                        </div>
-                        <div class="card-footer bg-transparent border-top text-center py-2">
-                            <a href="{{ route('clinic.appointments.index') }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-calendar-alt me-1"></i>{{ __('translation.clinic_chat.view_appointments') }}
-                            </a>
+
+                {{-- Unified Search Card --}}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-2">
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary bg-opacity-10 border-0 rounded-start-3 px-3">
+                                    <i class="fas fa-search text-primary small"></i>
+                                </span>
+                                <input type="text" id="workspaceSearch" class="form-control border-0 shadow-none" placeholder="{{ __('translation.patient.search_placeholder') }}">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -243,39 +131,16 @@
                 {{-- Recent Patients --}}
                 <div class="col-12 col-lg-6">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between py-3">
-                            <h6 class="mb-0 fw-semibold">
-                                <i class="fas fa-users text-success me-2"></i>{{ __('translation.clinic.patients') }}
-                            </h6>
-                            <span class="badge bg-success rounded-pill">{{ $totalPatients }}</span>
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h6 class="mb-0 fw-semibold">
+                                    <i class="fas fa-users text-success me-2"></i>{{ __('translation.clinic.patients') }}
+                                </h6>
+                                <span class="badge bg-success rounded-pill">{{ $totalPatients }}</span>
+                            </div>
                         </div>
-                        <div class="card-body p-0" style="max-height: 350px; overflow-y: auto;">
-                            @forelse($patients as $patient)
-                                <a href="{{ route('clinic.patients.show', $patient) }}" 
-                                   class="d-flex align-items-center p-3 border-bottom text-decoration-none list-item-hover">
-                                    <div class="rounded-circle bg-info bg-opacity-10 p-2 me-3">
-                                        <i class="fas fa-user-injured text-info"></i>
-                                    </div>
-                                    <div class="flex-grow-1" style="min-width: 0;">
-                                        <div class="fw-medium text-dark text-truncate">{{ $patient->full_name }}</div>
-                                        <small class="text-muted">
-                                            <i class="fas fa-hashtag me-1"></i>{{ $patient->file_number }}
-                                            @if($patient->phone)
-                                                <span class="mx-1">•</span><i class="fas fa-phone me-1"></i>{{ $patient->phone }}
-                                            @endif
-                                        </small>
-                                    </div>
-                                    <i class="fas fa-chevron-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }} text-muted"></i>
-                                </a>
-                            @empty
-                                <div class="text-center py-5">
-                                    <i class="fas fa-user-plus text-muted fs-1 mb-3" style="opacity: 0.3;"></i>
-                                    <p class="text-muted mb-3">{{ __('translation.clinic_chat.no_patients') }}</p>
-                                    <a href="{{ route('clinic.patients.create') }}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-plus me-1"></i>{{ __('translation.clinic.new_patient') }}
-                                    </a>
-                                </div>
-                            @endforelse
+                        <div class="card-body p-0" id="workspacePatientsContainer" style="max-height: 350px; overflow-y: auto;">
+                            @include('clinic.partials.workspace-patients-list', ['patients' => $patients])
                         </div>
                         @if($totalPatients > 5)
                             <div class="card-footer bg-transparent border-top text-center py-2">
@@ -286,10 +151,26 @@
                         @endif
                     </div>
                 </div>
+                 {{-- Today's Appointments --}}
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between py-3">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="fas fa-calendar-day text-primary me-2"></i>{{ __('translation.clinic_chat.today_appointments') }}
+                            </h6>
+                            <span class="badge bg-primary rounded-pill">{{ $totalTodayAppointments }}</span>
+                        </div>
+                        <div class="card-body p-0" id="workspaceAppointmentsContainer" style="max-height: 450px; overflow-y: auto;">
+                            @include('clinic.partials.workspace-appointments-list', ['appointments' => $todayAppointments])
+                        </div>
+                        <div class="card-footer bg-transparent border-top text-center py-2">
+                            <a href="{{ route('clinic.appointments.index') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-calendar-alt me-1"></i>{{ __('translation.clinic_chat.view_appointments') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {{-- Details Container (for AJAX loaded content) --}}
-            <div id="detailsContainer" class="mt-4" style="display: none;"></div>
         </div>
     </div>
 </div>
@@ -348,14 +229,12 @@
                 <a href="{{ route('clinic.patients.create') }}" class="btn btn-primary">
                     <i class="fas fa-user-plus me-2"></i>{{ __('translation.clinic.new_patient') }}
                 </a>
-                <a href="{{ route('clinic.patients.index') }}" class="btn btn-outline-success">
-                    <i class="fas fa-notes-medical me-2"></i>{{ __('translation.clinic.new_examination') }}
-                </a>
+            
                 <a href="{{ route('clinic.patients.index') }}" class="btn btn-outline-info">
                     <i class="fas fa-users me-2"></i>{{ __('translation.clinic.view_all_patients') }}
                 </a>
-                <a href="{{ route('clinic.examinations.index') }}" class="btn btn-outline-warning">
-                    <i class="fas fa-clipboard-list me-2"></i>{{ __('translation.clinic.examinations') }}
+                <a href="{{ route('clinic.ai-assistant') }}" class="btn btn-outline-success">
+                    <i class="fas fa-robot me-2"></i>{{ __('translation.ai_assistant.title') }}
                 </a>
             </div>
         </div>
@@ -415,7 +294,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted mb-3">{{ __('translation.clinic_chat.cancel_appointment_confirm') }}</p>
                 <div class="mb-3">
                     <label class="form-label">{{ __('translation.clinic_chat.cancellation_reason') }}</label>
@@ -442,7 +321,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted mb-3">{{ __('translation.clinic_chat.complete_appointment_confirm') }}</p>
                 <div class="mb-3">
                     <label class="form-label">{{ __('translation.clinic_chat.completion_notes') }}</label>
@@ -475,7 +354,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted mb-3">{{ __('translation.clinic_chat.register_patient_desc') }}</p>
                 
                 <div class="row g-3">
@@ -552,7 +431,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <div class="text-center py-3">
                     <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
                         <i class="fas fa-calendar-check text-success fa-2x"></i>
@@ -566,6 +445,34 @@
                 <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">{{ __('translation.common.no') }}</button>
                 <button type="button" class="btn btn-success px-4" id="confirmConfirmBtn">
                     <i class="fas fa-check me-1"></i>{{ __('translation.common.yes') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Request Access Confirmation Modal --}}
+<div class="modal fade" id="requestAccessModal" tabindex="-1" aria-labelledby="requestAccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="requestAccessModalLabel">{{ __('translation.patient.request_access_title') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user-lock text-primary fa-2x"></i>
+                    </div>
+                    <h6 id="requestAccessPatientName" class="mb-1"></h6>
+                    <p class="text-muted mb-0 small" id="requestAccessFileNumber"></p>
+                </div>
+                <p class="text-center text-muted" id="requestAccessMessage"></p>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-center">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">{{ __('translation.modal.confirm_delete.cancel') }}</button>
+                <button type="button" class="btn btn-primary px-4" id="confirmRequestAccessBtn">
+                    <i class="fas fa-check me-1"></i>{{ __('translation.patient.request_access_confirm') }}
                 </button>
             </div>
         </div>
@@ -591,80 +498,56 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const detailsContainer = document.getElementById('detailsContainer');
-    const searchInput = document.getElementById('searchInput');
-    const searchForm = document.getElementById('searchForm');
+// Workspace unified search (patients + appointments)
+(function() {
+    const searchInput = document.getElementById('workspaceSearch');
+    const patientsContainer = document.getElementById('workspacePatientsContainer');
+    const appointmentsContainer = document.getElementById('workspaceAppointmentsContainer');
+    if (!searchInput || !patientsContainer || !appointmentsContainer) return;
 
-    // Search functionality
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        if (query) {
-            searchPatients(query);
-        }
-    });
-
-    // Real-time search
-    let searchTimeout;
+    let debounceTimer;
     searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        const query = this.value.trim();
-        if (query.length >= 2) {
-            searchTimeout = setTimeout(() => searchPatients(query), 300);
-        }
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadResults, 400);
     });
 
-    async function searchPatients(query) {
+    async function loadResults() {
+        const params = new URLSearchParams();
+        if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
+        const qs = params.toString() ? `?${params}` : '';
+
+        patientsContainer.style.opacity = '0.5';
+        appointmentsContainer.style.opacity = '0.5';
+
         try {
-            const data = await ApiClient.get(`{{ route('clinic.patients.search') }}?q=${encodeURIComponent(query)}`);
-            detailsContainer.style.display = 'block';
-            
-            let html = '<div class="card border-0 shadow-sm">';
-            html += '<div class="card-header bg-transparent border-0"><h6 class="mb-0"><i class="fas fa-search me-2"></i>{{ __("translation.common.search_results") }}</h6></div>';
-            html += '<div class="card-body p-0">';
-            
-            if (data.patients && data.patients.length > 0) {
-                data.patients.forEach(patient => {
-                    const patientUrl = `{{ route('clinic.patients.show', ['patient' => '__ID__']) }}`.replace('__ID__', patient.file_number);
-                    html += `
-                        <a href="${patientUrl}" class="d-flex align-items-center p-3 border-bottom text-decoration-none list-item-hover">
-                            <div class="rounded-circle bg-info bg-opacity-10 p-2 me-3">
-                                <i class="fas fa-user-injured text-info"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="fw-medium text-dark">${patient.name || patient.full_name}</div>
-                                <small class="text-muted">${patient.file_number}</small>
-                            </div>
-                            <i class="fas fa-chevron-{{ app()->getLocale() === 'ar' ? 'left' : 'right' }} text-muted"></i>
-                        </a>
-                    `;
-                });
-            } else {
-                html += '<div class="text-center py-4"><p class="text-muted mb-0">{{ __("translation.common.no_results") }}</p></div>';
-            }
-            
-            html += '</div></div>';
-            detailsContainer.innerHTML = html;
-            detailsContainer.scrollIntoView({ behavior: 'smooth' });
+            const [patientsHtml, appointmentsHtml] = await Promise.all([
+                ApiClient.getHtml(`{{ route('clinic.workspace.patients') }}${qs}`),
+                ApiClient.getHtml(`{{ route('clinic.workspace.appointments') }}${qs}`)
+            ]);
+            patientsContainer.innerHTML = patientsHtml;
+            appointmentsContainer.innerHTML = appointmentsHtml;
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Workspace search error:', error);
+        } finally {
+            patientsContainer.style.opacity = '1';
+            appointmentsContainer.style.opacity = '1';
         }
     }
-});
+})();
 
 // Current appointment data for modals
 let currentAppointmentId = null;
 let currentAppointmentData = null;
 
 // Modal instances
-let cancelModal, completeModal, registerModal, confirmModal;
+let cancelModal, completeModal, registerModal, confirmModal, requestAccessModal;
 
 document.addEventListener('DOMContentLoaded', function() {
     cancelModal = new bootstrap.Modal(document.getElementById('cancelAppointmentModal'));
     completeModal = new bootstrap.Modal(document.getElementById('completeAppointmentModal'));
     registerModal = new bootstrap.Modal(document.getElementById('registerPatientModal'));
     confirmModal = new bootstrap.Modal(document.getElementById('confirmAppointmentModal'));
+    requestAccessModal = new bootstrap.Modal(document.getElementById('requestAccessModal'));
     
     // Cancel appointment button
     document.getElementById('confirmCancelBtn').addEventListener('click', function() {
@@ -687,6 +570,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Confirm appointment button
     document.getElementById('confirmConfirmBtn').addEventListener('click', function() {
         submitConfirmAppointment(currentAppointmentId);
+    });
+
+    // Request access button delegation (buttons are loaded via AJAX)
+    document.getElementById('workspacePatientsContainer').addEventListener('click', function(e) {
+        const btn = e.target.closest('.request-access-btn');
+        if (!btn) return;
+        e.preventDefault();
+        const patientId = btn.dataset.patientId;
+        const patientName = btn.dataset.patientName;
+        const fileNumber = btn.dataset.patientFileNumber;
+        openRequestAccessModal(patientId, patientName, fileNumber);
+    });
+
+    // Confirm request access button
+    document.getElementById('confirmRequestAccessBtn').addEventListener('click', function() {
+        submitRequestAccess();
     });
 });
 
@@ -833,6 +732,53 @@ async function submitRegisterPatient(id) {
             SwalUtil.toast(data.message || '{{ __("translation.clinic_chat.patient_registered") }}', 'success');
             if (data.patient_url) {
                 setTimeout(() => window.location.href = data.patient_url, 1000);
+            } else {
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        } else {
+            SwalUtil.toast(data.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    } catch (error) {
+        SwalUtil.toast('{{ __("translation.common.error_occurred") }}', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+// Request access to patient from another clinic
+let currentRequestPatientId = null;
+
+function openRequestAccessModal(patientId, patientName, fileNumber) {
+    currentRequestPatientId = patientId;
+    document.getElementById('requestAccessPatientName').textContent = patientName;
+    document.getElementById('requestAccessFileNumber').textContent = fileNumber;
+
+    const message = '{{ __("translation.patient.request_access_message") }}'
+        .replace(':name', patientName)
+        .replace(':file_number', fileNumber);
+    document.getElementById('requestAccessMessage').textContent = message;
+
+    requestAccessModal.show();
+}
+
+async function submitRequestAccess() {
+    const btn = document.getElementById('confirmRequestAccessBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __("translation.common.loading") }}';
+
+    try {
+        const data = await ApiClient.post('{{ route("clinic.patients.request-access") }}', {
+            patient_id: currentRequestPatientId
+        });
+
+        if (data.success) {
+            requestAccessModal.hide();
+            SwalUtil.toast(data.message || '{{ __("translation.patient.request_access_success") }}', 'success');
+            if (data.redirect) {
+                setTimeout(() => window.location.href = data.redirect, 1000);
             } else {
                 setTimeout(() => window.location.reload(), 1000);
             }

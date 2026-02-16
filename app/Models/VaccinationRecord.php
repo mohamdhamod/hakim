@@ -10,6 +10,7 @@ class VaccinationRecord extends Model
     use HasFactory;
 
     protected $fillable = [
+        'clinic_id',
         'patient_id',
         'vaccination_type_id',
         'administered_by_user_id',
@@ -29,6 +30,14 @@ class VaccinationRecord extends Model
         'expiry_date' => 'date',
         'next_dose_due_date' => 'date',
     ];
+
+    /**
+     * Get the clinic that owns this vaccination record.
+     */
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
 
     /**
      * Get the patient that owns this vaccination record.

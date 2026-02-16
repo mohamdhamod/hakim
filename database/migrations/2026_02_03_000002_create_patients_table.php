@@ -31,7 +31,6 @@ return new class extends Migration
             $table->string('emergency_contact_phone')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            $table->softDeletes();
 
             $table->index(['clinic_id', 'file_number']);
         });

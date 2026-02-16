@@ -17,11 +17,7 @@ class DemoUsersSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ensure roles exist
-        $adminRole = Role::firstOrCreate(['name' => RoleEnum::ADMIN, 'guard_name' => 'web']);
-        $doctorRole = Role::firstOrCreate(['name' => RoleEnum::DOCTOR, 'guard_name' => 'web']);
-        $patientRole = Role::firstOrCreate(['name' => RoleEnum::PATIENT, 'guard_name' => 'web']);
-
+    
         // Get the first active specialty for the demo doctor
         $specialty = Specialty::active()->ordered()->first();
 
@@ -63,46 +59,7 @@ class DemoUsersSeeder extends Seeder
             $this->command->info('  Specialty: ' . $specialty->name);
         }
 
-        // Create Demo Patient
-        $patient = User::firstOrCreate(
-            ['email' => 'patient@demo.com'],
-            [
-                'name' => 'محمد المريض',
-                'email' => 'patient@demo.com',
-                'password' => 'demo1234',
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Assign patient role
-        if (!$patient->hasRole(RoleEnum::PATIENT)) {
-            $patient->assignRole(RoleEnum::PATIENT);
-        }
-
-        $this->command->info('✓ Demo Patient created:');
-        $this->command->info('  Email: patient@demo.com');
-        $this->command->info('  Password: demo1234');
-
-        // Create Demo Admin (if not exists)
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@demo.com'],
-            [
-                'name' => 'المدير العام',
-                'email' => 'admin@demo.com',
-                'password' => 'demo1234',
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Assign admin role
-        if (!$admin->hasRole(RoleEnum::ADMIN)) {
-            $admin->assignRole(RoleEnum::ADMIN);
-        }
-
-        $this->command->info('✓ Demo Admin created:');
-        $this->command->info('  Email: admin@demo.com');
-        $this->command->info('  Password: demo1234');
-
+        
         $this->command->newLine();
         $this->command->info('========================================');
         $this->command->info('All demo accounts use password: demo1234');

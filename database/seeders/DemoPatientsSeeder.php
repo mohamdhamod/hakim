@@ -144,7 +144,6 @@ class DemoPatientsSeeder extends Seeder
 
             // Create patient
             $patient = Patient::create([
-                'clinic_id' => $clinic->id,
                 'file_number' => Patient::generateFileNumber($clinic->id),
                 'full_name' => $patientData['full_name'],
                 'date_of_birth' => $dateOfBirth,
@@ -156,6 +155,9 @@ class DemoPatientsSeeder extends Seeder
                 'emergency_contact_name' => 'ولي الأمر',
                 'emergency_contact_phone' => $patientData['phone'],
             ]);
+
+            // Attach patient to clinic
+            $patient->clinics()->attach($clinic->id);
 
             $this->command->info("✓ تم إنشاء المريض: {$patient->full_name} (العمر: {$patientData['age_months']} شهر)");
 

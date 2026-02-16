@@ -56,7 +56,7 @@ class SendMedicalReminders extends Command
         $missedVaccinations = VaccinationRecord::where('status', 'scheduled')
             ->whereNotNull('next_dose_due_date')
             ->where('next_dose_due_date', '<', now())
-            ->with(['patient.clinic', 'vaccinationType'])
+            ->with(['patient.clinics', 'vaccinationType'])
             ->get();
 
         $count = 0;
@@ -92,7 +92,7 @@ class SendMedicalReminders extends Command
         $upcomingFollowups = PatientChronicDisease::where('status', 'active')
             ->whereNotNull('next_followup_date')
             ->whereBetween('next_followup_date', [now(), now()->addDays($daysAhead)])
-            ->with(['patient.clinic', 'chronicDiseaseType'])
+            ->with(['patient.clinics', 'chronicDiseaseType'])
             ->get();
 
         $count = 0;

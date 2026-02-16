@@ -54,13 +54,45 @@
             @canany([
                 \App\Enums\PermissionEnum::MANAGE_SPECIALTIES_VIEW,
             ])
-                <li class="side-nav-title mt-3">{{ __('translation.sidebar.specialties') }}</li>
+                <li class="side-nav-title mt-3">{{ __('translation.sidebar.medical_types') }}</li>
 
                 <li class="side-nav-item">
-                    <a href="{{ route('specialties.index') }}" class="side-nav-link {{ request()->routeIs('specialties.*') ? 'active' : '' }}">
-                        <i class="menu-icon bi bi-hospital"></i>
-                        <span class="menu-text">{{ __('translation.sidebar.manage_specialties') }}</span>
-                    </a>
+                    <button class="side-nav-link {{ request()->routeIs('specialties.*') || request()->routeIs('chronic_disease_types.*') || request()->routeIs('lab_test_types.*') || request()->routeIs('vaccination_types.*') ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#medicalTypesMenu" aria-expanded="{{ request()->routeIs('specialties.*') || request()->routeIs('chronic_disease_types.*') || request()->routeIs('lab_test_types.*') || request()->routeIs('vaccination_types.*') ? 'true' : 'false' }}">
+                        <i class="menu-icon bi bi-clipboard2-pulse"></i>
+                        <span class="menu-text">{{ __('translation.sidebar.medical_types') }}</span>
+                        <span class="menu-arrow">
+                            <i class="bi bi-chevron-down"></i>
+                        </span>
+                    </button>
+                    <div class="collapse {{ request()->routeIs('specialties.*') || request()->routeIs('chronic_disease_types.*') || request()->routeIs('lab_test_types.*') || request()->routeIs('vaccination_types.*') ? 'show' : '' }}" id="medicalTypesMenu">
+                        <ul class="sub-menu">
+                            <li class="side-nav-item">
+                                <a href="{{ route('specialties.index') }}" class="side-nav-link {{ request()->routeIs('specialties.*') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-hospital"></i>
+                                    <span class="menu-text">{{ __('translation.sidebar.manage_specialties') }}</span>
+                                </a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="{{ route('chronic_disease_types.index') }}" class="side-nav-link {{ request()->routeIs('chronic_disease_types.*') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-heart-pulse"></i>
+                                    <span class="menu-text">{{ __('translation.sidebar.chronic_diseases') }}</span>
+                                </a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="{{ route('lab_test_types.index') }}" class="side-nav-link {{ request()->routeIs('lab_test_types.*') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-droplet"></i>
+                                    <span class="menu-text">{{ __('translation.sidebar.lab_tests') }}</span>
+                                </a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="{{ route('vaccination_types.index') }}" class="side-nav-link {{ request()->routeIs('vaccination_types.*') ? 'active' : '' }}">
+                                    <i class="menu-icon bi bi-shield-plus"></i>
+                                    <span class="menu-text">{{ __('translation.sidebar.vaccinations') }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
             @endcanany
 

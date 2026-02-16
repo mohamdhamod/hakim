@@ -16,30 +16,29 @@ class PatientExportController extends Controller
      */
     public function printComprehensiveReport($lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient);
 
-        // Load all medical data
+        // Load only medical data belonging to this clinic
         $patient->load([
-            'examinations' => function ($query) {
-                $query->with('doctor')->latest('examination_date');
+            'examinations' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with('doctor')->latest('examination_date');
             },
-            'labTestResults' => function ($query) {
-                $query->with('labTestType', 'orderedBy')->latest('test_date');
+            'labTestResults' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with('labTestType', 'orderedBy')->latest('test_date');
             },
-            'vaccinationRecords' => function ($query) {
-                $query->with('vaccinationType', 'administeredBy')->latest('vaccination_date');
+            'vaccinationRecords' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with('vaccinationType', 'administeredBy')->latest('vaccination_date');
             },
-            'growthMeasurements' => function ($query) {
-                $query->with('measuredBy')->latest('measurement_date');
+            'growthMeasurements' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with('measuredBy')->latest('measurement_date');
             },
-            'chronicDiseases' => function ($query) {
-                $query->with(['chronicDiseaseType', 'monitoringRecords' => function($q) {
-                    $q->latest('monitoring_date');
+            'chronicDiseases' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with(['chronicDiseaseType', 'monitoringRecords' => function($q) use ($clinic) {
+                    $q->where('clinic_id', $clinic->id)->latest('monitoring_date');
                 }]);
             }
         ]);
 
-        $clinic = $patient->clinic;
         $doctor = Auth::user();
         $exportDate = now();
 

@@ -63,7 +63,7 @@ class PatientIntegrationService
         // Find by phone number only
         $phone = $appointment->patient?->phone ?? $appointment->patient_phone;
         if ($phone) {
-            $patient = Patient::where('clinic_id', $clinic->id)
+            $patient = Patient::forClinic($clinic->id)
                 ->where('phone', $this->normalizePhone($phone))
                 ->first();
             
@@ -87,14 +87,17 @@ class PatientIntegrationService
         $clinic = $appointment->clinic;
         $user = $appointment->patient;
         
-        return Patient::create([
+        $patient = Patient::create([
             'user_id' => $appointment->patient_id,
-            'clinic_id' => $clinic->id,
             'file_number' => $this->generateFileNumber($clinic),
             'full_name' => $user?->name ?? $appointment->patient_name,
             'phone' => $user?->phone ?? $appointment->patient_phone,
             'email' => $user?->email ?? $appointment->patient_email,
         ]);
+
+        $patient->clinics()->attach($clinic->id);
+
+        return $patient;
     }
 
     /**
@@ -139,39 +142,11 @@ class PatientIntegrationService
 
     /**
      * Generate a unique file number for a patient in a clinic.
-     * Format: D5-00001 (First letter of doctor's email + clinic ID + sequence)
+     * Delegates to Patient::generateFileNumber().
      */
     public function generateFileNumber(Clinic $clinic): string
     {
-        // Get first letter of clinic doctor's email (uppercase)
-        $doctorEmail = $clinic->doctor?->email ?? 'X';
-        $prefix = strtoupper(substr($doctorEmail, 0, 1));
-        
-        // Clinic ID
-        $clinicId = $clinic->id;
-        
-        // Build the prefix pattern
-        $pattern = "{$prefix}{$clinicId}-";
-        
-        // Get all patients with this pattern and find the highest number
-        $patients = Patient::where('clinic_id', $clinic->id)
-            ->where('file_number', 'like', "{$pattern}%")
-            ->pluck('file_number');
-        
-        $maxNumber = 0;
-        foreach ($patients as $fileNumber) {
-            if (preg_match('/-(\d+)$/', $fileNumber, $matches)) {
-                $num = (int) $matches[1];
-                if ($num > $maxNumber) {
-                    $maxNumber = $num;
-                }
-            }
-        }
-        
-        $newNumber = str_pad($maxNumber + 1, 5, '0', STR_PAD_LEFT);
-        $fileNumber = "{$pattern}{$newNumber}";
-        
-        return $fileNumber;
+        return Patient::generateFileNumber($clinic->id);
     }
 
     /**
@@ -201,13 +176,13 @@ class PatientIntegrationService
     public function getUserPatientRecords(User $user): array
     {
         $patients = Patient::where('user_id', $user->id)
-            ->with(['clinic', 'examinations'])
+            ->with(['clinics', 'examinations'])
             ->get();
         
         return $patients->map(function ($patient) {
             return [
                 'patient' => $patient,
-                'clinic' => $patient->clinic,
+                'clinics' => $patient->clinics,
                 'examinations_count' => $patient->examinations->count(),
                 'last_visit' => $patient->examinations->sortByDesc('examination_date')->first()?->examination_date,
             ];
@@ -278,7 +253,7 @@ class PatientIntegrationService
         // Search by exact phone match only
         if (!empty($data['phone'])) {
             $normalizedPhone = $this->normalizePhone($data['phone']);
-            $phoneMatch = Patient::where('clinic_id', $clinic->id)
+            $phoneMatch = Patient::forClinic($clinic->id)
                 ->where('phone', $normalizedPhone)
                 ->first();
             

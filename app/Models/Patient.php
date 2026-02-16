@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Patient extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     /**
      * Get the route key for the model.
@@ -20,7 +19,6 @@ class Patient extends Model
 
     protected $fillable = [
         'user_id',
-        'clinic_id',
         'file_number',
         'full_name',
         'date_of_birth',
@@ -53,11 +51,28 @@ class Patient extends Model
     }
 
     /**
-     * Get the clinic this patient belongs to.
+     * Get the clinics this patient belongs to.
      */
-    public function clinic()
+    public function clinics()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsToMany(Clinic::class, 'clinic_patient')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the first/primary clinic (backward compatibility helper).
+     */
+    public function getClinicAttribute()
+    {
+        return $this->clinics->first();
+    }
+
+    /**
+     * Check if patient belongs to a specific clinic.
+     */
+    public function belongsToClinic(int $clinicId): bool
+    {
+        return $this->clinics()->where('clinics.id', $clinicId)->exists();
     }
 
     /**
@@ -147,7 +162,8 @@ class Patient extends Model
 
     /**
      * Generate unique file number for patient.
-     * Format: D5-00001 (First letter of doctor's email + clinic ID + sequence)
+     * Format: D5-46068-1 (Prefix + Excel date serial + daily sequence)
+     * Excel date serial = days since 1899-12-30
      */
     public static function generateFileNumber(int $clinicId): string
     {
@@ -156,26 +172,27 @@ class Patient extends Model
         $doctorEmail = $clinic?->doctor?->email ?? 'X';
         $prefix = strtoupper(substr($doctorEmail, 0, 1));
         
-        // Build the prefix pattern
-        $pattern = "{$prefix}{$clinicId}-";
+        // Excel date serial (days since 1899-12-30)
+        $excelEpoch = \Carbon\Carbon::create(1899, 12, 30);
+        $dateSerial = (int) $excelEpoch->diffInDays(now());
         
-        // Get all patients with this pattern and find the highest number
-        $patients = self::where('clinic_id', $clinicId)
-            ->where('file_number', 'like', "{$pattern}%")
-            ->pluck('file_number');
+        // Build the pattern for today: D5-46068-
+        $todayPattern = "{$prefix}{$clinicId}-{$dateSerial}-";
         
-        $maxNumber = 0;
+        // Find highest daily sequence for this clinic today
+        $maxSeq = 0;
+        $patients = self::where('file_number', 'like', "{$todayPattern}%")->pluck('file_number');
+        
         foreach ($patients as $fileNumber) {
             if (preg_match('/-(\d+)$/', $fileNumber, $matches)) {
                 $num = (int) $matches[1];
-                if ($num > $maxNumber) {
-                    $maxNumber = $num;
+                if ($num > $maxSeq) {
+                    $maxSeq = $num;
                 }
             }
         }
         
-        $newNumber = str_pad($maxNumber + 1, 5, '0', STR_PAD_LEFT);
-        $fileNumber = "{$pattern}{$newNumber}";
+        $fileNumber = "{$todayPattern}" . ($maxSeq + 1);
         
         return $fileNumber;
     }
@@ -231,5 +248,13 @@ class Patient extends Model
               ->orWhere('phone', 'like', "%{$term}%")
               ->orWhere('email', 'like', "%{$term}%");
         });
+    }
+
+    /**
+     * Scope to filter patients belonging to a specific clinic.
+     */
+    public function scopeForClinic($query, int $clinicId)
+    {
+        return $query->whereHas('clinics', fn($q) => $q->where('clinics.id', $clinicId));
     }
 }

@@ -97,7 +97,7 @@
                             <i class="bi bi-calendar-day text-primary me-2"></i>
                             {{ __('translation.clinic.today_appointments') }}
                         </h5>
-                        <a href="{{ route('clinic.examinations.today') }}" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ route('clinic.appointments.index') }}" class="btn btn-sm btn-outline-primary">
                             {{ __('translation.common.view_all') }}
                         </a>
                     </div>

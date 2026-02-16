@@ -44,3 +44,15 @@ Route::post('countries/{id?}/updateActiveStatus',[Controllers\Dashboard\CountryC
 // Specialties Management
 Route::resource('specialties', Controllers\Dashboard\SpecialtiesController::class);
 Route::post('specialties/{id?}/updateActiveStatus', [Controllers\Dashboard\SpecialtiesController::class, 'updateActiveStatus'])->name('specialties.updateActiveStatus');
+
+// Chronic Disease Types Management
+Route::resource('chronic_disease_types', Controllers\Dashboard\ChronicDiseaseTypesController::class);
+Route::post('chronic_disease_types/{id?}/updateActiveStatus', [Controllers\Dashboard\ChronicDiseaseTypesController::class, 'updateActiveStatus'])->name('chronic_disease_types.updateActiveStatus');
+
+// Lab Test Types Management
+Route::resource('lab_test_types', Controllers\Dashboard\LabTestTypesController::class);
+Route::post('lab_test_types/{id?}/updateActiveStatus', [Controllers\Dashboard\LabTestTypesController::class, 'updateActiveStatus'])->name('lab_test_types.updateActiveStatus');
+
+// Vaccination Types Management
+Route::resource('vaccination_types', Controllers\Dashboard\VaccinationTypesController::class);
+Route::post('vaccination_types/{id?}/updateActiveStatus', [Controllers\Dashboard\VaccinationTypesController::class, 'updateActiveStatus'])->name('vaccination_types.updateActiveStatus');

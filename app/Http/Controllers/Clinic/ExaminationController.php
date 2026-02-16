@@ -4,88 +4,28 @@ namespace App\Http\Controllers\Clinic;
 
 use App\Http\Controllers\Controller;
 use App\Models\Examination;
-use App\Models\ExaminationAttachment;
 use App\Models\Patient;
 use App\Traits\ClinicAuthorization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Yajra\DataTables\Facades\DataTables;
 
 class ExaminationController extends Controller
 {
     use ClinicAuthorization;
 
     /**
-     * Display a listing of examinations.
+     * Build redirect URL: append section hash if previous URL is the patient show page.
      */
-    public function index(Request $request)
+    private function buildRedirectUrl(Patient $patient, string $section = '#examinations-section'): string
     {
-        $clinic = $this->authorizeClinicAccess();
+        $previous = url()->previous();
+        $showUrl = route('clinic.patients.show', ['patient' => $patient->file_number]);
 
-        if ($request->ajax()) {
-            $examinations = Examination::with(['patient'])
-                ->where('clinic_id', $clinic->id)
-                ->select('examinations.*');
-
-            return DataTables::of($examinations)
-                ->addColumn('patient_name', function ($exam) {
-                    return $exam->patient->full_name ?? '-';
-                })
-                ->addColumn('patient_file_number', function ($exam) {
-                    return $exam->patient->file_number ?? '-';
-                })
-                ->addColumn('examination_date_formatted', function ($exam) {
-                    return $exam->examination_date->format('Y-m-d H:i');
-                })
-                ->addColumn('status_badge', function ($exam) {
-                    return '<span class="badge ' . $exam->status_badge_class . '">' . $exam->status_label . '</span>';
-                })
-                ->addColumn('actions', function ($exam) {
-                    $patientUrl = route('clinic.patients.show', [
-                        'patient' => $exam->patient->file_number,
-                        'tab' => 'examinations',
-                        'examination' => $exam->id
-                    ]);
-                    return '
-                        <div class="btn-group">
-                            <a href="' . $patientUrl . '" class="btn btn-sm btn-info" title="' . __('translation.common.view') . '">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="' . route('clinic.examinations.edit', $exam->id) . '" class="btn btn-sm btn-warning" title="' . __('translation.common.edit') . '">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="' . route('clinic.examinations.print', $exam->id) . '" class="btn btn-sm btn-secondary" target="_blank" title="' . __('translation.common.print') . '">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                        </div>';
-                })
-                ->rawColumns(['status_badge', 'actions'])
-                ->make(true);
+        if ($previous && str_starts_with(strtok($previous, '#?'), strtok($showUrl, '#?'))) {
+            return strtok($previous, '#') . $section;
         }
 
-        $examinations = Examination::with(['patient'])
-            ->where('clinic_id', $clinic->id)
-            ->orderBy('examination_date', 'desc')
-            ->paginate(15);
-
-        return view('clinic.examinations.index', compact('examinations'));
-    }
-
-    /**
-     * Display today's examinations.
-     */
-    public function today(Request $request)
-    {
-        $clinic = $this->authorizeClinicAccess();
-
-        $examinations = Examination::with(['patient'])
-            ->where('clinic_id', $clinic->id)
-            ->today()
-            ->orderBy('examination_date')
-            ->get();
-
-        return view('clinic.examinations.today', compact('examinations'));
+        return $previous ?: $showUrl . $section;
     }
 
     /**
@@ -120,19 +60,17 @@ class ExaminationController extends Controller
             'follow_up_date' => 'nullable|date|after:today',
             'follow_up_notes' => 'nullable|string|max:1000',
             'doctor_notes' => 'nullable|string|max:5000',
-            'status' => 'nullable|in:scheduled,in_progress,completed,cancelled',
         ]);
 
         // Verify patient belongs to this clinic
         $patient = Patient::findOrFail($validated['patient_id']);
-        if ($patient->clinic_id !== $clinic->id) {
+        if (!$patient->belongsToClinic($clinic->id)) {
             abort(403);
         }
 
         $validated['clinic_id'] = $clinic->id;
         $validated['user_id'] = Auth::id();
-        $validated['examination_number'] = Examination::generateExaminationNumber($clinic->id);
-        $validated['status'] = $validated['status'] ?? 'scheduled';
+        $validated['examination_number'] = Examination::generateExaminationNumber($patient->id);
 
         $examination = Examination::create($validated);
 
@@ -140,7 +78,7 @@ class ExaminationController extends Controller
             'patient' => $examination->patient->file_number,
             'tab' => 'examinations',
             'examination' => $examination->id
-        ]);
+        ]) . '#examinations-section';
 
         if ($request->ajax()) {
             return response()->json([
@@ -155,33 +93,7 @@ class ExaminationController extends Controller
             ->with('success', __('translation.examination.created_successfully'));
     }
 
-    /**
-     * Display the specified examination.
-     * Redirects to patient page with examination view modal.
-     */
-    public function show($lang, Examination $examination)
-    {
-        $this->authorizeClinicModel($examination);
 
-        // Redirect to patient page with examination parameter to open modal
-        return redirect()->route('clinic.patients.show', [
-            'patient' => $examination->patient->file_number,
-            'tab' => 'examinations',
-            'examination' => $examination->id
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified examination.
-     */
-    public function edit($lang , Examination $examination)
-    {
-        $this->authorizeClinicModel($examination);
-
-        $examination->load(['patient']);
-
-        return view('clinic.examinations.edit', compact('examination'));
-    }
 
     /**
      * Update the specified examination.
@@ -214,16 +126,11 @@ class ExaminationController extends Controller
             'follow_up_date' => 'nullable|date',
             'follow_up_notes' => 'nullable|string|max:1000',
             'doctor_notes' => 'nullable|string|max:5000',
-            'status' => 'nullable|in:scheduled,in_progress,completed,cancelled',
         ]);
 
         $examination->update($validated);
 
-        $redirectUrl = route('clinic.patients.show', [
-            'patient' => $examination->patient->file_number,
-            'tab' => 'examinations',
-            'examination' => $examination->id
-        ]);
+         $redirectUrl = $this->buildRedirectUrl($examination->patient);
 
         if ($request->ajax()) {
             return response()->json([
@@ -251,83 +158,26 @@ class ExaminationController extends Controller
     }
 
     /**
-     * Upload attachment to examination.
+     * Remove the specified examination from storage.
      */
-    public function uploadAttachment(Request $request, $lang , Examination $examination)
+    public function destroy($lang, Examination $examination)
     {
         $this->authorizeClinicModel($examination, true);
 
-        $request->validate([
-            'file' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx',
-            'description' => 'nullable|string|max:255',
-        ]);
+        $patient = $examination->patient;
+        $examination->delete();
 
-        $file = $request->file('file');
-        $path = $file->store('examinations/' . $examination->id, 'public');
+        $redirectUrl = $this->buildRedirectUrl($patient);
 
-        $attachment = ExaminationAttachment::create([
-            'examination_id' => $examination->id,
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_type' => $this->getFileType($file->getMimeType()),
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'description' => $request->description,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => __('translation.examination.attachment_uploaded'),
-            'attachment' => $attachment,
-        ]);
-    }
-
-    /**
-     * Delete attachment.
-     */
-    public function deleteAttachment($lang , ExaminationAttachment $attachment)
-    {
-        $clinic = $this->getClinic();
-        
-        if (!$clinic || $attachment->examination->clinic_id !== $clinic->id) {
-            abort(403);
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.examination.deleted_successfully'),
+                'redirect' => $redirectUrl,
+            ]);
         }
 
-        Storage::disk('public')->delete($attachment->file_path);
-        $attachment->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => __('translation.examination.attachment_deleted'),
-        ]);
-    }
-
-    /**
-     * Get file type from mime type.
-     */
-    private function getFileType(string $mimeType): string
-    {
-        if (str_starts_with($mimeType, 'image/')) {
-            return 'image';
-        }
-        if ($mimeType === 'application/pdf') {
-            return 'pdf';
-        }
-        return 'document';
-    }
-
-    /**
-     * Mark examination as completed.
-     */
-    public function complete($lang , Examination $examination)
-    {
-        $this->authorizeClinicModel($examination, true);
-
-        $examination->markAsCompleted();
-
-        return response()->json([
-            'success' => true,
-            'message' => __('translation.examination.marked_completed'),
-        ]);
+        return redirect($redirectUrl)
+            ->with('success', __('translation.examination.deleted_successfully'));
     }
 }

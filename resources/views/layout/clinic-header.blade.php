@@ -44,7 +44,9 @@
             </div>
 
             <div class="topbar-item d-none d-lg-flex">
-                <a class="topbar-link btn shadow-none btn-link px-2" href="{{ route('clinic.examinations.index') }}">{{ __('translation.examination.examinations') }}</a>
+                <a class="topbar-link btn shadow-none btn-link px-2" href="{{ route('clinic.ai-assistant') }}">
+                    <i class="fas fa-robot me-1"></i>{{ __('translation.ai_assistant.title') }}
+                </a>
             </div>
         </div>
 

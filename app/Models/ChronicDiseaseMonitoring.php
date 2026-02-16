@@ -12,6 +12,7 @@ class ChronicDiseaseMonitoring extends Model
     protected $table = 'chronic_disease_monitoring';
 
     protected $fillable = [
+        'clinic_id',
         'patient_chronic_disease_id',
         'examination_id',
         'recorded_by_user_id',
@@ -26,6 +27,14 @@ class ChronicDiseaseMonitoring extends Model
     protected $casts = [
         'monitoring_date' => 'date',
     ];
+
+    /**
+     * Get the clinic that owns this monitoring record.
+     */
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
 
     /**
      * Get the patient chronic disease.

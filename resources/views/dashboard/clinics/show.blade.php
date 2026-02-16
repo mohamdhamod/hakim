@@ -168,7 +168,7 @@
                 <h5 class="modal-title">{{ __('translation.clinic.reject_clinic') }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <form id="reject-form">
                     <input type="hidden" id="reject-clinic-id" value="{{ $clinic->id }}">
                     <div class="mb-3">

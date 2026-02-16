@@ -19,14 +19,14 @@
             {{-- Action Center --}}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
                         <div class="d-flex align-items-center gap-3">
                             <div class="avatar-circle bg-primary-subtle text-primary" style="width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-user-injured fs-3"></i>
                             </div>
                             <div>
                                 <h4 class="mb-1 fw-bold">{{ $patient->full_name }}</h4>
-                                <div class="d-flex align-items-center gap-3 small text-muted">
+                                <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 small text-muted">
                                     <span><i class="fas fa-hashtag"></i> {{ $patient->file_number }}</span>
                                     @if($patient->age)
                                         <span><i class="fas fa-birthday-cake"></i> {{ $patient->age }} {{ __('translation.patient.years') }}</span>
@@ -37,19 +37,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newExaminationModal">
-                                <i class="fas fa-plus me-2"></i>{{ __('translation.examination.new') }}
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-success btn-sm" onclick="openExaminationCreate()">
+                                <i class="fas fa-plus me-1"></i>{{ __('translation.examination.new') }}
                             </button>
                             
                             {{-- Print Comprehensive Report --}}
-                            <a href="{{ route('patients.print.comprehensive', $patient) }}" class="btn btn-info" target="_blank">
-                                <i class="fas fa-print me-2"></i>{{ __('translation.print_comprehensive_report') }}
+                            <a href="{{ route('patients.print.comprehensive', $patient) }}" class="btn btn-info btn-sm" target="_blank">
+                                <i class="fas fa-print me-1"></i>{{ __('translation.print_comprehensive_report') }}
                             </a>
                             
-                            <a href="{{ route('clinic.patients.edit', $patient) }}" class="btn btn-warning">
-                                <i class="fas fa-edit me-2"></i>{{ __('translation.common.edit') }}
-                            </a>
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+                                <i class="fas fa-edit me-1"></i>{{ __('translation.common.edit') }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -109,22 +109,22 @@
             @include('clinic.patients.partials.examinations')
 
             {{-- Lab Tests Section --}}
-            @if($patient->clinic->hasService('lab_tests'))
+            @if($clinic->hasService('lab_tests'))
             @include('clinic.patients.partials.lab-tests')
             @endif
 
             {{-- Vaccinations Section --}}
-            @if($patient->clinic->hasService('vaccinations'))
+            @if($clinic->hasService('vaccinations'))
             @include('clinic.patients.partials.vaccinations')
             @endif
 
             {{-- Growth Measurements Section --}}
-            @if($patient->clinic->hasService('growth_chart'))
+            @if($clinic->hasService('growth_chart'))
             @include('clinic.patients.partials.growth-measurements')
             @endif
 
             {{-- Chronic Diseases Section --}}
-            @if($patient->clinic->hasService('chronic_diseases'))
+            @if($clinic->hasService('chronic_diseases'))
             @include('clinic.patients.partials.chronic-diseases')
             @endif
         </div>
@@ -141,7 +141,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-success btn-sm text-start" data-bs-toggle="modal" data-bs-target="#newExaminationModal">
+                        <button type="button" class="btn btn-success btn-sm text-start" onclick="openExaminationCreate()">
                             <i class="fas fa-stethoscope me-2"></i>{{ __('translation.examination.new_for_patient') }}
                         </button>
                         <button type="button" class="btn btn-outline-danger btn-sm text-start" data-bs-toggle="modal" data-bs-target="#medicalHistoryModal">
@@ -265,6 +265,103 @@
     </div>
 </div>
 
+{{-- Edit Patient Info Modal --}}
+<div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="{{ route('clinic.patients.update', $patient) }}" method="POST" id="editPatientForm">
+                @csrf
+                @method('PUT')
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="editPatientModalLabel">
+                        <i class="fas fa-user-edit text-warning me-2"></i>
+                        {{ __('translation.patient.edit') }}: {{ $patient->full_name }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ __('translation.patient.file_number') }}</label>
+                            <input type="text" class="form-control bg-light" value="{{ $patient->file_number }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ __('translation.patient.full_name') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="full_name" class="form-control" value="{{ $patient->full_name }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">{{ __('translation.patient.birth_year') }}</label>
+                            <select name="birth_year" class="form-select">
+                                <option value="">{{ __('translation.patient.select_year') }}</option>
+                                @for($year = date('Y'); $year >= 1920; $year--)
+                                    <option value="{{ $year }}" {{ $patient->date_of_birth?->format('Y') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">{{ __('translation.patient.birth_month') }}</label>
+                            <select name="birth_month" class="form-select">
+                                <option value="">{{ __('translation.common.select') }}</option>
+                                @foreach([
+                                    1 => __('translation.months_list.january'),
+                                    2 => __('translation.months_list.february'),
+                                    3 => __('translation.months_list.march'),
+                                    4 => __('translation.months_list.april'),
+                                    5 => __('translation.months_list.may'),
+                                    6 => __('translation.months_list.june'),
+                                    7 => __('translation.months_list.july'),
+                                    8 => __('translation.months_list.august'),
+                                    9 => __('translation.months_list.september'),
+                                    10 => __('translation.months_list.october'),
+                                    11 => __('translation.months_list.november'),
+                                    12 => __('translation.months_list.december'),
+                                ] as $num => $name)
+                                    <option value="{{ $num }}" {{ $patient->date_of_birth?->format('n') == $num ? 'selected' : '' }}>{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">{{ __('translation.patient.gender') }}</label>
+                            <select name="gender" class="form-select">
+                                <option value="">{{ __('translation.common.select') }}</option>
+                                <option value="male" {{ $patient->gender === 'male' ? 'selected' : '' }}>{{ __('translation.patient.male') }}</option>
+                                <option value="female" {{ $patient->gender === 'female' ? 'selected' : '' }}>{{ __('translation.patient.female') }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">{{ __('translation.patient.blood_type') }}</label>
+                            <select name="blood_type" class="form-select">
+                                <option value="">{{ __('translation.common.select') }}</option>
+                                @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $type)
+                                    <option value="{{ $type }}" {{ $patient->blood_type === $type ? 'selected' : '' }}>{{ $type }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ __('translation.patient.phone') }}</label>
+                            <input type="tel" name="phone" class="form-control" value="{{ $patient->phone }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ __('translation.patient.email') }}</label>
+                            <input type="email" name="email" class="form-control" value="{{ $patient->email }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ __('translation.patient.address') }}</label>
+                            <textarea name="address" class="form-control" rows="2">{{ $patient->address }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('translation.common.cancel') }}</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>{{ __('translation.common.save_changes') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- Medical History Modal --}}
 <div class="modal fade" id="medicalHistoryModal" tabindex="-1" aria-labelledby="medicalHistoryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -279,7 +376,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">{{ __('translation.patient.allergies') }}</label>
@@ -324,7 +421,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                     <div class="mb-3">
                         <label class="form-label">{{ __('translation.patient.emergency_contact_name') }}</label>
                         <input type="text" name="emergency_contact_name" class="form-control" value="{{ $patient->emergency_contact_name }}">
@@ -359,7 +456,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                     <textarea name="notes" class="form-control" rows="6" placeholder="{{ __('translation.patient.notes_placeholder') }}">{{ $patient->notes }}</textarea>
                 </div>
                 <div class="modal-footer border-0">
@@ -388,7 +485,12 @@
 {{-- Chronic Disease Modals --}}
 @include('clinic.patients.partials.chronic-disease-modals')
 
+{{-- Confirm Delete Modal --}}
+@include('modules.confirm')
+
 @endsection
+
+@include('modules.i18n')
 
 @push('scripts')
 <script>
@@ -399,88 +501,26 @@ document.addEventListener('DOMContentLoaded', function() {
     examinationModal.show();
     @endif
 
-    // Handle form submissions via AJAX for patient modals
-    ['medicalHistoryForm', 'emergencyContactForm', 'notesForm'].forEach(formId => {
+    // Handle form submissions via AJAX for patient modals (handleFormSubmit)
+    ['editPatientForm', 'medicalHistoryForm', 'emergencyContactForm', 'notesForm'].forEach(formId => {
         const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', async function(e) {
+        if (form && !form.__handleSubmitBound) {
+            form.__handleSubmitBound = true;
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.saving") }}';
-                
-                try {
-                    const formData = new FormData(form);
-                    const data = await ApiClient.request(form.action, {
-                        method: 'POST',
-                        data: formData,
-                        showLoading: false
-                    });
-                    
-                    if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
-                        modal.hide();
-                        SwalUtil.toast(data.message || '{{ __("translation.common.saved_successfully") }}', 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        SwalUtil.toast(data.message || '{{ __("translation.common.error_occurred") }}', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    SwalUtil.toast('{{ __("translation.common.error_occurred") }}', 'error');
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
+                e.stopImmediatePropagation();
+                window.handleFormSubmit(e, this);
             });
         }
     });
-
-    // Handle examination form submission
-    const examinationForm = document.getElementById('newExaminationForm');
-    if (examinationForm) {
-        examinationForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const submitBtn = examinationForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("translation.common.saving") }}';
-            
-            try {
-                const formData = new FormData(examinationForm);
-                const data = await ApiClient.request(examinationForm.action, {
-                    method: 'POST',
-                    data: formData,
-                    showLoading: false
-                });
-                
-                if (data.success) {
-                    const modal = bootstrap.Modal.getInstance(examinationForm.closest('.modal'));
-                    modal.hide();
-                    SwalUtil.toast(data.message || '{{ __("translation.examination.created_successfully") }}', 'success');
-                    
-                    if (data.redirect) {
-                        setTimeout(() => window.location.href = data.redirect, 1000);
-                    } else {
-                        setTimeout(() => location.reload(), 1000);
-                    }
-                } else {
-                    SwalUtil.toast(data.message || '{{ __("translation.common.error_occurred") }}', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                SwalUtil.toast('{{ __("translation.common.error_occurred") }}', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
-        });
-    }
 });
 </script>
 
-{{-- Medical Features Scripts (Lab Tests & Vaccinations) --}}
-@include('clinic.patients.partials.medical-scripts')
+{{-- Medical Features Scripts --}}
+@include('clinic.patients.partials.lab-test-medical-scripts')
+@include('clinic.patients.partials.vaccination-medical-scripts')
+@include('clinic.patients.partials.examination-medical-scripts')
+@include('clinic.patients.partials.chronic-disease-medical-scripts')
+@include('clinic.patients.partials.growth-measurement-medical-scripts')
 @endpush
 

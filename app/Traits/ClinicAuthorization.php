@@ -53,7 +53,7 @@ trait ClinicAuthorization
     {
         $clinic = $this->getClinic();
 
-        if (!$clinic || !$clinic->isApproved() || $patient->clinic_id !== $clinic->id) {
+        if (!$clinic || !$clinic->isApproved() || !$patient->belongsToClinic($clinic->id)) {
             if ($jsonResponse) {
                 abort(response()->json([
                     'success' => false,

@@ -67,7 +67,6 @@ return new class extends Migration
             $table->enum('status', ['scheduled', 'in_progress', 'completed', 'cancelled'])->default('scheduled');
             
             $table->timestamps();
-            $table->softDeletes();
 
             $table->index(['patient_id', 'examination_date']);
             $table->index(['user_id', 'examination_date']);

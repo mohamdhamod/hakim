@@ -13,6 +13,21 @@ use Illuminate\Support\Facades\Auth;
 class WorkspaceController extends Controller
 {
     /**
+     * Display the AI Assistant page (coming soon).
+     */
+    public function aiAssistant()
+    {
+        $user = Auth::user();
+
+        if (!$user->isDoctor()) {
+            return redirect()->route('home')
+                ->with('error', __('translation.clinic.doctors_only'));
+        }
+
+        return view('clinic.ai-assistant');
+    }
+
+    /**
      * Display the chat-style workspace.
      */
     public function index()
@@ -64,14 +79,14 @@ class WorkspaceController extends Controller
             ->get();
 
         // Get recent patients (limit to 5 for workspace)
-        $patients = Patient::where('clinic_id', $clinic->id)
+        $patients = Patient::forClinic($clinic->id)
             ->withCount('examinations')
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
         // Get counts for "View All" buttons
-        $totalPatients = Patient::where('clinic_id', $clinic->id)->count();
+        $totalPatients = Patient::forClinic($clinic->id)->count();
         $totalTodayAppointments = Appointment::where('clinic_id', $clinic->id)->today()->count();
         $totalUpcomingAppointments = Appointment::where('clinic_id', $clinic->id)
             ->where('appointment_date', '>', today())
@@ -99,6 +114,76 @@ class WorkspaceController extends Controller
     }
 
     /**
+     * Search/list patients for workspace card (AJAX).
+     */
+    public function searchPatients(Request $request)
+    {
+        $clinic = Auth::user()->clinic;
+        if (!$clinic) {
+            return response('', 204);
+        }
+
+        $query = Patient::forClinic($clinic->id)
+            ->withCount('examinations');
+
+        $crossClinicPatients = collect();
+
+        if ($search = $request->get('search')) {
+            $query->search($search)->limit(10);
+
+            // If searching by file_number pattern (e.g. D5-46068-1), also search across all clinics
+            if (preg_match('/^[A-Za-z]\d+-\d+(-\d+)?$/', $search)) {
+                $crossClinicPatient = Patient::where('file_number', $search)
+                    ->whereDoesntHave('clinics', fn($q) => $q->where('clinics.id', $clinic->id))
+                    ->first();
+
+                if ($crossClinicPatient) {
+                    $crossClinicPatients = collect([$crossClinicPatient]);
+                }
+            }
+        } else {
+            $query->orderBy('created_at', 'desc')->limit(5);
+        }
+
+        $patients = $query->get();
+
+        return view('clinic.partials.workspace-patients-list', compact('patients', 'crossClinicPatients'))->render();
+    }
+
+    /**
+     * Search/list today's appointments for workspace card (AJAX).
+     */
+    public function searchAppointments(Request $request)
+    {
+        $clinic = Auth::user()->clinic;
+        if (!$clinic) {
+            return response('', 204);
+        }
+
+        $query = Appointment::with('patient')
+            ->where('clinic_id', $clinic->id)
+            ->today()
+            ->ordered();
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('patient_name', 'like', "%{$search}%")
+                  ->orWhere('patient_phone', 'like', "%{$search}%")
+                  ->orWhereHas('patient', function ($pq) use ($search) {
+                      $pq->where('name', 'like', "%{$search}%")
+                         ->orWhere('phone', 'like', "%{$search}%");
+                  });
+            });
+        } else {
+            $query->limit(5);
+        }
+
+        $appointments = $query->get();
+
+        return view('clinic.partials.workspace-appointments-list', compact('appointments'))->render();
+    }
+
+    /**
      * Get appointment details for the workspace.
      */
     public function appointmentDetails($lang, Appointment $appointment)
@@ -121,34 +206,6 @@ class WorkspaceController extends Controller
             'html' => $html,
             'title' => $appointment->patient_display_name,
             'subtitle' => $appointment->appointment_date->format('Y-m-d') . ' ' . \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i'),
-        ]);
-    }
-
-    /**
-     * Get patient details for the workspace.
-     */
-    public function patientDetails($lang , Patient $patient)
-    {
-        $clinic = Auth::user()->clinic;
-
-        if ($patient->clinic_id !== $clinic->id) {
-            return response()->json([
-                'success' => false,
-                'message' => __('translation.common.not_found'),
-            ], 404);
-        }
-
-        $patient->load(['examinations' => function ($query) {
-            $query->orderBy('examination_date', 'desc')->limit(10);
-        }]);
-
-        $html = view('clinic.partials.patient-details', compact('patient'))->render();
-
-        return response()->json([
-            'success' => true,
-            'html' => $html,
-            'title' => $patient->name,
-            'subtitle' => __('translation.patient.file_number') . ': ' . $patient->file_number,
         ]);
     }
 
@@ -235,7 +292,13 @@ class WorkspaceController extends Controller
 
         // If create examination is requested and patient exists
         if ($request->boolean('create_examination') && $appointment->patient_id) {
-            $response['examination_url'] = route('clinic.examinations.create', ['patient' => $appointment->patient_id]);
+            $patient = \App\Models\Patient::find($appointment->patient_id);
+            if ($patient) {
+                $response['examination_url'] = route('clinic.patients.show', [
+                    'patient' => $patient->file_number,
+                    'tab' => 'examinations',
+                ]) . '#examinations-section';
+            }
         }
 
         return response()->json($response);
@@ -272,7 +335,7 @@ class WorkspaceController extends Controller
 
         // Create patient from appointment
         $patient = Patient::create([
-            'clinic_id' => $clinic->id,
+            'file_number' => Patient::generateFileNumber($clinic->id),
             'full_name' => $appointment->patient_name,
             'phone' => $appointment->patient_phone,
             'email' => $appointment->patient_email,
@@ -280,6 +343,9 @@ class WorkspaceController extends Controller
             'gender' => $request->gender,
             'notes' => $request->notes,
         ]);
+
+        // Attach patient to this clinic
+        $patient->clinics()->attach($clinic->id);
 
         // Link appointment to patient
         $appointment->update([
@@ -331,21 +397,14 @@ class WorkspaceController extends Controller
         // Get paginated results
         $appointments = $query->ordered()->paginate(15)->withQueryString();
 
-        // Get counts for stats
-        $totalAppointments = Appointment::where('clinic_id', $clinic->id)->count();
-        $pendingCount = Appointment::where('clinic_id', $clinic->id)->where('status', 'pending')->count();
-        $confirmedCount = Appointment::where('clinic_id', $clinic->id)->where('status', 'confirmed')->count();
-        $completedCount = Appointment::where('clinic_id', $clinic->id)->where('status', 'completed')->count();
-        $cancelledCount = Appointment::where('clinic_id', $clinic->id)->where('status', 'cancelled')->count();
+        // AJAX request — return only the grid partial
+        if ($request->ajax()) {
+            return view('clinic.appointments.partials.appointments-grid', compact('appointments'))->render();
+        }
 
         return view('clinic.appointments.index', compact(
             'clinic',
-            'appointments',
-            'totalAppointments',
-            'pendingCount',
-            'confirmedCount',
-            'completedCount',
-            'cancelledCount'
+            'appointments'
         ));
     }
 }

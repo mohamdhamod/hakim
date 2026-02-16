@@ -10,7 +10,7 @@
             </div>
             <form class="add-form" action="{{ route('specialties.store') }}" method="POST">
                 @csrf
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                     <div class="row">
                         <!-- Key Field -->
                         <div class="col-md-6 mb-3">

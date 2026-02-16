@@ -4,108 +4,36 @@
 
 @section('content')
 <div class="container py-4">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-1">{{ __('translation.clinic_chat.appointments') }}</h1>
-            <p class="text-muted mb-0">{{ __('translation.clinic_chat.manage_appointments') }}</p>
-        </div>
-        <a href="{{ route('clinic.workspace') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} me-2"></i>{{ __('translation.common.back') }}
-        </a>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 stat-card" data-filter="all">
-                <div class="card-body text-center py-3">
-                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-                        <i class="fas fa-calendar-check text-primary"></i>
-                    </div>
-                    <h4 class="mb-0 fw-bold">{{ $totalAppointments }}</h4>
-                    <small class="text-muted">{{ __('translation.clinic_chat.total') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 stat-card" data-filter="pending">
-                <div class="card-body text-center py-3">
-                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-                        <i class="fas fa-clock text-warning"></i>
-                    </div>
-                    <h4 class="mb-0 fw-bold text-warning">{{ $pendingCount }}</h4>
-                    <small class="text-muted">{{ __('translation.clinic_chat.pending') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 stat-card" data-filter="confirmed">
-                <div class="card-body text-center py-3">
-                    <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-                        <i class="fas fa-check text-success"></i>
-                    </div>
-                    <h4 class="mb-0 fw-bold text-success">{{ $confirmedCount }}</h4>
-                    <small class="text-muted">{{ __('translation.clinic_chat.confirmed') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100 stat-card" data-filter="completed">
-                <div class="card-body text-center py-3">
-                    <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-2" style="width: 40px; height: 40px;">
-                        <i class="fas fa-check-double text-info"></i>
-                    </div>
-                    <h4 class="mb-0 fw-bold text-info">{{ $completedCount }}</h4>
-                    <small class="text-muted">{{ __('translation.clinic_chat.status_completed') }}</small>
-                </div>
+    {{-- Search Card --}}
+    <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-2">
+            <div class="input-group">
+                <span class="input-group-text bg-primary bg-opacity-10 border-0 rounded-start-3 px-3">
+                    <i class="fas fa-search text-primary small"></i>
+                </span>
+                <input type="text" id="searchAppointments" class="form-control border-0 shadow-none" placeholder="{{ __('translation.clinic_chat.search_patient') }}">
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body py-3">
-            <form method="GET" action="{{ route('clinic.appointments.index') }}" id="filterForm">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted">{{ __('translation.common.search') }}</label>
-                        <input type="text" name="search" id="searchInput" class="form-control form-control-sm" placeholder="{{ __('translation.clinic_chat.search_patient') }}" value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small text-muted">{{ __('translation.clinic_chat.status') }}</label>
-                        <select name="status" id="filterStatus" class="form-select form-select-sm choices-select">
-                            <option value="all">{{ __('translation.common.all') }}</option>
-                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('translation.clinic_chat.pending') }}</option>
-                            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>{{ __('translation.clinic_chat.confirmed') }}</option>
-                            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>{{ __('translation.clinic_chat.status_completed') }}</option>
-                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>{{ __('translation.clinic_chat.status_cancelled') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small text-muted">{{ __('translation.clinic_chat.date_from') }}</label>
-                        <input type="date" name="date_from" id="dateFrom" class="form-control form-control-sm" value="{{ request('date_from') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small text-muted">{{ __('translation.clinic_chat.date_to') }}</label>
-                        <input type="date" name="date_to" id="dateTo" class="form-control form-control-sm" value="{{ request('date_to') }}">
-                    </div>
-                    <div class="col-md-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
-                            <i class="fas fa-search me-1"></i>{{ __('translation.common.search') }}
-                        </button>
-                        <a href="{{ route('clinic.appointments.index') }}" class="btn btn-sm btn-outline-secondary" id="resetFilters">
-                            <i class="fas fa-redo"></i>
-                        </a>
-                    </div>
-                </div>
-            </form>
+    {{-- Appointments Card --}}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="fas fa-calendar-check text-primary me-2"></i>
+                    {{ __('translation.clinic_chat.appointments') }}
+                </h5>
+                <a href="{{ route('clinic.workspace') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} me-1"></i>{{ __('translation.common.back') }}
+                </a>
+            </div>
         </div>
-    </div>
 
-    <!-- Appointments Grid -->
-    <div id="appointmentsContainer">
-        @include('clinic.appointments.partials.appointments-grid', ['appointments' => $appointments])
+        {{-- Results Container --}}
+        <div class="card-body p-0" id="appointmentsContainer">
+            @include('clinic.appointments.partials.appointments-grid', ['appointments' => $appointments])
+        </div>
     </div>
 </div>
 
@@ -119,7 +47,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted mb-3">{{ __('translation.clinic_chat.cancel_appointment_confirm') }}</p>
                 <div class="mb-3">
                     <label class="form-label">{{ __('translation.clinic_chat.cancellation_reason') }}</label>
@@ -146,7 +74,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted mb-3">{{ __('translation.clinic_chat.complete_appointment_confirm') }}</p>
                 <div class="mb-3">
                     <label class="form-label">{{ __('translation.clinic_chat.completion_notes') }}</label>
@@ -179,7 +107,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted mb-3">{{ __('translation.clinic_chat.register_patient_desc') }}</p>
                 <input type="hidden" id="registerAppointmentId">
                 
@@ -248,17 +176,39 @@
 
 @push('scripts')
 <script>
-    let currentAppointmentId = null;
-    
-    // Stat cards click to filter
-    document.querySelectorAll('.stat-card').forEach(card => {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', function() {
-            const filter = this.dataset.filter;
-            document.getElementById('filterStatus').value = filter;
-            document.getElementById('filterForm').submit();
+    // AJAX search
+    (function() {
+        const searchInput = document.getElementById('searchAppointments');
+        const container = document.getElementById('appointmentsContainer');
+        if (!searchInput || !container) return;
+
+        let debounceTimer;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(loadAppointments, 400);
         });
-    });
+
+        async function loadAppointments() {
+            const params = new URLSearchParams();
+            if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
+            const qs = params.toString() ? `?${params}` : '';
+
+            container.style.opacity = '0.5';
+            container.style.pointerEvents = 'none';
+
+            try {
+                const html = await ApiClient.getHtml(`{{ route('clinic.appointments.index') }}${qs}`);
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Appointments search error:', error);
+            } finally {
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        }
+    })();
+
+    let currentAppointmentId = null;
     
     // Cancel Appointment
     function cancelAppointmentModal(appointmentId) {

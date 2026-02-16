@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('key')->nullable();
             $table->integer('score')->default(0);
             $table->string('code')->nullable();
-            $table->softDeletes();
             $table->timestamps();
         });
     }

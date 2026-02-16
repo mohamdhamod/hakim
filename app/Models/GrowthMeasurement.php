@@ -10,6 +10,7 @@ class GrowthMeasurement extends Model
     use HasFactory;
 
     protected $fillable = [
+        'clinic_id',
         'patient_id',
         'examination_id',
         'measured_by_user_id',
@@ -40,6 +41,14 @@ class GrowthMeasurement extends Model
     ];
 
     protected $appends = ['weight', 'height', 'head_circumference'];
+
+    /**
+     * Get the clinic that owns this measurement.
+     */
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
 
     /**
      * Get the patient that owns this measurement.

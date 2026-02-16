@@ -4,22 +4,21 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="ModelLabel">{{ __('translation.roles.view_sub_program_info') }}</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <form id="frm_add" class="view-form">
 
                     <div class="row" id="data">
 
 </div>
-                    <div class="form-group m-2 float-right">
-                        <button type="button" class="btn btn-xs btn-dark" data-dismiss="modal">
-                            {{ __('translation.general.close') }}
-                        </button>
-                    </div>
                 </form>
             </div>
-
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-dark" data-bs-dismiss="modal">
+                    {{ __('translation.general.close') }}
+                </button>
+            </div>
         </div>
     </div>
 </div>

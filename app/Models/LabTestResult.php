@@ -10,6 +10,7 @@ class LabTestResult extends Model
     use HasFactory;
 
     protected $fillable = [
+        'clinic_id',
         'patient_id',
         'examination_id',
         'lab_test_type_id',
@@ -28,6 +29,14 @@ class LabTestResult extends Model
     protected $casts = [
         'test_date' => 'date',
     ];
+
+    /**
+     * Get the clinic that owns this test result.
+     */
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
 
     /**
      * Get the patient that owns this test result.

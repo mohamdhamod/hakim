@@ -30,10 +30,11 @@ class PatientController extends Controller
     {
         $clinic = $this->authorizeClinicAccess();
 
-        if ($request->ajax()) {
+        // DataTables AJAX request (has 'draw' parameter)
+        if ($request->ajax() && $request->has('draw')) {
             $patients = Patient::with(['latestExamination'])
                 ->withCount('examinations')
-                ->where('clinic_id', $clinic->id)
+                ->forClinic($clinic->id)
                 ->select('patients.*');
 
             return DataTables::of($patients)
@@ -56,9 +57,6 @@ class PatientController extends Controller
                             <a href="' . route('clinic.patients.show', $patient->id) . '" class="btn btn-sm btn-info" title="' . __('translation.common.view') . '">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="' . route('clinic.patients.edit', $patient->id) . '" class="btn btn-sm btn-warning" title="' . __('translation.common.edit') . '">
-                                <i class="bi bi-pencil"></i>
-                            </a>
                             <a href="' . route('clinic.patients.show', $patient->id) . '" class="btn btn-sm btn-success" title="' . __('translation.examination.new') . '">
                                 <i class="bi bi-plus-lg"></i>
                             </a>
@@ -68,9 +66,35 @@ class PatientController extends Controller
                 ->make(true);
         }
 
-        $patients = Patient::where('clinic_id', $clinic->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+        // Build query with search/filter/sort
+        $query = Patient::withCount('examinations')
+            ->forClinic($clinic->id);
+
+        if ($search = $request->get('search')) {
+            $query->search($search);
+        }
+
+        if ($gender = $request->get('gender')) {
+            $query->where('gender', $gender);
+        }
+
+        switch ($request->get('sort')) {
+            case 'name':
+                $query->orderBy('full_name', 'asc');
+                break;
+            case 'visits':
+                $query->orderBy('examinations_count', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
+
+        $patients = $query->paginate(12);
+
+        // Filter AJAX request — return only the grid partial
+        if ($request->ajax()) {
+            return view('clinic.patients.partials.patients-grid', compact('patients'))->render();
+        }
 
         return view('clinic.patients.index', compact('patients'));
     }
@@ -131,7 +155,6 @@ class PatientController extends Controller
             ], 200); // Return 200 so handleSubmit processes it correctly
         }
 
-        $validated['clinic_id'] = $clinic->id;
         $validated['file_number'] = $this->integrationService->generateFileNumber($clinic);
 
         // Try to link with existing user account
@@ -143,6 +166,9 @@ class PatientController extends Controller
         }
 
         $patient = Patient::create($validated);
+
+        // Attach patient to this clinic
+        $patient->clinics()->attach($clinic->id);
 
         if ($request->ajax()) {
             return response()->json([
@@ -184,19 +210,9 @@ class PatientController extends Controller
         ]);
 
         // Generate examination number for the modal form
-        $examinationNumber = Examination::generateExaminationNumber($clinic->id);
+        $examinationNumber = Examination::generateExaminationNumber($patient->id);
 
-        return view('clinic.patients.show', compact('patient', 'examinationNumber'));
-    }
-
-    /**
-     * Show the form for editing the specified patient.
-     */
-    public function edit($lang , Patient $patient)
-    {
-        $this->authorizePatientAccess($patient);
-
-        return view('clinic.patients.edit', compact('patient'));
+        return view('clinic.patients.show', compact('patient', 'clinic', 'examinationNumber'));
     }
 
     /**
@@ -276,12 +292,44 @@ class PatientController extends Controller
 
         $term = $request->get('term', '');
         
-        $patients = Patient::where('clinic_id', $clinic->id)
+        $patients = Patient::forClinic($clinic->id)
             ->search($term)
             ->limit(10)
             ->get(['id', 'file_number', 'full_name', 'phone']);
 
         return response()->json($patients);
+    }
+
+    /**
+     * Request access to a patient from another clinic.
+     * Adds the clinic to the patient's clinic_patient pivot table.
+     */
+    public function requestAccess(Request $request)
+    {
+        $clinic = $this->authorizeClinicAccess(true);
+
+        $validated = $request->validate([
+            'patient_id' => 'required|integer|exists:patients,id',
+        ]);
+
+        $patient = Patient::findOrFail($validated['patient_id']);
+
+        // Check if patient already belongs to this clinic
+        if ($patient->belongsToClinic($clinic->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('translation.patient.request_access_already'),
+            ], 422);
+        }
+
+        // Add clinic to patient's clinics
+        $patient->clinics()->attach($clinic->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('translation.patient.request_access_success'),
+            'redirect' => route('clinic.patients.show', $patient),
+        ]);
     }
 
     /**
@@ -304,10 +352,11 @@ class PatientController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.patient.medical_history_updated'),
+                'redirect' => route('clinic.patients.show', $patient->file_number),
             ]);
         }
 
-        return redirect()->route('clinic.patients.show', $patient->id)
+        return redirect()->route('clinic.patients.show', $patient->file_number)
             ->with('success', __('translation.patient.medical_history_updated'));
     }
 
@@ -329,10 +378,11 @@ class PatientController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.patient.emergency_contact_updated'),
+                'redirect' => route('clinic.patients.show', $patient->file_number),
             ]);
         }
 
-        return redirect()->route('clinic.patients.show', $patient->id)
+        return redirect()->route('clinic.patients.show', $patient->file_number)
             ->with('success', __('translation.patient.emergency_contact_updated'));
     }
 
@@ -353,10 +403,11 @@ class PatientController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.patient.notes_updated'),
+                'redirect' => route('clinic.patients.show', $patient->file_number),
             ]);
         }
 
-        return redirect()->route('clinic.patients.show', $patient->id)
+        return redirect()->route('clinic.patients.show', $patient->file_number)
             ->with('success', __('translation.patient.notes_updated'));
     }
 
@@ -365,13 +416,13 @@ class PatientController extends Controller
      */
     public function allExaminations($lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient);
 
         $examinations = $patient->examinations()
             ->orderBy('examination_date', 'desc')
             ->paginate(15);
 
-        return view('clinic.patients.partials.all-examinations', compact('patient', 'examinations'));
+        return view('clinic.patients.partials.all-examinations', compact('patient', 'examinations', 'clinic'));
     }
 
     /**
@@ -379,14 +430,14 @@ class PatientController extends Controller
      */
     public function allLabTests($lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient);
 
         $labTests = $patient->labTestResults()
             ->with('labTestType.translations')
             ->orderBy('test_date', 'desc')
             ->paginate(15);
 
-        return view('clinic.patients.partials.all-lab-tests', compact('patient', 'labTests'));
+        return view('clinic.patients.partials.all-lab-tests', compact('patient', 'labTests', 'clinic'));
     }
 
     /**
@@ -394,14 +445,14 @@ class PatientController extends Controller
      */
     public function allVaccinations($lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient);
 
         $vaccinations = $patient->vaccinationRecords()
             ->with('vaccinationType.translations')
             ->orderBy('vaccination_date', 'desc')
             ->paginate(15);
 
-        return view('clinic.patients.partials.all-vaccinations', compact('patient', 'vaccinations'));
+        return view('clinic.patients.partials.all-vaccinations', compact('patient', 'vaccinations', 'clinic'));
     }
 
     /**
@@ -409,14 +460,14 @@ class PatientController extends Controller
      */
     public function allChronicDiseases($lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient);
 
         $chronicDiseases = $patient->chronicDiseases()
             ->with('chronicDiseaseType.translations')
             ->orderBy('diagnosis_date', 'desc')
             ->paginate(15);
 
-        return view('clinic.patients.partials.all-chronic-diseases', compact('patient', 'chronicDiseases'));
+        return view('clinic.patients.partials.all-chronic-diseases', compact('patient', 'chronicDiseases', 'clinic'));
     }
 
     /**
@@ -424,12 +475,12 @@ class PatientController extends Controller
      */
     public function allGrowthMeasurements($lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient);
 
         $measurements = $patient->growthMeasurements()
             ->orderBy('measurement_date', 'desc')
             ->paginate(15);
 
-        return view('clinic.patients.partials.all-growth-measurements', compact('patient', 'measurements'));
+        return view('clinic.patients.partials.all-growth-measurements', compact('patient', 'measurements', 'clinic'));
     }
 }

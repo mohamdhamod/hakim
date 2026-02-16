@@ -8,11 +8,32 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <form class="add-chronic-form" action="{{ route('patients.chronic-diseases.store', $patient) }}" method="POST">
+                @csrf
+
+            {{-- Tabs Navigation --}}
+            <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="chronicDiseaseTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="manual-chronic-tab" data-bs-toggle="tab" data-bs-target="#manualChronicPane" type="button" role="tab" aria-controls="manualChronicPane" aria-selected="true">
+                        <i class="fas fa-edit me-1"></i>{{ __('translation.examination.manual_entry') }}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="ai-chronic-tab" data-bs-toggle="tab" data-bs-target="#aiChronicPane" type="button" role="tab" aria-controls="aiChronicPane" aria-selected="false">
+                        <i class="fas fa-robot me-1"></i>{{ __('translation.ai_chronic_disease') }}
+                        <span class="badge bg-info ms-1">{{ __('translation.examination.coming_soon') }}</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
+                <div class="tab-content" id="chronicDiseaseTabContent">
+                {{-- Tab 1: Manual Chronic Disease Form --}}
+                <div class="tab-pane fade show active" id="manualChronicPane" role="tabpanel" aria-labelledby="manual-chronic-tab">
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.disease_type') }} <span class="text-danger">*</span></label>
-                        <select class="form-select choices-select" id="diseaseType" required>
+                        <select class="form-select choices-select" id="diseaseType" name="chronic_disease_type_id" required>
                             <option value="">{{ __('translation.select_disease') }}</option>
                             @foreach(\App\Models\ChronicDiseaseType::with('translations')->where('is_active', true)->orderBy('category')->get()->groupBy('category') as $category => $diseases)
                                 <optgroup label="{{ $category }}">
@@ -27,11 +48,11 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.diagnosis_date') }} <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="diagnosisDate" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" class="form-control" id="diagnosisDate" name="diagnosis_date" value="{{ date('Y-m-d') }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.severity') }}</label>
-                        <select class="form-select choices-select" id="diseaseSeverity">
+                        <select class="form-select choices-select" id="diseaseSeverity" name="severity">
                             <option value="mild">{{ __('translation.mild') }}</option>
                             <option value="moderate" selected>{{ __('translation.moderate') }}</option>
                             <option value="severe">{{ __('translation.severe') }}</option>
@@ -39,28 +60,46 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.treatment_plan') }}</label>
-                        <textarea class="form-control" id="diseaseTreatmentPlan" rows="3"></textarea>
+                        <textarea class="form-control" id="diseaseTreatmentPlan" name="treatment_plan" rows="3"></textarea>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.next_followup_date') }}</label>
-                        <input type="date" class="form-control" id="nextFollowupDate">
+                        <input type="date" class="form-control" id="nextFollowupDate" name="next_followup_date">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.disease_status') }}</label>
-                        <select class="form-select choices-select" id="diseaseStatus">
+                        <select class="form-select choices-select" id="diseaseStatus" name="status">
                             <option value="active" selected>{{ __('translation.active') }}</option>
                             <option value="in_remission">{{ __('translation.in_remission') }}</option>
                             <option value="resolved">{{ __('translation.resolved') }}</option>
                         </select>
                     </div>
                 </div>
+                </div>{{-- end manualChronicPane --}}
+
+                {{-- Tab 2: AI (Coming Soon) --}}
+                <div class="tab-pane fade" id="aiChronicPane" role="tabpanel" aria-labelledby="ai-chronic-tab">
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-robot text-info" style="font-size: 5rem; opacity: 0.3;"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">{{ __('translation.ai_chronic_disease') }}</h4>
+                        <p class="text-muted mb-4 px-5">{{ __('translation.ai_chronic_disease_description') }}</p>
+                        <span class="badge bg-info fs-6 px-4 py-2">
+                            <i class="fas fa-clock me-2"></i>{{ __('translation.examination.coming_soon') }}
+                        </span>
+                    </div>
+                </div>{{-- end aiChronicPane --}}
+
+                </div>{{-- end tab-content --}}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('translation.common.cancel') }}</button>
-                <button type="button" class="btn btn-warning" onclick="saveChronicDisease()">
+                <button type="submit" class="btn btn-warning" id="chronicDiseaseSaveBtn">
                     <i class="fas fa-save me-2"></i>{{ __('translation.common.save') }}
                 </button>
             </div>
+            </form>
         </div>
     </div>
 </div>
@@ -75,7 +114,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="chronicDiseaseDetailsContent">
+            <div class="modal-body" id="chronicDiseaseDetailsContent" style="max-height: 50vh; overflow-y: auto;">
                 <div class="text-center py-4">
                     <div class="spinner-border text-warning" role="status">
                         <span class="visually-hidden">{{ __('translation.common.loading') }}</span>
@@ -99,8 +138,11 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <form class="add-monitoring-form" action="" method="POST">
+                @csrf
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <input type="hidden" id="monitoringDiseaseId">
+                <input type="hidden" name="parameter_name" id="monitoringParameterNameHidden">
                 <div id="monitoringDiseaseName" class="alert alert-light mb-3 py-2 small">
                     <i class="fas fa-heartbeat text-warning me-1"></i>
                     <strong id="monitoringDiseaseLabel"></strong>
@@ -108,7 +150,7 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.monitoring_date') }} <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="monitoringDate" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" class="form-control" id="monitoringDate" name="monitoring_date" value="{{ date('Y-m-d') }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.parameter_name') }} <span class="text-danger">*</span></label>
@@ -132,15 +174,15 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.parameter_value') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="monitoringParameterValue" required>
+                        <input type="text" class="form-control" id="monitoringParameterValue" name="parameter_value" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('translation.parameter_unit') }}</label>
-                        <input type="text" class="form-control" id="monitoringParameterUnit" placeholder="mmHg, mg/dL, ...">
+                        <input type="text" class="form-control" id="monitoringParameterUnit" name="parameter_unit" placeholder="mmHg, mg/dL, ...">
                     </div>
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.status') }}</label>
-                        <select class="form-select choices-select" id="monitoringStatus">
+                        <select class="form-select choices-select" id="monitoringStatus" name="status">
                             <option value="">{{ __('translation.select') }}...</option>
                             <option value="controlled">{{ __('translation.controlled') }}</option>
                             <option value="uncontrolled">{{ __('translation.uncontrolled') }}</option>
@@ -149,16 +191,17 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label">{{ __('translation.notes') }}</label>
-                        <textarea class="form-control" id="monitoringNotes" rows="2"></textarea>
+                        <textarea class="form-control" id="monitoringNotes" name="notes" rows="2"></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('translation.common.cancel') }}</button>
-                <button type="button" class="btn btn-primary" onclick="saveMonitoring()">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save me-2"></i>{{ __('translation.common.save') }}
                 </button>
             </div>
+            </form>
         </div>
     </div>
 </div>

@@ -14,11 +14,26 @@ class GrowthChartController extends Controller
     use ClinicAuthorization;
 
     /**
+     * Build redirect URL: append section hash if previous URL is the patient show page.
+     */
+    private function buildRedirectUrl(Patient $patient, string $section = '#growth-measurements-section'): string
+    {
+        $previous = url()->previous();
+        $showUrl = route('clinic.patients.show', $patient);
+
+        if ($previous && str_starts_with(strtok($previous, '#?'), strtok($showUrl, '#?'))) {
+            return strtok($previous, '#') . $section;
+        }
+
+        return $previous ?: $showUrl . $section;
+    }
+
+    /**
      * Store a newly created growth measurement in storage.
      */
     public function store(Request $request, $lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient);
+        $clinic = $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'measurement_date' => 'required|date',
@@ -36,6 +51,7 @@ class GrowthChartController extends Controller
         }
 
         $validated['patient_id'] = $patient->id;
+        $validated['clinic_id'] = $clinic->id;
         $validated['measured_by_user_id'] = Auth::id();
 
         // Create measurement
@@ -55,7 +71,8 @@ class GrowthChartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.growth_measurement_added_successfully'),
-                'data' => $measurement
+                'data' => $measurement,
+                'redirect' => $this->buildRedirectUrl($patient)
             ]);
         }
 
@@ -70,6 +87,7 @@ class GrowthChartController extends Controller
     public function update(Request $request, $lang, Patient $patient, GrowthMeasurement $growthChart)
     {
         $this->authorizePatientAccess($patient);
+        $this->authorizeClinicModel($growthChart, true);
 
         $validated = $request->validate([
             'measurement_date' => 'required|date',
@@ -94,7 +112,8 @@ class GrowthChartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.growth_measurement_updated_successfully'),
-                'data' => $growthChart
+                'data' => $growthChart,
+                'redirect' => $this->buildRedirectUrl($patient)
             ]);
         }
 
@@ -109,6 +128,7 @@ class GrowthChartController extends Controller
     public function destroy($lang, Patient $patient, GrowthMeasurement $growthChart)
     {
         $this->authorizePatientAccess($patient);
+        $this->authorizeClinicModel($growthChart, true);
 
         $growthChart->delete();
 
@@ -116,6 +136,7 @@ class GrowthChartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => __('translation.growth_measurement_deleted_successfully'),
+                'redirect' => $this->buildRedirectUrl($patient)
             ]);
         }
 

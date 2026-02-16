@@ -1,7 +1,7 @@
 {{-- Growth Measurements Section (For Children Only) --}}
 @if($patient->date_of_birth && $patient->age < 18)
-<div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #4facfe10 0%, #00f2fe10 100%);">
-    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+<div class="card border-0 shadow-sm mb-4" id="growth-measurements-section" style="background: linear-gradient(135deg, #4facfe10 0%, #00f2fe10 100%);">
+    <div class="card-header bg-white border-0 py-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
         <h5 class="mb-0 fw-semibold">
             <i class="fas fa-chart-line text-info me-2"></i>
             {{ __('translation.growth_chart') }}
@@ -11,7 +11,7 @@
         </h5>
         <div class="d-flex gap-2 align-items-center">
             @if($patient->growthMeasurements && $patient->growthMeasurements->count() >= 2)
-            <ul class="nav nav-pills nav-sm" id="growthTabs" role="tablist">
+            <ul class="nav nav-pills nav-sm d-none d-sm-flex" id="growthTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active py-1 px-3 small" id="growth-table-tab" data-bs-toggle="pill" data-bs-target="#growthTablePane" type="button" role="tab">
                         <i class="fas fa-table me-1"></i>{{ __('translation.common.table') }}
@@ -24,8 +24,8 @@
                 </li>
             </ul>
             @endif
-            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#newGrowthMeasurementModal">
-                <i class="fas fa-plus me-2"></i>{{ __('translation.add_measurement') }}
+            <button type="button" class="btn btn-sm btn-info" onclick="openGrowthCreate()">
+                <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">{{ __('translation.add_measurement') }}</span><span class="d-sm-none">{{ __('translation.common.add') }}</span>
             </button>
         </div>
     </div>
@@ -34,7 +34,7 @@
             <div class="tab-content">
                 {{-- Table Tab --}}
                 <div class="tab-pane fade show active" id="growthTablePane" role="tabpanel">
-                    <div class="table-responsive">
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
@@ -97,14 +97,119 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-info" onclick="viewGrowthMeasurement({{ $measurement->id }})" title="{{ __('translation.common.view') }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
+                                            <div class="d-flex gap-1 flex-nowrap">
+                                                <button type="button" class="btn btn-sm btn-info view-btn" data-type="growth" data-model='@json($measurement)' data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('translation.common.view') }}">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                @if($measurement->clinic_id === $clinic->id)
+                                                <button type="button" class="btn btn-sm btn-primary edit-btn" data-type="growth" data-model='@json($measurement)' data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('translation.common.edit') }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger delete-btn" data-type="growth" data-model='@json($measurement)' data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('translation.common.delete') }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile Cards -->
+                    <div class="d-md-none p-3">
+                        @if($patient->growthMeasurements && $patient->growthMeasurements->count() >= 2)
+                        <div class="d-flex justify-content-center mb-3">
+                            <ul class="nav nav-pills nav-sm" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active py-1 px-3 small" data-bs-toggle="pill" data-bs-target="#growthTablePane" type="button" role="tab">
+                                        <i class="fas fa-table me-1"></i>{{ __('translation.common.table') }}
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link py-1 px-3 small" data-bs-toggle="pill" data-bs-target="#growthChartsPane" type="button" role="tab">
+                                        <i class="fas fa-chart-area me-1"></i>{{ __('translation.view_charts') }}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        @endif
+                        @foreach($patient->growthMeasurements->take(5) as $measurement)
+                            <div class="card mb-3 border rounded-3">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="fw-bold mb-0">
+                                                <i class="fas fa-calendar text-primary me-1"></i>{{ $measurement->measurement_date->format('M d, Y') }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                @if($measurement->age_months)
+                                                    @if($measurement->age_months < 12)
+                                                        {{ $measurement->age_months }} {{ __('translation.months') }}
+                                                    @else
+                                                        {{ floor($measurement->age_months / 12) }} {{ __('translation.years') }}
+                                                        @if($measurement->age_months % 12 > 0)
+                                                            {{ $measurement->age_months % 12 }} {{ __('translation.months') }}
+                                                        @endif
+                                                    @endif
+                                                @endif
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 small mt-2">
+                                        <div class="col-6">
+                                            <span class="text-muted d-block">{{ __('translation.weight') }}</span>
+                                            <strong class="text-primary">{{ $measurement->weight_kg }}</strong> <small>kg</small>
+                                            @if($measurement->weight_percentile)
+                                                <small class="text-muted ms-1">({{ round($measurement->weight_percentile) }}%)</small>
+                                            @endif
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="text-muted d-block">{{ __('translation.height') }}</span>
+                                            <strong class="text-info">{{ $measurement->height_cm }}</strong> <small>cm</small>
+                                            @if($measurement->height_percentile)
+                                                <small class="text-muted ms-1">({{ round($measurement->height_percentile) }}%)</small>
+                                            @endif
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="text-muted d-block">{{ __('translation.bmi') }}</span>
+                                            <strong style="color: #6610f2;">{{ round($measurement->bmi, 1) }}</strong>
+                                            @if($measurement->bmi_percentile)
+                                                <small class="text-muted ms-1">({{ round($measurement->bmi_percentile) }}%)</small>
+                                            @endif
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="text-muted d-block">{{ __('translation.head_circumference') }}</span>
+                                            @if($measurement->head_circumference_cm)
+                                                <strong class="text-danger">{{ $measurement->head_circumference_cm }}</strong> <small>cm</small>
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="row g-1 mt-3 pt-2 border-top">
+                                        <div class="col-6">
+                                            <button class="btn btn-sm btn-info w-100 view-btn" data-type="growth" data-model='@json($measurement)'>
+                                                <i class="fas fa-eye me-1"></i>{{ __('translation.common.view') }}
+                                            </button>
+                                        </div>
+                                        @if($measurement->clinic_id === $clinic->id)
+                                        <div class="col-6">
+                                            <button class="btn btn-sm btn-primary w-100 edit-btn" data-type="growth" data-model='@json($measurement)'>
+                                                <i class="fas fa-edit me-1"></i>{{ __('translation.common.edit') }}
+                                            </button>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-sm btn-danger w-100 delete-btn" data-type="growth" data-model='@json($measurement)'>
+                                                <i class="fas fa-trash me-1"></i>{{ __('translation.common.delete') }}
+                                            </button>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                     
                     @if($patient->growthMeasurements->count() > 5)
@@ -240,7 +345,7 @@
                 <div style="font-size: 3rem; opacity: 0.2; margin-bottom: 1rem;">📏</div>
                 <h6 class="text-muted mb-2">{{ __('translation.no_measurements') }}</h6>
                 <p class="small text-muted mb-3">{{ __('translation.track_child_growth') }}</p>
-                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#newGrowthMeasurementModal">
+                <button type="button" class="btn btn-sm btn-info" onclick="openGrowthCreate()">
                     <i class="fas fa-plus me-2"></i>{{ __('translation.add_first_measurement') }}
                 </button>
             </div>

@@ -1,146 +1,179 @@
-{{-- Appointments Grid --}}
-<div class="row g-4">
-    @forelse($appointments as $appointment)
-        @php
-            $statusColors = [
-                'pending' => 'warning',
-                'confirmed' => 'success',
-                'completed' => 'info',
-                'cancelled' => 'danger',
-            ];
-            $statusColor = $statusColors[$appointment->status] ?? 'secondary';
-            $statusIcons = [
-                'pending' => 'clock',
-                'confirmed' => 'check',
-                'completed' => 'check-double',
-                'cancelled' => 'times',
-            ];
-            $statusIcon = $statusIcons[$appointment->status] ?? 'calendar';
-        @endphp
-        <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 hover-lift">
-                <div class="card-body">
-                    {{-- Header with status --}}
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="avatar-circle bg-{{ $statusColor }}-subtle text-{{ $statusColor }} me-3" style="width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-{{ $statusIcon }} fs-5"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold">{{ $appointment->patient_display_name }}</h6>
-                            <span class="badge bg-{{ $statusColor }} bg-opacity-10 text-{{ $statusColor }}">
+{{-- Appointments List --}}
+@php
+    $statusColors = [
+        'pending' => 'warning',
+        'confirmed' => 'success',
+        'completed' => 'info',
+        'cancelled' => 'danger',
+    ];
+    $statusIcons = [
+        'pending' => 'clock',
+        'confirmed' => 'check',
+        'completed' => 'check-double',
+        'cancelled' => 'times',
+    ];
+@endphp
+
+@if($appointments->count() > 0)
+    {{-- Desktop Table --}}
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{{ __('translation.clinic_chat.patient') }}</th>
+                    <th>{{ __('translation.clinic_chat.date') }}</th>
+                    <th>{{ __('translation.clinic_chat.time') }}</th>
+                    <th>{{ __('translation.patient.phone') }}</th>
+                    <th>{{ __('translation.clinic_chat.status') }}</th>
+                    <th>{{ __('translation.clinic_chat.reason') }}</th>
+                    <th width="150">{{ __('translation.common.actions') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($appointments as $appointment)
+                    @php $sc = $statusColors[$appointment->status] ?? 'secondary'; @endphp
+                    <tr>
+                        <td class="small fw-medium">{{ $appointment->patient_display_name }}</td>
+                        <td class="small">
+                            <i class="fas fa-calendar text-primary me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d') }}
+                        </td>
+                        <td class="small">
+                            <i class="fas fa-clock text-muted me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}
+                        </td>
+                        <td class="small">
+                            @if($appointment->patient_phone)
+                                <span dir="ltr">{{ $appointment->patient_phone }}</span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td class="small">
+                            <span class="badge bg-{{ $sc }} bg-opacity-10 text-{{ $sc }}">
                                 {{ __('translation.clinic_chat.status_' . $appointment->status) }}
                             </span>
+                        </td>
+                        <td class="small">{{ Str::limit($appointment->reason, 30) ?: '-' }}</td>
+                        <td>
+                            <div class="d-flex gap-1 flex-nowrap">
+                                @if($appointment->status === 'pending')
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="confirmAppointment({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.confirm') }}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                @endif
+                                @if($appointment->status === 'confirmed')
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="completeAppointment({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.complete') }}">
+                                        <i class="fas fa-check-double"></i>
+                                    </button>
+                                @endif
+                                @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelAppointmentModal({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.cancel') }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                @endif
+                                @if(!$appointment->patient_id && !$appointment->clinic_patient_id && $appointment->status !== 'completed' && $appointment->status !== 'cancelled')
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.register_patient') }}">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                @elseif($appointment->clinicPatient)
+                                    <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ __('translation.clinic.view_patient') }}">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Mobile Cards --}}
+    <div class="d-md-none p-3">
+        @foreach($appointments as $appointment)
+            @php $sc = $statusColors[$appointment->status] ?? 'secondary'; @endphp
+            <div class="card mb-3 border rounded-3">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center" style="min-width: 0;">
+                            <div class="rounded-circle bg-{{ $sc }} bg-opacity-10 p-2 me-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                                <i class="fas fa-{{ $statusIcons[$appointment->status] ?? 'calendar' }} text-{{ $sc }}"></i>
+                            </div>
+                            <div style="min-width: 0;">
+                                <h6 class="mb-0 fw-bold text-truncate">{{ $appointment->patient_display_name }}</h6>
+                            </div>
                         </div>
+                        <span class="badge bg-{{ $sc }} bg-opacity-10 text-{{ $sc }} ms-2" style="flex-shrink: 0;">
+                            {{ __('translation.clinic_chat.status_' . $appointment->status) }}
+                        </span>
                     </div>
-                    
-                    {{-- Appointment info --}}
-                    <div class="appointment-info small mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-calendar text-muted me-2" style="width: 16px;"></i>
-                            <span>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d') }}</span>
+                    <div class="small mt-2">
+                        <div class="d-flex flex-wrap gap-3 mb-1">
+                            <span><i class="fas fa-calendar text-primary me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d') }}</span>
+                            <span><i class="fas fa-clock text-muted me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}</span>
                         </div>
-                        
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-clock text-muted me-2" style="width: 16px;"></i>
-                            <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}</span>
-                        </div>
-                        
                         @if($appointment->patient_phone)
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-phone text-muted me-2" style="width: 16px;"></i>
-                            <span dir="ltr">{{ $appointment->patient_phone }}</span>
-                        </div>
+                            <div class="mb-1"><i class="fas fa-phone text-muted me-1"></i><span dir="ltr">{{ $appointment->patient_phone }}</span></div>
                         @endif
-                        
                         @if($appointment->reason)
-                        <div class="d-flex align-items-start">
-                            <i class="fas fa-comment-medical text-muted me-2 mt-1" style="width: 16px;"></i>
-                            <span class="text-muted">{{ Str::limit($appointment->reason, 50) }}</span>
-                        </div>
+                            <div class="text-muted"><i class="fas fa-comment-medical me-1"></i>{{ Str::limit($appointment->reason, 60) }}</div>
                         @endif
                     </div>
-                    
-                    {{-- Actions --}}
                     @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="row g-1 mt-3 pt-2 border-top">
                         @if($appointment->status === 'pending')
-                            <button type="button" class="btn btn-sm btn-success flex-grow-1" onclick="confirmAppointment({{ $appointment->id }})">
-                                <i class="fas fa-check me-1"></i>{{ __('translation.clinic_chat.confirm') }}
-                            </button>
+                            <div class="col">
+                                <button class="btn btn-sm btn-success w-100" onclick="confirmAppointment({{ $appointment->id }})">
+                                    <i class="fas fa-check me-1"></i>{{ __('translation.clinic_chat.confirm') }}
+                                </button>
+                            </div>
                         @endif
-                        
                         @if($appointment->status === 'confirmed')
-                            <button type="button" class="btn btn-sm btn-info flex-grow-1" onclick="completeAppointment({{ $appointment->id }})">
-                                <i class="fas fa-check-double me-1"></i>{{ __('translation.clinic_chat.complete') }}
-                            </button>
+                            <div class="col">
+                                <button class="btn btn-sm btn-info w-100" onclick="completeAppointment({{ $appointment->id }})">
+                                    <i class="fas fa-check-double me-1"></i>{{ __('translation.clinic_chat.complete') }}
+                                </button>
+                            </div>
                         @endif
-                        
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelAppointmentModal({{ $appointment->id }})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        
-                        @if(!$appointment->patient_id && !$appointment->clinic_patient_id)
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')" title="{{ __('translation.clinic_chat.register_as_patient') }}">
-                                <i class="fas fa-user-plus"></i>
+                        <div class="col">
+                            <button class="btn btn-sm btn-outline-danger w-100" onclick="cancelAppointmentModal({{ $appointment->id }})">
+                                <i class="fas fa-times me-1"></i>{{ __('translation.clinic_chat.cancel') }}
                             </button>
+                        </div>
+                        @if(!$appointment->patient_id && !$appointment->clinic_patient_id)
+                            <div class="col-12 mt-1">
+                                <button class="btn btn-sm btn-outline-primary w-100" onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')">
+                                    <i class="fas fa-user-plus me-1"></i>{{ __('translation.clinic_chat.register_patient') }}
+                                </button>
+                            </div>
                         @elseif($appointment->clinicPatient)
-                            <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-outline-secondary" title="{{ __('translation.clinic.view_patient') }}">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                            <div class="col-12 mt-1">
+                                <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-outline-secondary w-100">
+                                    <i class="fas fa-eye me-1"></i>{{ __('translation.clinic.view_patient') }}
+                                </a>
+                            </div>
                         @endif
                     </div>
                     @elseif($appointment->clinicPatient)
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                    <div class="mt-3 pt-2 border-top">
+                        <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-outline-secondary w-100">
                             <i class="fas fa-eye me-1"></i>{{ __('translation.clinic.view_patient') }}
                         </a>
-                    </div>
-                    @else
-                    <div class="text-center text-muted small py-2">
-                        <i class="fas fa-{{ $appointment->status === 'completed' ? 'check-circle text-info' : 'times-circle text-danger' }} me-1"></i>
-                        {{ __('translation.clinic_chat.status_' . $appointment->status) }}
                     </div>
                     @endif
                 </div>
             </div>
-        </div>
-    @empty
-        <div class="col-12">
-            <div class="text-center py-5">
-                <i class="fas fa-calendar-times text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
-                <h5 class="mt-3 text-muted">{{ __('translation.clinic_chat.no_appointments') }}</h5>
-                <p class="text-muted">{{ __('translation.clinic_chat.no_appointments_message') }}</p>
-            </div>
-        </div>
-    @endforelse
-</div>
-
-@if($appointments->hasPages())
-    <div class="mt-4">
-        {{ $appointments->links() }}
+        @endforeach
+    </div>
+@else
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-times text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+        <h5 class="mt-3 text-muted">{{ __('translation.clinic_chat.no_appointments') }}</h5>
+        <p class="text-muted">{{ __('translation.clinic_chat.no_appointments_message') }}</p>
     </div>
 @endif
 
-<style>
-.hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
-}
-.avatar-circle {
-    flex-shrink: 0;
-}
-.stat-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1) !important;
-}
-.bg-warning-subtle { background-color: rgba(255, 193, 7, 0.15) !important; }
-.bg-success-subtle { background-color: rgba(25, 135, 84, 0.15) !important; }
-.bg-info-subtle { background-color: rgba(13, 202, 240, 0.15) !important; }
-.bg-danger-subtle { background-color: rgba(220, 53, 69, 0.15) !important; }
-</style>
+@if($appointments->hasPages())
+    <div class="mt-4 px-3">
+        {{ $appointments->links() }}
+    </div>
+@endif

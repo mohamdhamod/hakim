@@ -691,7 +691,7 @@
                 </div>
                 @endforeach
             @else
-            <div class="no-data">{{ __('translation.no_examinations') }}</div>
+            <div class="no-data">{{ __('translation.examination.no_examinations') }}</div>
             @endif
         </div>
 

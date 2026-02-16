@@ -59,32 +59,16 @@
                 </div>
             </li>
 
-            <!-- Examinations -->
-            <li class="side-nav-title mt-3">{{ __('translation.examination.examinations') }}</li>
-            
-            <li class="side-nav-item">
-                <button class="side-nav-link {{ request()->routeIs('clinic.examinations.*') ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#examinationsMenu" aria-expanded="{{ request()->routeIs('clinic.examinations.*') ? 'true' : 'false' }}">
-                    <i class="menu-icon bi bi-clipboard2-pulse"></i>
-                    <span class="menu-text">{{ __('translation.examination.examinations') }}</span>
-                    <span class="menu-arrow">
-                        <i class="bi bi-chevron-down"></i>
-                    </span>
-                </button>
-                <div class="collapse {{ request()->routeIs('clinic.examinations.*') ? 'show' : '' }}" id="examinationsMenu">
-                    <ul class="sub-menu">
-                        <li class="side-nav-item">
-                            <a href="{{ route('clinic.examinations.index') }}" class="side-nav-link {{ request()->routeIs('clinic.examinations.index') ? 'active' : '' }}">
-                                <i class="menu-icon bi bi-list-ul"></i>
-                                <span class="menu-text">{{ __('translation.common.view_all') }}</span>
-                            </a>
-                        </li>
-
-                    </ul>
-                </div>
-            </li>
-
             <!-- Settings -->
             <li class="side-nav-title mt-3">{{ __('translation.common.settings') }}</li>
+
+            <li class="side-nav-item">
+                <a href="{{ route('clinic.ai-assistant') }}" class="side-nav-link {{ request()->routeIs('clinic.ai-assistant') ? 'active' : '' }}">
+                    <i class="menu-icon bi bi-robot"></i>
+                    <span class="menu-text">{{ __('translation.ai_assistant.title') }}</span>
+                    <span class="badge bg-info rounded-pill ms-auto">{{ __('translation.examination.coming_soon') }}</span>
+                </a>
+            </li>
             
             <li class="side-nav-item">
                 <a href="{{ route('clinic.settings') }}" class="side-nav-link {{ request()->routeIs('clinic.settings') ? 'active' : '' }}">

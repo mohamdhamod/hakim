@@ -181,9 +181,6 @@
                                             {{ \Carbon\Carbon::parse($exam->examination_date)->format('d/m/Y') }}
                                         </small>
                                     </div>
-                                    <span class="badge {{ $exam->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
-                                        {{ $exam->status === 'completed' ? __('translation.patient.completed') : __('translation.patient.in_progress') }}
-                                    </span>
                                 </div>
                             </div>
                         @empty

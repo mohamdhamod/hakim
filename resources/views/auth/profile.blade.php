@@ -231,7 +231,7 @@
                             </div>
                             <form action="{{ route('clinic.team.invite') }}" method="POST">
                                 @csrf
-                                <div class="modal-body">
+                                <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                                     <p class="text-muted small mb-3">{{ __('translation.clinic.invite_description') }}</p>
                                     
                                     <div class="mb-3">

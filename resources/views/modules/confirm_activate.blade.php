@@ -6,7 +6,7 @@
                 <h5 class="modal-title" id="confirmActivateModalLabel">{{ __('translation.modal.confirm_activate.title') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 50vh; overflow-y: auto;">
                 <p id="confirmActivateMessage">{{ __('translation.modal.confirm_activate.message') }}</p>
             </div>
             <div class="modal-footer">

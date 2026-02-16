@@ -14,11 +14,28 @@ class VaccinationController extends Controller
     use ClinicAuthorization;
 
     /**
+     * Build redirect URL: append section hash if previous URL is the patient show page.
+     */
+    private function buildRedirectUrl(Patient $patient, string $section = '#vaccinations-section'): string
+    {
+        $previous = url()->previous();
+        $showUrl = route('clinic.patients.show', $patient);
+
+        // If previous URL is the patient show page (with or without hash/query), append section hash
+        if ($previous && str_starts_with(strtok($previous, '#?'), strtok($showUrl, '#?'))) {
+            return strtok($previous, '#') . $section;
+        }
+
+        // Otherwise return previous URL as-is (e.g., all-vaccinations page)
+        return $previous ?: $showUrl . $section;
+    }
+
+    /**
      * Store a newly created vaccination record in storage.
      */
     public function store(Request $request, $lang, Patient $patient)
     {
-        $this->authorizePatientAccess($patient, true);
+        $clinic = $this->authorizePatientAccess($patient, true);
 
         $validated = $request->validate([
             'vaccination_type_id' => 'required|exists:vaccination_types,id',
@@ -34,22 +51,25 @@ class VaccinationController extends Controller
         ]);
 
         $validated['patient_id'] = $patient->id;
+        $validated['clinic_id'] = $clinic->id;
         $validated['administered_by_user_id'] = Auth::id();
         $validated['dose_number'] = $validated['dose_number'] ?? 1;
         $validated['status'] = $validated['status'] ?? 'completed';
 
         $vaccination = VaccinationRecord::create($validated);
 
+        $redirectUrl = $this->buildRedirectUrl($patient);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => __('translation.vaccination_added_successfully'),
-                'data' => $vaccination
+                'data' => $vaccination,
+                'redirect' => $redirectUrl,
             ]);
         }
 
-        return redirect()
-            ->route('clinic.patients.show', $patient)
+        return redirect($redirectUrl)
             ->with('success', __('translation.vaccination_added_successfully'));
     }
 
@@ -59,6 +79,7 @@ class VaccinationController extends Controller
     public function update(Request $request, $lang, Patient $patient, VaccinationRecord $vaccination)
     {
         $this->authorizePatientAccess($patient, true);
+        $this->authorizeClinicModel($vaccination, true);
 
         $validated = $request->validate([
             'vaccination_type_id' => 'required|exists:vaccination_types,id',
@@ -75,16 +96,18 @@ class VaccinationController extends Controller
 
         $vaccination->update($validated);
 
+        $redirectUrl = $this->buildRedirectUrl($patient);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => __('translation.vaccination_updated_successfully'),
-                'data' => $vaccination
+                'data' => $vaccination,
+                'redirect' => $redirectUrl,
             ]);
         }
 
-        return redirect()
-            ->route('clinic.patients.show', $patient)
+        return redirect($redirectUrl)
             ->with('success', __('translation.vaccination_updated_successfully'));
     }
 
@@ -94,18 +117,21 @@ class VaccinationController extends Controller
     public function destroy($lang, Patient $patient, VaccinationRecord $vaccination)
     {
         $this->authorizePatientAccess($patient, true);
+        $this->authorizeClinicModel($vaccination, true);
 
         $vaccination->delete();
+
+        $redirectUrl = $this->buildRedirectUrl($patient);
 
         if (request()->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => __('translation.vaccination_deleted_successfully'),
+                'redirect' => $redirectUrl,
             ]);
         }
 
-        return redirect()
-            ->route('clinic.patients.show', $patient)
+        return redirect($redirectUrl)
             ->with('success', __('translation.vaccination_deleted_successfully'));
     }
 }
