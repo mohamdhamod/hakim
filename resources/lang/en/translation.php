@@ -250,6 +250,7 @@ return [
         'login_cta_hint' => "Forgot your password or don't have an account? Choose one of the options below:",
         'login_cta_google' => 'Continue with Google',
         'register_cta_google' => 'Sign up with Google',
+        'register_cta_hint' => 'Already have an account or prefer another method? Choose one of the options below:',
         'login_cta_otp' => 'Sign in using email only',
         'login_cta_reset_password' => 'Reset password',
         'login_cta_register' => 'Create a new account',

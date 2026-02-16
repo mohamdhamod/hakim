@@ -66,13 +66,37 @@
                                     </button>
                                 </div>
 
-                            <!-- Login Link -->
-                            <p class="text-muted text-center mt-4 mb-0">
-                                {{ __('translation.auth.already_have_account') }}
-                                <a href="{{ route('login') }}" class="text-decoration-underline link-offset-3 fw-semibold">
-                                    {{ __('translation.auth.sign_in') }}
-                                </a>
-                            </p>
+                            <div class="mt-3">
+                                        <p class="small text-muted text-center mb-2">
+                                            {{ __('translation.auth.register_cta_hint') }}
+                                        </p>
+                                        <div class="d-grid gap-2">
+                                            {{-- Google Sign-Up --}}
+                                            @if(config('services.google.client_id'))
+                                                <div id="google-signin-wrapper">
+                                                    <div id="google-signin-container"></div>
+                                                </div>
+                                                <div id="webview-google-notice" class="d-none">
+                                                    <div class="alert alert-info py-2 mb-2 small">
+                                                        <i class="bi bi-info-circle me-1"></i>
+                                                        {{ __('translation.auth.google_webview_notice') }}
+                                                    </div>
+                                                </div>
+                                                <noscript>
+                                                    <a class="btn btn-outline-dark" href="{{ route('oauth.google.redirect') }}">
+                                                        <i class="bi bi-google me-1"></i>{{ __('translation.auth.register_cta_google') }}
+                                                    </a>
+                                                </noscript>
+                                            @else
+                                                <a class="btn btn-outline-dark" href="{{ route('oauth.google.redirect') }}">
+                                                    <i class="bi bi-google me-1"></i>{{ __('translation.auth.register_cta_google') }}
+                                                </a>
+                                            @endif
+                                            <a class="btn btn-outline-primary" href="{{ route('login.otp') }}">{{ __('translation.auth.login_cta_otp') }}</a>
+                                            <a class="btn btn-outline-secondary" href="{{ route('password.request') }}">{{ __('translation.auth.login_cta_reset_password') }}</a>
+                                            <a class="btn btn-primary" href="{{ route('login') }}">{{ __('translation.auth.sign_in') }}</a>
+                                        </div>
+                                    </div>
 
                         </form>
                         </div>
@@ -96,11 +120,98 @@
 
 @endsection
 
-    @push('scripts')
-            @include('modules.i18n')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                try { if (window.handleSubmit) handleSubmit('#formRegisterStart'); } catch(e) { console.error(e); }
+@push('styles')
+<style>
+    #google-signin-container {
+        display: flex;
+        justify-content: center;
+        min-height: 44px;
+    }
+    #google-signin-container > div {
+        width: 100% !important;
+    }
+    #google-signin-container iframe {
+        width: 100% !important;
+    }
+</style>
+@endpush
+
+@push('scripts')
+    @include('modules.i18n')
+
+    @if(config('services.google.client_id'))
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        const GOOGLE_CLIENT_ID = @json(config('services.google.client_id'));
+        const GOOGLE_TOKEN_URL = @json(route('oauth.google.token'));
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        function isWebView() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            if (/wv/.test(ua) || /Android.*Version\/[\d.]+.*Chrome\/[\d.]+ Mobile/.test(ua) && !/Chrome\/[\d.]+ Mobile Safari/.test(ua)) return true;
+            if (/(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua)) return true;
+            if (/\bwv\b|WebView|FBAN|FBAV|Instagram|Twitter|Line\//i.test(ua)) return true;
+            return false;
+        }
+
+        function handleGoogleCredentialResponse(response) {
+            if (!response.credential) return;
+            const container = document.getElementById('google-signin-container');
+            if (container) container.innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            ApiClient.post(GOOGLE_TOKEN_URL, { credential: response.credential })
+            .then(data => {
+                if (data.success && data.redirect) window.location.href = data.redirect;
+                else { SwalHelper.error(data.message || 'Registration failed.'); initializeGoogleSignIn(); }
+            })
+            .catch(() => { SwalHelper.error('An error occurred.'); initializeGoogleSignIn(); });
+        }
+
+        function initializeGoogleSignIn() {
+            const wrapper = document.getElementById('google-signin-wrapper');
+            const container = document.getElementById('google-signin-container');
+            const notice = document.getElementById('webview-google-notice');
+            if (isWebView()) { if (wrapper) wrapper.classList.add('d-none'); if (notice) notice.classList.remove('d-none'); return; }
+            if (!container || !window.google?.accounts?.id) return;
+            container.innerHTML = '';
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: true,
+                context: 'signup',
+                ux_mode: 'popup',
+                itp_support: true
             });
-        </script>
-    @endpush
+            google.accounts.id.renderButton(container, {
+                type: 'standard', theme: 'outline', size: 'large', text: 'signup_with',
+                shape: 'rectangular', logo_alignment: 'center',
+                width: container.offsetWidth || 300, locale: @json(app()->getLocale())
+            });
+        }
+
+        window.onload = function() {
+            if (isWebView()) {
+                const wrapper = document.getElementById('google-signin-wrapper');
+                const notice = document.getElementById('webview-google-notice');
+                if (wrapper) wrapper.classList.add('d-none');
+                if (notice) notice.classList.remove('d-none');
+                return;
+            }
+            if (window.google?.accounts?.id) initializeGoogleSignIn();
+            else setTimeout(function() {
+                if (window.google?.accounts?.id) initializeGoogleSignIn();
+                else {
+                    const container = document.getElementById('google-signin-container');
+                    if (container) container.innerHTML = '<a class="btn btn-outline-dark w-100" href="{{ route('oauth.google.redirect') }}"><i class="bi bi-google me-1"></i>{{ __('translation.auth.register_cta_google') }}</a>';
+                }
+            }, 2000);
+        };
+    </script>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try { if (window.handleSubmit) handleSubmit('#formRegisterStart'); } catch(e) { console.error(e); }
+        });
+    </script>
+@endpush
