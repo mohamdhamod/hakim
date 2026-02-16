@@ -24,10 +24,12 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             
             // Clinic system seeders
+            ClinicServiceSeeder::class,
             SpecialtiesSeeder::class,
             ClinicPermissionsSeeder::class,
             LabTestTypeSeeder::class,
             VaccinationTypeSeeder::class,
+
             
             // Demo data (optional - comment out in production)
             DemoUsersSeeder::class,
