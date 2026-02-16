@@ -24,9 +24,6 @@ Route::get('/', [Controllers\HomeController::class, 'index'])->name('home');
 // Browse Clinics page (public)
 Route::get('/clinics', [Controllers\ClinicHomeController::class, 'index'])->name('home.clinics');
 
-// Clinic details (public)
-Route::get('/clinics/{clinic}', [Controllers\ClinicHomeController::class, 'show'])->name('clinics.show');
-
 // Appointments (requires auth)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/appointments', [Controllers\AppointmentController::class, 'store'])->name('appointments.store');
@@ -48,12 +45,7 @@ Route::middleware(['auth', 'verified'])->prefix('patient')->name('patient.')->gr
     // Medical History
     Route::get('/medical-history', [Patient\DashboardController::class, 'medicalHistory'])->name('medical-history');
     
-    // Browse Clinics
-    Route::get('/clinics', [Patient\DashboardController::class, 'clinics'])->name('clinics');
-    Route::get('/clinics/{clinic}', [Patient\DashboardController::class, 'showClinic'])->name('clinic.show');
-    
-    // Book Appointment
-    Route::post('/book-appointment', [Patient\DashboardController::class, 'bookAppointment'])->name('book-appointment');
+
 });
 
 // ==========================================

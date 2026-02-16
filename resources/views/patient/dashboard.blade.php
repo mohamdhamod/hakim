@@ -18,7 +18,7 @@
                         <p class="mb-0 opacity-75">{{ __('translation.patient.welcome_subtitle') }}</p>
                     </div>
                     <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                        <a href="{{ route('patient.clinics') }}" class="btn btn-light btn-lg">
+                        <a href="{{ route('home.clinics') }}" class="btn btn-light btn-lg">
                             <i class="bi bi-hospital me-2"></i>{{ __('translation.patient.browse_clinics') }}
                         </a>
                     </div>
@@ -139,7 +139,7 @@
                             <div class="text-center py-5">
                                 <i class="bi bi-calendar-x text-muted fs-1"></i>
                                 <p class="text-muted mt-3 mb-0">{{ __('translation.patient.no_upcoming') }}</p>
-                                <a href="{{ route('patient.clinics') }}" class="btn btn-primary mt-3">
+                                <a href="{{ route('home.clinics') }}" class="btn btn-primary mt-3">
                                     <i class="bi bi-plus-circle me-1"></i>
                                     {{ __('translation.patient.book_now') }}
                                 </a>
@@ -205,7 +205,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="{{ route('patient.clinics') }}" class="btn btn-primary">
+                            <a href="{{ route('home.clinics') }}" class="btn btn-primary">
                                 <i class="bi bi-calendar-plus me-2"></i>
                                 {{ __('translation.patient.book_appointment') }}
                             </a>
@@ -218,48 +218,6 @@
                                 {{ __('translation.patient.view_records') }}
                             </a>
                         </div>
-                    </div>
-                </div>
-
-                {{-- Available Clinics --}}
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold">
-                                <i class="bi bi-hospital text-success me-2"></i>
-                                {{ __('translation.patient.available_clinics') }}
-                            </h5>
-                            <a href="{{ route('patient.clinics') }}" class="btn btn-sm btn-link p-0">
-                                {{ __('translation.patient.view_all') }}
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        @forelse($availableClinics as $clinic)
-                            <a href="{{ route('patient.clinic.show', ['locale' => app()->getLocale(), 'clinic' => $clinic->id]) }}" 
-                               class="d-block border-bottom p-3 text-decoration-none text-dark hover-bg-light">
-                                <div class="d-flex align-items-center">
-                                    @if($clinic->logo)
-                                        <div class="rounded-circle overflow-hidden me-3" style="width: 45px; height: 45px;">
-                                            <img src="{{ $clinic->logo_path }}" alt="{{ $clinic->display_name }}" 
-                                                 class="w-100 h-100 object-fit-cover">
-                                        </div>
-                                    @else
-                                        <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
-                                            <i class="bi bi-hospital text-success"></i>
-                                        </div>
-                                    @endif
-                                    <div>
-                                        <h6 class="mb-0 fw-semibold">{{ $clinic->display_name }}</h6>
-                                        <small class="text-muted">{{ $clinic->specialty->name ?? '-' }}</small>
-                                    </div>
-                                </div>
-                            </a>
-                        @empty
-                            <div class="text-center py-4">
-                                <p class="text-muted mb-0">{{ __('translation.patient.no_clinics') }}</p>
-                            </div>
-                        @endforelse
                     </div>
                 </div>
             </div>

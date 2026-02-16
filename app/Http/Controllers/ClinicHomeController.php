@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Appointment;
 use App\Models\Clinic;
 use App\Models\Specialty;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ClinicHomeController extends Controller
 {
@@ -46,17 +44,4 @@ class ClinicHomeController extends Controller
         return view('home.clinics', compact('clinics', 'specialties'));
     }
 
-    /**
-     * Show clinic details.
-     */
-    public function show(Clinic $clinic)
-    {
-        if ($clinic->status !== 'approved') {
-            abort(404);
-        }
-
-        $clinic->load(['doctor', 'specialty']);
-
-        return view('home.clinic-details', compact('clinic'));
-    }
 }

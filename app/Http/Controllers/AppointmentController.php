@@ -80,7 +80,7 @@ class AppointmentController extends Controller
     /**
      * Cancel an appointment.
      */
-    public function cancel(Request $request, Appointment $appointment)
+    public function cancel(Request $request, $lang, Appointment $appointment)
     {
         // Check ownership
         if ($appointment->patient_id !== Auth::id()) {

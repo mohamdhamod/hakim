@@ -91,7 +91,7 @@
                                             </td>
                                             <td class="actions">
                                                 <!-- View button -->
-                                                <a href="{{ route('clinics.show', $clinic->id) }}"
+                                                <a href="{{ route('dashboard.clinics.show', ['locale' => app()->getLocale(), 'clinic' => $clinic->id]) }}"
                                                    class="btn btn-sm btn-info"
                                                    data-bs-toggle="tooltip"
                                                    data-bs-placement="top"

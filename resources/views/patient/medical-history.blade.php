@@ -79,7 +79,7 @@
                             <i class="bi bi-file-earmark-x text-muted" style="font-size: 4rem;"></i>
                             <h4 class="mt-3 text-muted">{{ __('translation.patient.no_history') }}</h4>
                             <p class="text-muted">{{ __('translation.patient.no_history_desc') }}</p>
-                            <a href="{{ route('patient.clinics') }}" class="btn btn-primary mt-2">
+                            <a href="{{ route('home.clinics') }}" class="btn btn-primary mt-2">
                                 <i class="bi bi-hospital me-1"></i>
                                 {{ __('translation.patient.visit_clinic') }}
                             </a>

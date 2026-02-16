@@ -14,7 +14,7 @@
                 </h2>
                 <p class="text-muted mb-0">{{ __('translation.patient.appointments_subtitle') }}</p>
             </div>
-            <a href="{{ route('patient.clinics') }}" class="btn btn-primary">
+            <a href="{{ route('home.clinics') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle me-1"></i>
                 {{ __('translation.patient.book_new') }}
             </a>
@@ -123,7 +123,7 @@
                         <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
                         <h4 class="mt-3 text-muted">{{ __('translation.patient.no_appointments') }}</h4>
                         <p class="text-muted">{{ __('translation.patient.no_appointments_desc') }}</p>
-                        <a href="{{ route('patient.clinics') }}" class="btn btn-primary mt-2">
+                        <a href="{{ route('home.clinics') }}" class="btn btn-primary mt-2">
                             <i class="bi bi-plus-circle me-1"></i>
                             {{ __('translation.patient.book_first') }}
                         </a>
