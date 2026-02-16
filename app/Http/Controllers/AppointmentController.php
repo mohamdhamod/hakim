@@ -22,13 +22,6 @@ class AppointmentController extends Controller
             'reason' => ['nullable', 'string', 'max:1000'],
         ];
 
-        // Guest booking validation
-        if (!Auth::check()) {
-            $rules['patient_name'] = ['required', 'string', 'max:255'];
-            $rules['patient_phone'] = ['required', 'string', 'max:20'];
-            $rules['patient_email'] = ['nullable', 'email', 'max:255'];
-        }
-
         $validator = Validator::make($request->all(), $rules);
         
         if ($validator->fails()) {
@@ -56,16 +49,10 @@ class AppointmentController extends Controller
             'status' => 'pending',
         ];
 
-        if (Auth::check()) {
-            $appointmentData['patient_id'] = Auth::id();
-            $appointmentData['patient_name'] = Auth::user()->name;
-            $appointmentData['patient_phone'] = Auth::user()->phone;
-            $appointmentData['patient_email'] = Auth::user()->email;
-        } else {
-            $appointmentData['patient_name'] = $request->patient_name;
-            $appointmentData['patient_phone'] = $request->patient_phone;
-            $appointmentData['patient_email'] = $request->patient_email;
-        }
+        $appointmentData['patient_id'] = Auth::id();
+        $appointmentData['patient_name'] = Auth::user()->name;
+        $appointmentData['patient_phone'] = Auth::user()->phone;
+        $appointmentData['patient_email'] = Auth::user()->email;
 
         $appointment = Appointment::create($appointmentData);
 

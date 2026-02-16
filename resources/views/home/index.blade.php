@@ -66,6 +66,22 @@
                                     {{ __('translation.home.my_clinic') }}
                                 </a>
                             @endif
+                            @if(auth()->user()->isAdmin())
+                                <a href="{{ route('dashboard') }}" class="btn btn-outline-dark btn-compact">
+                                    <i class="bi bi-speedometer2 me-1"></i>
+                                    {{ __('translation.clinic.dashboard') }}
+                                </a>
+                            @endif
+                            <a href="{{ route('profile.index') }}" class="btn btn-outline-secondary btn-compact">
+                                <i class="bi bi-person me-1"></i>
+                                {{ __('translation.auth.profile') }}
+                            </a>
+                            <a href="{{ route('logout') }}" class="btn btn-outline-danger btn-compact"
+                               onclick="event.preventDefault();const f=document.getElementById('hero-logout-form'); if(!f) return; if (f.requestSubmit) { f.requestSubmit(); } else { const ev=new Event('submit',{bubbles:true,cancelable:true}); if (f.dispatchEvent(ev)) f.submit(); }">
+                                <i class="bi bi-box-arrow-right me-1"></i>
+                                {{ __('translation.auth.logout') }}
+                            </a>
+                            <form id="hero-logout-form" action="{{ route('logout') }}" method="POST" class="d-none" data-recaptcha-action="logout">@csrf</form>
                         @endguest
                     </div>
 

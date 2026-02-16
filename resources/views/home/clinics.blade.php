@@ -57,24 +57,6 @@
                         </div>
                     </div>
                     
-                    @guest
-                        <!-- Guest Info -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium">{{ __('translation.auth.name') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="patient_name" class="form-control form-control-sm" required>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-medium">{{ __('translation.auth.phone') }} <span class="text-danger">*</span></label>
-                                <input type="tel" name="patient_phone" class="form-control form-control-sm" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-medium">{{ __('translation.auth.email_address') }}</label>
-                                <input type="email" name="patient_email" class="form-control form-control-sm">
-                            </div>
-                        </div>
-                    @endguest
-                    
                     <!-- Date & Time -->
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
@@ -119,9 +101,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const baseUrl = "{{ route('home.clinics') }}";
     let debounceTimer;
 
+    const isAuthenticated = {{ Auth::check() ? 'true' : 'false' }};
+    const loginUrl = "{{ route('login') }}";
+
     function bindBookingButtons() {
         container.querySelectorAll('.book-appointment-btn').forEach(btn => {
             btn.addEventListener('click', function() {
+                if (!isAuthenticated) {
+                    window.location.href = loginUrl;
+                    return;
+                }
                 document.getElementById('booking_clinic_id').value = this.dataset.clinicId;
                 document.getElementById('booking_clinic_name').textContent = this.dataset.clinicName;
                 document.getElementById('booking_doctor_name').textContent = this.dataset.doctorName;

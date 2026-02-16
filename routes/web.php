@@ -27,11 +27,9 @@ Route::get('/clinics', [Controllers\ClinicHomeController::class, 'index'])->name
 // Clinic details (public)
 Route::get('/clinics/{clinic}', [Controllers\ClinicHomeController::class, 'show'])->name('clinics.show');
 
-// Appointments (public booking - guests can book)
-Route::post('/appointments', [Controllers\AppointmentController::class, 'store'])->name('appointments.store');
-
-// User appointments (requires auth)
+// Appointments (requires auth)
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/appointments', [Controllers\AppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/my-appointments', [Controllers\AppointmentController::class, 'myAppointments'])->name('appointments.index');
     Route::post('/appointments/{appointment}/cancel', [Controllers\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 });
