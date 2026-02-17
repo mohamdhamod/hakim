@@ -19,9 +19,6 @@
                             <li class="breadcrumb-item">
                                 <a href="{{ route('clinic.workspace') }}">{{ __('translation.clinic.dashboard') }}</a>
                             </li>
-                            <li class="breadcrumb-item">
-                                <a href="{{ route('clinic.settings') }}">{{ __('translation.clinic.settings') }}</a>
-                            </li>
                             <li class="breadcrumb-item active" aria-current="page">{{ __('translation.working_hours.title') }}</li>
                         </ol>
                     </nav>

@@ -85,8 +85,8 @@
                             <i class="fas fa-robot me-1"></i>{{ __('translation.ai_assistant.title') }}
                         </a>
                         <a href="{{ route('clinic.working-hours.index') }}" class="btn btn-outline-warning">
-                                <i class="bi bi-clock me-1"></i>{{ __('translation.working_hours.title') }}
-                            </a>
+                            <i class="bi bi-clock me-1"></i>{{ __('translation.working_hours.title') }}
+                        </a>
                     </div>
                 </div>
 

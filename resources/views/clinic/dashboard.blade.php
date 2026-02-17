@@ -106,9 +106,7 @@
                             <a href="{{ route('clinic.working-hours.index') }}" class="btn btn-outline-warning">
                                 <i class="bi bi-clock me-1"></i>{{ __('translation.working_hours.title') }}
                             </a>
-                            <a href="{{ route('clinic.settings') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-gear me-1"></i>{{ __('translation.clinic.settings') }}
-                            </a>
+
                         </div>
                     </div>
                 </div>

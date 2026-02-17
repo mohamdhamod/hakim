@@ -70,10 +70,6 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/workspace/appointments', [Clinic\WorkspaceController::class, 'searchAppointments'])->name('clinic.workspace.appointments');
         Route::post('/patients/request-access', [Clinic\PatientController::class, 'requestAccess'])->name('clinic.patients.request-access');
 
-        // Clinic Settings
-        Route::get('/settings', [Clinic\DashboardController::class, 'settings'])->name('clinic.settings');
-        Route::put('/settings', [Clinic\DashboardController::class, 'updateSettings'])->name('clinic.settings.update');
-
         // Working Hours Management
         Route::get('/working-hours', [Clinic\WorkingHoursController::class, 'index'])->name('clinic.working-hours.index');
         Route::post('/working-hours', [Clinic\WorkingHoursController::class, 'store'])->name('clinic.working-hours.store');
