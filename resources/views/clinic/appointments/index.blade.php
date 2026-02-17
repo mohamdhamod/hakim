@@ -103,7 +103,7 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title text-primary">
-                    <i class="fas fa-user-plus me-2"></i>{{ __('translation.clinic_chat.register_as_patient') }}
+                    <i class="fas fa-user-plus me-2"></i>{{ __('translation.clinic_chat.register_patient') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

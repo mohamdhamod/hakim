@@ -146,14 +146,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Bind initial booking buttons
     bindBookingButtons();
 
-    // Handle form submission
+    // Handle form submission via AJAX
     const bookingForm = document.getElementById('bookingForm');
-    if (bookingForm && window.handleSubmit) {
-        handleSubmit('#bookingForm', function(response) {
-            bookingModal.hide();
-            bookingForm.reset();
-            if (window.showToast) {
-                showToast('success', response.message || '{{ __("translation.clinic_home.booking_success") }}');
+    if (bookingForm && window.CRUDManager) {
+        CRUDManager.bindForm('#bookingForm', {
+            resetOnSuccess: true,
+            closeModalOnSuccess: true,
+            onSuccess: function(data) {
+                if (bookingModal) bookingModal.hide();
+                if (window.showToast) {
+                    showToast(data.message || '{{ __("translation.clinic_home.booking_success") }}', 'success');
+                }
             }
         });
     }

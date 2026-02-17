@@ -503,6 +503,7 @@ window.SwalUtil = SwalHelper;
 // ================================
 
 const Utils = {
+  
     /**
      * Get CSRF token
      */
@@ -1034,18 +1035,7 @@ const FormManager = {
                         }
                         // Use setTimeout to ensure the redirect happens after current execution
                         setTimeout(() => {
-                            const target = new URL(result.redirect, window.location.origin);
-                            const current = new URL(window.location.href);
-                            // Strip hash from both to compare base URLs
-                            current.hash = '';
-                            const targetBase = target.href.replace(target.hash, '');
-                            // If same page with a hash fragment, set hash then reload to stay at section
-                            if (targetBase === current.href && target.hash) {
-                                window.location.hash = target.hash;
-                                window.location.reload();
-                            } else {
-                                window.location.assign(result.redirect);
-                            }
+                            window.location.assign(result.redirect);
                         }, 10);
                         return;
                     }
@@ -1166,27 +1156,20 @@ window.FormManager = FormManager;
 
 const ModalManager = {
     /**
-     * Show modal using Bootstrap Modal API (fires shown.bs.modal event)
-     * @param {HTMLElement|string} modal - DOM element or element ID
+     * Resolve modal argument to DOM element (accepts string ID or element)
+     */
+    _resolve(modal) {
+        if (typeof modal === 'string') return document.getElementById(modal) || document.querySelector(modal);
+        return modal;
+    },
+
+    /**
+     * Show modal with backdrop and keyboard handling
      */
     show(modal) {
-        // Resolve string ID to DOM element
-        if (typeof modal === 'string') {
-            modal = document.getElementById(modal);
-        }
+        modal = this._resolve(modal);
         if (!modal) return;
 
-        // Use Bootstrap Modal API if available (fires shown.bs.modal properly)
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            let bsModal = bootstrap.Modal.getInstance(modal);
-            if (!bsModal) {
-                bsModal = new bootstrap.Modal(modal);
-            }
-            bsModal.show();
-            return;
-        }
-
-        // Fallback: manual show + dispatch event
         modal.style.display = 'block';
         modal.classList.add('show', 'in');
         modal.classList.remove('out');
@@ -1214,32 +1197,15 @@ const ModalManager = {
         modal._cleanup = () => {
             document.removeEventListener('keydown', handleEsc);
         };
-
-        // Dispatch shown event for listeners (autoInitModalChoices, etc.)
-        modal.dispatchEvent(new Event('shown.bs.modal', { bubbles: true }));
     },
 
     /**
      * Hide modal and clean up
-     * @param {HTMLElement|string} modal - DOM element or element ID
      */
     hide(modal) {
-        // Resolve string ID to DOM element
-        if (typeof modal === 'string') {
-            modal = document.getElementById(modal);
-        }
+        modal = this._resolve(modal);
         if (!modal) return;
 
-        // Use Bootstrap Modal API if available
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            if (bsModal) {
-                bsModal.hide();
-                return;
-            }
-        }
-
-        // Fallback: manual hide
         modal.style.display = 'none';
         modal.classList.remove('show', 'in');
         modal.classList.add('out');
@@ -1588,6 +1554,51 @@ const UIManager = {
 // ================================
 
 const CRUDManager = {
+    // ── Private Helpers ──────────────────────────────────
+
+    /** Build standard JSON request headers */
+    _headers(extra = {}) {
+        return Object.assign({
+            'X-CSRF-TOKEN': Utils.getCSRFToken(),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }, extra);
+    },
+
+    /** Attach reCAPTCHA v3 token to headers; returns { token, action } or null */
+    async _attachRecaptcha(headers, url, method = 'post', explicitAction = null) {
+        if (!RecaptchaV3 || !RecaptchaV3.siteKey) return null;
+        try {
+            const action = explicitAction || RecaptchaV3.deriveActionFromUrl(url, method);
+            const token = await RecaptchaV3.execute(action);
+            if (token) { headers['X-Recaptcha-Token'] = token; return { token, action }; }
+        } catch (_) {}
+        return null;
+    },
+
+    /** Parse JSON response safely */
+    async _parseResponse(response) {
+        let result = null;
+        const ct = (response.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) { try { result = await response.json(); } catch (_) {} }
+        return { result, wasRedirected: response.redirected === true, finalUrl: response.url || null };
+    },
+
+    /** Raw fetch returning parsed JSON (for backward-compat ApiClient shim) */
+    async _rawRequest(method, url, data = {}) {
+        const isFormData = data instanceof FormData;
+        const headers = this._headers();
+        if (isFormData) delete headers['Content-Type'];
+        const response = await fetch(url, {
+            method, credentials: 'same-origin', headers,
+            body: isFormData ? data : JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    // ── Public API ───────────────────────────────────────
+
     /**
      * Generalized DELETE request handler
      * @param {string} resourceUrl - Full URL to delete
@@ -1599,123 +1610,10 @@ const CRUDManager = {
      * @param {Object} [options.headers] - Extra headers to include
      */
     async deleteItem(resourceUrl, options = {}) {
-        const {
-            onSuccess,
-            onError,
-            successMessage = (window.i18n?.toasts?.delete_success || ''),
-            errorMessage = (window.i18n?.toasts?.delete_failed || ''),
-            headers = {},
-            // Optional: force navigation after success
-            redirectOnSuccess = false,
-            redirectUrl = null
-        } = options;
-
-        if (!resourceUrl) {
-            console.error('deleteItem: resourceUrl is required');
-            return false;
-        }
-
-        try {
-            const requestHeaders = Object.assign({
-                'X-CSRF-TOKEN': Utils.getCSRFToken(),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }, headers);
-
-            // Attach reCAPTCHA v3 token for protected endpoints (middleware checks header)
-            if (RecaptchaV3 && RecaptchaV3.siteKey) {
-                const action = RecaptchaV3.deriveActionFromUrl(resourceUrl, 'delete');
-                const token = await RecaptchaV3.execute(action);
-                if (token) {
-                    requestHeaders['X-Recaptcha-Token'] = token;
-                }
-            }
-
-            const response = await fetch(resourceUrl, {
-                method: 'DELETE',
-                credentials: 'same-origin',
-                headers: requestHeaders
-            });
-
-            let result = null;
-            const contentType = (response.headers.get('content-type') || '').toLowerCase();
-            const wasRedirected = response.redirected === true;
-            const finalUrl = response.url || null;
-            if (contentType.includes('application/json')) {
-                try { result = await response.json(); } catch (_) { /* ignore parse error */ }
-            }
-
-            if (response.ok) {
-                // Store toast message in sessionStorage so it survives page reload/redirect
-                const storeToast = (msg) => {
-                    if (!msg) return;
-                    try {
-                        sessionStorage.setItem('toastMessage', JSON.stringify({ message: msg, type: 'success' }));
-                    } catch (_) { /* storage not available */ }
-                };
-
-                // Helper: navigate to URL, handling same-page hash redirects
-                const navigateTo = (url, msg) => {
-                    storeToast(msg);
-                    try {
-                        const target = new URL(url, window.location.origin);
-                        const current = new URL(window.location.href);
-                        // Same page with hash → set hash + reload so page refreshes
-                        if (target.hash && target.origin === current.origin && target.pathname === current.pathname) {
-                            window.location.hash = target.hash;
-                            window.location.reload();
-                            return;
-                        }
-                    } catch (_) { /* fall through */ }
-                    window.location.href = url;
-                };
-
-                const toastMsg = (result && result.message) || successMessage;
-
-                // If server issued a redirect (e.g., non-AJAX flow), follow it in the browser
-                if (wasRedirected && finalUrl) {
-                    navigateTo(finalUrl, toastMsg);
-                    return true;
-                }
-
-                // If server returned a redirect URL inside JSON result, follow it
-                if (result && result.redirect) {
-                    navigateTo(result.redirect, toastMsg);
-                    return true;
-                }
-
-                // If caller requested a redirect on success, do it
-                if (redirectOnSuccess && redirectUrl) {
-                    navigateTo(redirectUrl, toastMsg);
-                    return true;
-                }
-
-                // Otherwise, show toast and refresh table if available
-                ToastManager.show((result && result.message) || successMessage, 'success');
-                if (typeof onSuccess === 'function') {
-                    try { onSuccess(result); } catch (e) { console.warn('onSuccess error:', e); }
-                }
-                if (window.currentDataTable?.ajax?.reload) {
-                    window.currentDataTable.ajax.reload();
-                }
-                return true;
-            } else {
-                const err = new Error((result && result.message) || errorMessage);
-                if (typeof onError === 'function') {
-                    try { onError(err, response); } catch (e) { console.warn('onError error:', e); }
-                }
-                ToastManager.show(err.message, 'danger');
-                return false;
-            }
-        } catch (error) {
-            console.error('deleteItem error:', error);
-            ToastManager.show(error.message || errorMessage, 'danger');
-            if (typeof onError === 'function') {
-                try { onError(error); } catch (e) { console.warn('onError error:', e); }
-            }
-            return false;
-        }
+        return this.requestJson(resourceUrl, Object.assign({
+            successMessage: window.i18n?.toasts?.delete_success || '',
+            errorMessage: window.i18n?.toasts?.delete_failed || '',
+        }, options, { method: 'DELETE' }));
     },
 
     async confirmDelete (data , resourceUrl = null, i18n = null , itemTitle = null ) {
@@ -1757,117 +1655,17 @@ const CRUDManager = {
     },
 
     /**
-     * Generalized activation/status toggle handler
+     * Generalized activation/status toggle handler - delegates to requestJson
      * @param {string} resourceUrl - Full URL to post to
-     * @param {Object} options
-     * @param {Function} [options.onSuccess]
-     * @param {Function} [options.onError]
-     * @param {string} [options.successMessage]
-     * @param {string} [options.errorMessage]
-     * @param {Object} [options.headers]
-     * @param {string} [options.action] - 'activate' or 'deactivate'
+     * @param {Object} options - { action, onSuccess, onError, successMessage, errorMessage, headers, ... }
      */
     async activationStatus(resourceUrl, options = {}) {
-        const {
-            onSuccess,
-            onError,
-            successMessage = (window.i18n?.toasts?.activate_success || ''),
-            errorMessage = (window.i18n?.toasts?.activate_failed || ''),
-            headers = {},
-            action = null,
-            // Optional redirect behavior
-            redirectOnSuccess = false,
-            redirectUrl = null
-        } = options;
-
-        if (!resourceUrl) {
-            console.error('activationStatus: resourceUrl is required');
-            return false;
-        }
-        if (!action) {
-            console.error('activationStatus: action is required (activate|deactivate)');
-            return false;
-        }
-
-        try {
-            const requestHeaders = Object.assign({
-                'X-CSRF-TOKEN': Utils.getCSRFToken(),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }, headers);
-
-            const payload = { action };
-
-            // Attach reCAPTCHA v3 token for protected endpoints
-            if (RecaptchaV3 && RecaptchaV3.siteKey) {
-                const recaptchaAction = RecaptchaV3.deriveActionFromUrl(resourceUrl, 'post');
-                const token = await RecaptchaV3.execute(recaptchaAction);
-                if (token) {
-                    requestHeaders['X-Recaptcha-Token'] = token;
-                    // Also include in body for compatibility with servers reading input()
-                    payload['g-recaptcha-response'] = token;
-                    payload['recaptcha_action'] = recaptchaAction;
-                }
-            }
-
-            const response = await fetch(resourceUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: requestHeaders,
-                body: JSON.stringify(payload)
-            });
-
-            let result = null;
-            const contentType = (response.headers.get('content-type') || '').toLowerCase();
-            const wasRedirected = response.redirected === true;
-            const finalUrl = response.url || null;
-            if (contentType.includes('application/json')) {
-                try { result = await response.json(); } catch (_) { /* ignore parse error */ }
-            }
-
-            if (response.ok) {
-                if (wasRedirected && finalUrl) {
-                    window.location.href = finalUrl;
-                    return true;
-                }
-
-                // If server returned a redirect URL inside JSON result, follow it
-                if (result && result.redirect) {
-                    window.location.href = result.redirect;
-                    return true;
-                }
-
-                // If caller requested a redirect on success, do it
-                if (redirectOnSuccess && redirectUrl) {
-                    window.location.href = redirectUrl;
-                    return true;
-                }
-
-                ToastManager.show((result && result.message) || successMessage, 'success');
-                if (typeof onSuccess === 'function') {
-                    try { onSuccess(result); } catch (e) { console.warn('onSuccess error:', e); }
-                }
-                if (window.currentDataTable?.ajax?.reload) {
-                    window.currentDataTable.ajax.reload();
-                }
-                return true;
-            } else {
-                const err = new Error((result && result.message) || errorMessage);
-                if (typeof onError === 'function') {
-                    try { onError(err, response); } catch (e) { console.warn('onError error:', e); }
-                }
-                ToastManager.show(err.message, 'danger');
-                return false;
-            }
-        } catch (error) {
-            console.error('activationStatus error:', error);
-            ToastManager.show(error.message || errorMessage, 'danger');
-            if (typeof onError === 'function') {
-                try { onError(error); } catch (e) { console.warn('onError error:', e); }
-            }
-            return false;
-        }
+        const { action, ...rest } = options;
+        if (!action) { console.error('activationStatus: action is required (activate|deactivate)'); return false; }
+        return this.requestJson(resourceUrl, Object.assign({
+            successMessage: window.i18n?.toasts?.activate_success || '',
+            errorMessage: window.i18n?.toasts?.activate_failed || '',
+        }, rest, { method: 'POST', data: { action } }));
     },
 
     /**
@@ -1888,110 +1686,56 @@ const CRUDManager = {
      */
     async requestJson(resourceUrl, options = {}) {
         const {
-            method = 'POST',
-            data = null,
-            headers = {},
-            onSuccess,
-            onError,
+            method = 'POST', data = null, headers = {},
+            onSuccess, onError,
             successMessage = (window.i18n?.messages?.operation_completed_successfully || ''),
             errorMessage = (window.i18n?.messages?.operation_failed || ''),
-            redirectOnSuccess = false,
-            redirectUrl = null,
-            showSuccessToast = true,
-            showErrorToast = true,
+            redirectOnSuccess = false, redirectUrl = null,
+            showSuccessToast = true, showErrorToast = true,
         } = options;
 
-        if (!resourceUrl) {
-            console.error('requestJson: resourceUrl is required');
-            return false;
-        }
+        if (!resourceUrl) { console.error('requestJson: resourceUrl is required'); return false; }
 
         try {
             const reqMethod = String(method || 'POST').toUpperCase();
-            const requestHeaders = Object.assign({
-                'X-CSRF-TOKEN': Utils.getCSRFToken(),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }, headers);
+            const requestHeaders = this._headers(headers);
+            let bodyData = data ?? null;
 
-            let bodyData = (data === null || typeof data === 'undefined') ? null : data;
-
-            // Attach reCAPTCHA v3 token for protected endpoints
-            if (RecaptchaV3 && RecaptchaV3.siteKey && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(reqMethod)) {
-                const recaptchaAction = RecaptchaV3.deriveActionFromUrl(resourceUrl, reqMethod.toLowerCase());
-                const token = await RecaptchaV3.execute(recaptchaAction);
-                if (token) {
-                    requestHeaders['X-Recaptcha-Token'] = token;
-                    // Only mutate body if the caller already sends JSON (avoid adding bodies unexpectedly)
-                    if (bodyData && typeof bodyData === 'object') {
-                        bodyData = Object.assign({}, bodyData, {
-                            'g-recaptcha-response': token,
-                            'recaptcha_action': recaptchaAction,
-                        });
-                    }
+            // Attach reCAPTCHA v3 token for non-idempotent requests
+            if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(reqMethod)) {
+                const rc = await this._attachRecaptcha(requestHeaders, resourceUrl, reqMethod.toLowerCase());
+                if (rc && bodyData && typeof bodyData === 'object') {
+                    bodyData = { ...bodyData, 'g-recaptcha-response': rc.token, 'recaptcha_action': rc.action };
                 }
             }
 
             const response = await fetch(resourceUrl, {
-                method: reqMethod,
-                credentials: 'same-origin',
+                method: reqMethod, credentials: 'same-origin',
                 headers: requestHeaders,
                 body: bodyData === null ? null : JSON.stringify(bodyData),
             });
 
-            let result = null;
-            const contentType = (response.headers.get('content-type') || '').toLowerCase();
-            const wasRedirected = response.redirected === true;
-            const finalUrl = response.url || null;
-            if (contentType.includes('application/json')) {
-                try { result = await response.json(); } catch (_) { /* ignore parse error */ }
-            }
+            const { result, wasRedirected, finalUrl } = await this._parseResponse(response);
+            const serverFailed = result?.success === false;
 
-            const serverIndicatesFailure = (result && result.success === false);
-
-            if (response.ok && !serverIndicatesFailure) {
-                if (wasRedirected && finalUrl) {
-                    window.location.href = finalUrl;
-                    return true;
-                }
-                if (result && result.redirect) {
-                    window.location.href = result.redirect;
-                    return true;
-                }
-                if (redirectOnSuccess && redirectUrl) {
-                    window.location.href = redirectUrl;
-                    return true;
-                }
-
-                if (showSuccessToast) {
-                    ToastManager.show((result && result.message) || successMessage, 'success');
-                }
-                if (typeof onSuccess === 'function') {
-                    try { onSuccess(result, response); } catch (e) { console.warn('onSuccess error:', e); }
-                }
-                if (window.currentDataTable?.ajax?.reload) {
-                    window.currentDataTable.ajax.reload();
-                }
+            if (response.ok && !serverFailed) {
+                if (wasRedirected && finalUrl) { window.location.href = finalUrl; return true; }
+                if (result?.redirect) { window.location.href = result.redirect; return true; }
+                if (redirectOnSuccess && redirectUrl) { window.location.href = redirectUrl; return true; }
+                if (showSuccessToast) ToastManager.show(result?.message || successMessage, 'success');
+                if (typeof onSuccess === 'function') { try { onSuccess(result, response); } catch (e) { console.warn('onSuccess error:', e); } }
+                if (window.currentDataTable?.ajax?.reload) window.currentDataTable.ajax.reload();
                 return true;
             }
 
-            const err = new Error((result && (result.message || result.error)) || errorMessage);
-            if (typeof onError === 'function') {
-                try { onError(err, response, result); } catch (e) { console.warn('onError error:', e); }
-            }
-            if (showErrorToast) {
-                ToastManager.show(err.message, (response.status >= 500 ? 'danger' : 'warning'));
-            }
+            const err = new Error(result?.message || result?.error || errorMessage);
+            if (typeof onError === 'function') { try { onError(err, response, result); } catch (e) { console.warn('onError error:', e); } }
+            if (showErrorToast) ToastManager.show(err.message, (response.status >= 500 ? 'danger' : 'warning'));
             return false;
         } catch (error) {
             console.error('requestJson error:', error);
-            if (typeof onError === 'function') {
-                try { onError(error); } catch (e) { console.warn('onError error:', e); }
-            }
-            if (showErrorToast) {
-                ToastManager.show(error.message || errorMessage, 'danger');
-            }
+            if (typeof onError === 'function') { try { onError(error); } catch (e) { console.warn('onError error:', e); } }
+            if (showErrorToast) ToastManager.show(error.message || errorMessage, 'danger');
             return false;
         }
     },
@@ -2129,42 +1873,358 @@ const CRUDManager = {
 
         return this.bindSelectJsonUpdate(arg1 || {});
     },
-    async confirmActivate (data , resourceUrl = null, i18n = null) {
+    /**
+     * Confirm activation/deactivation with modal.
+     * Supports: (options) or legacy (data, resourceUrl, i18n)
+     */
+    confirmActivate(arg1 = {}, arg2 = null, arg3 = null) {
+        let opts;
+        if (arg1 && (arg1.itemLabel || arg1.resourceUrl || arg1.action || arg1.message || arg1.confirmText)) {
+            opts = { ...arg1 };
+        } else {
+            const data = arg1 || {};
+            const i18n = arg3 || window.i18n || {};
+            opts = {
+                itemLabel: data.title || data.key || data.full_name || data.name || '',
+                resourceUrl: arg2 || data.url || '',
+                action: (typeof data.active !== 'undefined') ? (data.active ? 'deactivate' : 'activate') : 'activate',
+                message: i18n.confirm?.message || null,
+                successMessage: i18n.toasts?.activate_success || null,
+                errorMessage: i18n.toasts?.activate_failed || null,
+            };
+        }
+
+        if (!opts.resourceUrl) { console.error('confirmActivate: resourceUrl is required'); return; }
+
         const modal = document.getElementById('confirmActivateModal');
-        const message = document.getElementById('confirmActivateMessage');
+        const messageEl = document.getElementById('confirmActivateMessage');
         const confirmBtn = document.getElementById('confirmActivateBtn');
 
-        if (modal && message && confirmBtn) {
-            // Set the confirmation message
-            message.textContent = (i18n.confirm.message || '').replace(':item', (data.title || data.key));
+        const callActivation = () => {
+            this.activationStatus(opts.resourceUrl, {
+                action: opts.action,
+                successMessage: opts.successMessage,
+                errorMessage: opts.errorMessage,
+                onSuccess: opts.onSuccess,
+                onError: opts.onError,
+                redirectOnSuccess: opts.redirectOnSuccess,
+                redirectUrl: opts.redirectUrl,
+            });
+        };
 
-            // Remove any existing event listeners
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        if (modal && messageEl && confirmBtn) {
+            const base = opts.message || window.i18n?.confirm?.activate_message || window.i18n?.confirm?.message || '';
+            messageEl.textContent = base.replace(':item', opts.itemLabel || '');
+            const newBtn = confirmBtn.cloneNode(true);
+            if (opts.confirmText) newBtn.textContent = opts.confirmText;
+            if (opts.confirmClass) newBtn.className = opts.confirmClass;
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            newBtn.addEventListener('click', () => {
+                try { hideModal(modal); } catch (_) { try { window.bootstrap?.Modal?.getOrCreateInstance(modal)?.hide(); } catch (_) {} }
+                callActivation();
+            });
+            try { showModal(modal); } catch (_) { try { window.bootstrap?.Modal?.getOrCreateInstance(modal)?.show(); } catch (_) {} }
+        } else {
+            callActivation();
+        }
+    },
 
-            // Add new event listener
-            newConfirmBtn.addEventListener('click', function () {
-                hideModal(modal);
-                window.activationStatus(resourceUrl, {
-                    successMessage: i18n.toasts.delete_success,
-                    errorMessage: i18n.toasts.delete_failed
-                });
+    // ========================================================================
+    // HTTP GET Utilities (merged from ApiClient)
+    // ========================================================================
+
+    /**
+     * GET JSON request with optional query params
+     * @param {string} url - API endpoint
+     * @param {Object} params - Query parameters
+     * @returns {Promise<Object>} Parsed JSON response
+     */
+    async getJson(url, params = {}) {
+        if (!url) { console.error('getJson: url is required'); return null; }
+        const qs = new URLSearchParams(params).toString();
+        const response = await fetch(qs ? `${url}?${qs}` : url, {
+            method: 'GET', credentials: 'same-origin', headers: this._headers()
+        });
+        return response.json();
+    },
+
+    /**
+     * GET HTML request (for AJAX page loads)
+     * @param {string} url - Endpoint URL
+     * @returns {Promise<string>} HTML text
+     */
+    async getHtml(url) {
+        if (!url) { console.error('getHtml: url is required'); return ''; }
+        const response = await fetch(url, {
+            method: 'GET', credentials: 'same-origin', headers: this._headers({ 'Accept': 'text/html' })
+        });
+        return response.text();
+    },
+
+    // ========================================================================
+    // Form Utilities (merged from FormHelper)
+    // ========================================================================
+
+    /**
+     * Bind AJAX submit to a form with callbacks
+     * @param {string|HTMLElement} selector - Form selector or element
+     * @param {Object} options - { onSuccess, onError, onBefore, loadingText, resetOnSuccess }
+     */
+    bindForm: function(selector, options = {}) {
+        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (!form || form.__crudFormBound) return;
+        form.__crudFormBound = true;
+        form.__handleSubmitBound = true; // Prevent global submit listener from also handling this form
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.submitForm(form, options);
+        });
+    },
+
+    /**
+     * Submit form via AJAX with loading state, modal auto-close, and validation error display
+     * @param {string|HTMLElement} selector - Form selector or element
+     * @param {Object} options - Submission options
+     */
+    submitForm: async function(selector, options = {}) {
+        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (!form) return null;
+
+        const {
+            onSuccess,
+            onError,
+            onBefore,
+            onComplete,
+            loadingText = 'Processing...',
+            resetOnSuccess = false,
+            closeModalOnSuccess = true
+        } = options;
+
+        // Find submit button
+        const submitBtn = form.querySelector('button[type="submit"], .btn-primary');
+        const originalBtnHtml = submitBtn?.innerHTML;
+        const modal = form.closest('.modal');
+
+        // Before callback
+        if (onBefore && onBefore(form) === false) return null;
+
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>${loadingText}`;
+        }
+
+        const restoreBtn = () => { if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHtml; } };
+
+        try {
+            const formData = new FormData(form);
+            const url = form.action || window.location.href;
+            const requestHeaders = this._headers();
+            delete requestHeaders['Content-Type']; // FormData sets its own boundary
+
+            const rc = await this._attachRecaptcha(requestHeaders, url, 'post');
+            if (rc) formData.append('g-recaptcha-response', rc.token);
+
+            const response = await fetch(url, {
+                method: 'POST', credentials: 'same-origin',
+                headers: requestHeaders, body: formData
             });
 
-            // Show the modal
-            showModal(modal);
-        } else {
-            // Fallback to alert if modal elements not found
-            if (window.confirm && window.confirm((i18n.confirm.message || '').replace(':item', (data.title || data.key)))) {
+            const data = await response.json();
+            restoreBtn();
 
-                window.activationStatus(resourceUrl, {
-                    successMessage: i18n.toasts.delete_success,
-                    errorMessage: i18n.toasts.delete_failed
-                });
+            if (data.success) {
+                if (resetOnSuccess) form.reset();
+                if (closeModalOnSuccess && modal) {
+                    try { bootstrap.Modal.getInstance(modal)?.hide(); } catch (_) { hideModal(modal); }
+                }
+                if (data.redirect) { window.location.href = data.redirect; return data; }
+                if (onSuccess) { onSuccess(data); } else if (data.message) { ToastManager.show(data.message, 'success'); }
+                if (window.currentDataTable?.ajax?.reload) { try { window.currentDataTable.ajax.reload(null, false); } catch (_) {} }
             } else {
-                console.error('Confirmation modal not found and confirm() not available');
+                if (onError) { onError(data); }
+                else if (data.errors) { this.showFormErrors(form, data.errors); }
+                else if (data.message) { ToastManager.show(data.message, 'danger'); }
             }
+
+            if (onComplete) onComplete(data);
+            return data;
+        } catch (error) {
+            restoreBtn();
+            if (onError) { onError({ success: false, message: error.message }); }
+            else { ToastManager.show(error.message || window.i18n?.messages?.network_error || 'Network Error', 'danger'); }
+            if (onComplete) onComplete({ success: false, error });
+            return null;
         }
+    },
+
+    /**
+     * Show validation errors on form fields
+     * @param {HTMLFormElement} form
+     * @param {Object} errors - { fieldName: [messages] }
+     */
+    showFormErrors: function(form, errors) {
+        this.clearFormErrors(form);
+        if (!form || !errors || typeof errors !== 'object') return;
+
+        form.classList.add('was-validated');
+        let firstError = null;
+
+        Object.entries(errors).forEach(([field, messages]) => {
+            const input = form.querySelector(`[name="${field}"], [name="${field}[]"]`) || form.querySelector(`#${field}`);
+            if (!input) return;
+            input.classList.add('is-invalid');
+
+            // Remove existing feedback
+            const existing = input.parentNode.querySelector('.invalid-feedback');
+            if (existing) existing.remove();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback d-block';
+            const icon = document.createElement('i');
+            icon.className = 'bi bi-exclamation-circle me-1';
+            errorDiv.appendChild(icon);
+            errorDiv.appendChild(document.createTextNode(Array.isArray(messages) ? messages[0] : String(messages)));
+            input.parentNode.appendChild(errorDiv);
+
+            if (!firstError) firstError = input;
+        });
+
+        if (firstError) {
+            firstError.focus();
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    },
+
+    /**
+     * Clear all validation errors from form
+     * @param {HTMLFormElement|string} formOrSelector
+     */
+    clearFormErrors: function(formOrSelector) {
+        const form = typeof formOrSelector === 'string' ? document.querySelector(formOrSelector) : formOrSelector;
+        if (!form) return;
+        form.querySelectorAll('.is-invalid, .is-valid').forEach(el => el.classList.remove('is-invalid', 'is-valid'));
+        form.querySelectorAll('.invalid-feedback, .valid-feedback, .text-danger.error-message').forEach(el => el.remove());
+        form.classList.remove('was-validated');
+    },
+
+    /**
+     * Get form data as plain object
+     * @param {string|HTMLElement} selector
+     * @returns {Object}
+     */
+    getFormData: function(selector) {
+        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (!form) return {};
+        return Object.fromEntries(new FormData(form));
+    },
+
+    /**
+     * Set form values from object
+     * @param {string|HTMLElement} selector
+     * @param {Object} data - { fieldName: value }
+     */
+    setFormData: function(selector, data) {
+        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (!form || !data) return;
+
+        Object.entries(data).forEach(([key, value]) => {
+            const input = form.querySelector(`[name="${key}"]`);
+            if (input) {
+                if (input.type === 'checkbox') {
+                    input.checked = !!value;
+                } else if (input.type === 'radio') {
+                    const radioInput = form.querySelector(`[name="${key}"][value="${value}"]`);
+                    if (radioInput) radioInput.checked = true;
+                } else {
+                    input.value = value;
+                }
+            }
+        });
+    },
+
+    /**
+     * Toggle favorite with animation (for lists)
+     * @param {HTMLElement} button - Button element
+     * @param {string} url - Toggle URL
+     * @param {Object} options - { onSuccess, removeCard, successMessage, errorMessage }
+     */
+    async toggleFavorite(button, url, options = {}) {
+        const { removeCard = true, onSuccess, successMessage, errorMessage } = options;
+        const card = button.closest('.col-lg-6, .col-md-6, .card');
+        const icon = button.querySelector('i');
+        const originalClass = icon?.className;
+
+        if (icon) icon.className = 'bi bi-hourglass-split fs-5';
+        button.disabled = true;
+
+        try {
+            const requestHeaders = this._headers();
+            await this._attachRecaptcha(requestHeaders, url, 'post', 'toggle_favorite');
+
+            const response = await fetch(url, {
+                method: 'POST', credentials: 'same-origin',
+                headers: requestHeaders, body: JSON.stringify({})
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                if (removeCard && card) {
+                    card.style.transition = 'opacity 0.3s, transform 0.3s';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        card.remove();
+                        if (document.querySelectorAll('.col-lg-6, .col-md-6').length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                }
+
+                ToastManager.show(successMessage || data.message || window.i18n?.messages?.updated || 'Updated!', 'success');
+                if (onSuccess) onSuccess(data);
+            } else {
+                if (icon) icon.className = originalClass;
+                button.disabled = false;
+                ToastManager.show(errorMessage || data.message || window.i18n?.messages?.error || 'Error', 'danger');
+            }
+        } catch (error) {
+            if (icon) icon.className = originalClass;
+            button.disabled = false;
+            ToastManager.show(window.i18n?.messages?.network_error || 'Network Error', 'danger');
+        }
+    },
+
+    /**
+     * Confirm and delete with SweetAlert (simple API)
+     * @param {string} url - Delete URL
+     * @param {Object} options - { confirmTitle, confirmText, confirmButton, onSuccess }
+     */
+    async confirmDeleteSwal(url, options = {}) {
+        const {
+            confirmTitle = window.i18n?.messages?.are_you_sure || 'Are you sure?',
+            confirmText = window.i18n?.messages?.action_cannot_be_undone || 'This action cannot be undone.',
+            confirmButton = window.i18n?.messages?.yes_delete || 'Yes, Delete',
+            onSuccess
+        } = options;
+
+        if (typeof Swal === 'undefined') {
+            if (!confirm(confirmText)) return;
+        } else {
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: confirmTitle,
+                text: confirmText,
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: confirmButton
+            });
+            if (!result.isConfirmed) return;
+        }
+
+        // Use the existing deleteItem which has reCAPTCHA support
+        return this.deleteItem(url, { onSuccess: onSuccess || (() => location.reload()) });
     }
 
 };
@@ -2215,94 +2275,24 @@ Object.assign(window, {
     getCSRFToken: Utils.getCSRFToken,
 
     // CRUD utilities
+    CRUDManager,
     deleteItem: CRUDManager.deleteItem.bind(CRUDManager),
-    // Expose confirmDelete so views that call it directly (old-style) work
     confirmDelete: CRUDManager.confirmDelete ? CRUDManager.confirmDelete.bind(CRUDManager) : undefined,
+    confirmDeleteSwal: CRUDManager.confirmDeleteSwal.bind(CRUDManager),
+    confirmActivate: CRUDManager.confirmActivate.bind(CRUDManager),
     activationStatus: CRUDManager.activationStatus.bind(CRUDManager),
     requestJson: CRUDManager.requestJson.bind(CRUDManager),
     bindSelectJsonUpdate: CRUDManager.bindSelectJsonUpdate.bind(CRUDManager),
-    bindStatusSelect: CRUDManager.bindStatusSelect.bind(CRUDManager)
+    bindStatusSelect: CRUDManager.bindStatusSelect.bind(CRUDManager),
+    // Form utilities (from CRUDManager)
+    bindForm: CRUDManager.bindForm.bind(CRUDManager),
+    submitFormAjax: CRUDManager.submitForm.bind(CRUDManager),
+    showFormErrors: CRUDManager.showFormErrors.bind(CRUDManager),
+    clearFormValidation: CRUDManager.clearFormErrors.bind(CRUDManager),
+    getFormData: CRUDManager.getFormData.bind(CRUDManager),
+    setFormData: CRUDManager.setFormData.bind(CRUDManager),
+    toggleFavorite: CRUDManager.toggleFavorite.bind(CRUDManager)
 });
-window.confirmActivate = function (arg1 = {}, arg2 = null, arg3 = null) {
-    
-    let opts = {};
-    if (arg1 && (arg1.itemLabel || arg1.resourceUrl || arg1.action || arg1.message || arg1.confirmText)) {
-        // Already an options object
-        opts = Object.assign({}, arg1);
-    } else {
-        // Legacy signature: (data, resourceUrl, i18n)
-        const data = arg1 || {};
-        const i18n = arg3 || window.i18n || {};
-        opts = {
-            itemLabel: data.title || data.key || data.full_name || data.name || '',
-            resourceUrl: arg2 || data.url || '',
-            action: (typeof data.active !== 'undefined') ? (data.active ? 'deactivate' : 'activate') : 'activate',
-            confirmText: null,
-            confirmClass: null,
-            message: (i18n.confirm && i18n.confirm.message) ? i18n.confirm.message : null,
-            successMessage: i18n.toasts?.activate_success || null,
-            errorMessage: i18n.toasts?.activate_failed || null,
-            onSuccess: null,
-            onError: null,
-            redirectOnSuccess: false,
-            redirectUrl: null
-        };
-    }
-
-    const modal = document.getElementById('confirmActivateModal');
-    const messageEl = document.getElementById('confirmActivateMessage');
-    const confirmBtn = document.getElementById('confirmActivateBtn');
-
-    if (!opts.resourceUrl) {
-        console.error('confirmActivate: resourceUrl is required');
-        return;
-    }
-
-    if (modal && messageEl && confirmBtn) {
-        const base = opts.message || (window.i18n?.confirm?.activate_message) || (window.i18n?.confirm?.message) || '';
-        messageEl.textContent = base.replace(':item', opts.itemLabel || '');
-
-        // Clone button to remove old listeners
-        const newBtn = confirmBtn.cloneNode(true);
-        // Set text/class if provided
-        if (opts.confirmText) newBtn.textContent = opts.confirmText;
-        if (opts.confirmClass) newBtn.className = opts.confirmClass;
-
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-
-        newBtn.addEventListener('click', function () {
-            try { hideModal(modal); } catch (_) {
-                try { window.bootstrap?.Modal?.getOrCreateInstance(modal)?.hide(); } catch (e) {}
-            }
-
-            // Call activationStatus helper
-            window.activationStatus(opts.resourceUrl, {
-                action: opts.action,
-                successMessage: opts.successMessage,
-                errorMessage: opts.errorMessage,
-                onSuccess: opts.onSuccess,
-                onError: opts.onError,
-                redirectOnSuccess: opts.redirectOnSuccess,
-                redirectUrl: opts.redirectUrl
-            });
-        });
-
-        try { showModal(modal); } catch (_) {
-            try { window.bootstrap?.Modal?.getOrCreateInstance(modal)?.show(); } catch (e) {}
-        }
-    } else {
-        // Fallback: directly call activationStatus
-        window.activationStatus(opts.resourceUrl, {
-            action: opts.action,
-            successMessage: opts.successMessage,
-            errorMessage: opts.errorMessage,
-            onSuccess: opts.onSuccess,
-            onError: opts.onError,
-            redirectOnSuccess: opts.redirectOnSuccess,
-            redirectUrl: opts.redirectUrl
-        });
-    }
-};
 
 // ================================
 // LEGACY COMPATIBILITY LAYER
@@ -2390,80 +2380,6 @@ if (!window.__recaptchaGlobalSubmitListenerAdded) {
 }
 
 // ================================
-// AUTO-INITIALIZATION
-// ================================
-
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        UIManager.bindPasswordToggle();
-        UIManager.initializeDropdownBehavior();
-
-        // Check for stored toast message from previous page redirect
-        const storedToast = sessionStorage.getItem('toastMessage');
-        if (storedToast) {
-            try {
-                const { message, type } = JSON.parse(storedToast);
-                if (message) {
-                    ToastManager.show(message, type || 'info');
-                }
-            } catch (e) {
-                console.warn('Failed to parse stored toast:', e);
-            }
-            // Clear the stored message after displaying
-            sessionStorage.removeItem('toastMessage');
-        }
-    } catch (e) {
-        console.warn('Auto-initialization warning:', e);
-    }
-});
-// Handle modal close buttons
-document.addEventListener('click', function(e) {
-    if (e.target.matches('[data-bs-dismiss="modal"]') || e.target.closest('[data-bs-dismiss="modal"]')) {
-        const modal = e.target.closest('.modal');
-        if (modal) {
-            hideModal(modal);
-        }
-    }
-});
-
-// Auto-initialize Choices.js on selects marked with `.select2` (legacy class) or `[data-choices]`.
-(function initChoices() {
-    async function setup() {
-        if (!window.loadChoices) return;
-        const Choices = await window.loadChoices();
-
-        const nodes = document.querySelectorAll('select.select2, select[data-choices]');
-        nodes.forEach((select) => {
-            if (select._choices) return;
-
-            const i18nPlaceholder = (window.i18n && window.i18n.messages && window.i18n.messages.select_an_option) || null;
-            const attrPlaceholder = select.getAttribute('data-placeholder') || select.getAttribute('placeholder') || null;
-            const placeholder = i18nPlaceholder || attrPlaceholder || (document.documentElement.lang === 'ar' ? 'اختر خيارًا' : (window.i18n?.messages?.select_an_option || 'Select an option'));
-
-            try {
-                const instance = new Choices(select, {
-                    removeItemButton: select.multiple,
-                    shouldSort: false,
-                    placeholder: true,
-                    placeholderValue: placeholder,
-                    searchEnabled: true,
-                });
-                select._choices = instance;
-            } catch (e) {
-                console.warn('Choices initialization skipped or failed:', e);
-            }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        setup().catch(() => null);
-        // Retry once after i18n loads (if it is injected after DOMContentLoaded)
-        setTimeout(() => { setup().catch(() => null); }, 400);
-    });
-})();
-
-// ================================
 // COPY TO CLIPBOARD
 // ================================
 
@@ -2498,489 +2414,49 @@ async function copyToClipboard(text, btn = null, options = {}) {
             btn.innerHTML = successText;
             btn.classList.add(successClass);
             btn.classList.remove(originalClass);
-            
             setTimeout(() => {
                 btn.innerHTML = originalText;
                 btn.classList.remove(successClass);
                 btn.classList.add(originalClass);
             }, timeout);
         }
-
         return true;
     } catch (error) {
         console.error('Copy failed:', error);
         return false;
     }
 }
-
-// Export to window
-Object.assign(window, {
-    copyToClipboard
-});
-
+window.copyToClipboard = copyToClipboard;
 
 // ============================================================================
-// API CLIENT - Centralized HTTP Request Handler
-// ============================================================================
-// Unified API client for all HTTP requests with CSRF, error handling, and loading states
+// BACKWARD COMPATIBILITY ALIASES
 // ============================================================================
 
+// ApiClient shim (delegates to CRUDManager for consistency)
 window.ApiClient = {
-    /**
-     * Get CSRF token from meta tag
-     */
-    getToken: function() {
-        return document.querySelector('meta[name="csrf-token"]')?.content || '';
-    },
-
-    /**
-     * Build fetch options with defaults
-     */
-    buildOptions: function(method, data, customHeaders = {}) {
-        const isFormData = data instanceof FormData;
-        const headers = {
-            'X-CSRF-TOKEN': this.getToken(),
-            'Accept': 'application/json',
-            ...customHeaders
-        };
-
-        if (!isFormData && data) {
-            headers['Content-Type'] = 'application/json';
-        }
-
-        const options = { method, headers };
-        
-        if (data) {
-            options.body = isFormData ? data : JSON.stringify(data);
-        }
-
-        return options;
-    },
-
-    /**
-     * GET request
-     * @param {string} url - API endpoint
-     * @param {Object} params - Query parameters
-     */
-    get: async function(url, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
-        const fullUrl = queryString ? `${url}?${queryString}` : url;
-        
-        const response = await fetch(fullUrl, this.buildOptions('GET', null));
-        return response.json();
-    },
-
-    /**
-     * GET HTML request (for AJAX page loads)
-     * @param {string} url - API endpoint
-     */
-    getHtml: async function(url) {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': this.getToken(),
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        });
-        return response.text();
-    },
-
-    /**
-     * POST request
-     * @param {string} url - API endpoint
-     * @param {Object|FormData} data - Request body
-     */
-    post: async function(url, data = {}) {
-        const response = await fetch(url, this.buildOptions('POST', data));
-        return response.json();
-    },
-
-    /**
-     * PUT request
-     */
-    put: async function(url, data = {}) {
-        const response = await fetch(url, this.buildOptions('PUT', data));
-        return response.json();
-    },
-
-    /**
-     * DELETE request
-     */
-    delete: async function(url, data = {}) {
-        const response = await fetch(url, this.buildOptions('DELETE', data));
-        return response.json();
-    },
-
-    /**
-     * Request with loading indicator and callbacks
-     * @param {string} url - API endpoint
-     * @param {Object} options - { method, data, loadingText, onSuccess, onError, onFinally }
-     */
-    request: async function(url, options = {}) {
-        const {
-            method = 'POST',
-            data = {},
-            loadingText = 'Processing...',
-            showLoading = true,
-            onSuccess,
-            onError,
-            onFinally
-        } = options;
-
-        // Show loading with SweetAlert if available
-        if (showLoading && typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: loadingText,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-        }
-
-        try {
-            const response = await fetch(url, this.buildOptions(method, data));
-            const result = await response.json();
-
-            if (showLoading && typeof Swal !== 'undefined') {
-                Swal.close();
-            }
-
-            if (result.success) {
-                if (onSuccess) onSuccess(result);
-            } else {
-                if (onError) {
-                    onError(result);
-                } else if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'error', title: window.i18n?.messages?.error || 'Error', text: result.message || window.i18n?.messages?.operation_failed || 'Operation failed' });
-                }
-            }
-
-            return result;
-        } catch (error) {
-            console.error('ApiClient Error:', error);
-            
-            if (showLoading && typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: window.i18n?.messages?.network_error || 'Network Error', text: window.i18n?.messages?.connection_failed || 'Connection failed. Please try again.' });
-            }
-
-            if (onError) onError({ success: false, message: error.message });
-            throw error;
-        } finally {
-            if (onFinally) onFinally();
-        }
-    },
-
-    /**
-     * Submit form via AJAX
-     * @param {HTMLFormElement|string} form - Form element or selector
-     * @param {Object} callbacks - { onSuccess, onError }
-     */
-    submitForm: async function(form, callbacks = {}) {
-        const formEl = typeof form === 'string' ? document.querySelector(form) : form;
-        if (!formEl) return;
-
-        const formData = new FormData(formEl);
-        const url = formEl.action || window.location.href;
-        const method = formEl.method?.toUpperCase() || 'POST';
-
-        return this.request(url, {
-            method,
-            data: formData,
-            ...callbacks
-        });
-    }
+    getToken: Utils.getCSRFToken,
+    get: (url, params) => CRUDManager.getJson(url, params),
+    getHtml: (url) => CRUDManager.getHtml(url),
+    post: (url, data = {}) => CRUDManager._rawRequest('POST', url, data),
+    put: (url, data = {}) => CRUDManager._rawRequest('PUT', url, data),
+    delete: (url, data = {}) => CRUDManager._rawRequest('DELETE', url, data),
+    request: (url, opts = {}) => CRUDManager.requestJson(url, { method: opts.method, data: opts.data }),
+    submitForm: (form, cb) => CRUDManager.submitForm(form, cb)
 };
 
-// ============================================================================
-// FORM HELPER - Simplified Form Handling Utilities
-// ============================================================================
-// Provides easy-to-use form utilities for Blade templates
-// ============================================================================
-
+// FormHelper shim
 window.FormHelper = {
-    /**
-     * Bind AJAX submit to a form with callbacks
-     * @param {string|HTMLElement} selector - Form selector or element
-     * @param {Object} options - { onSuccess, onError, onBefore, loadingText, resetOnSuccess }
-     */
-    bind: function(selector, options = {}) {
-        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
-        if (!form || form.__formHelperBound) return;
-        form.__formHelperBound = true;
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.submit(form, options);
-        });
-    },
-
-    /**
-     * Submit form via AJAX
-     * @param {string|HTMLElement} selector - Form selector or element
-     * @param {Object} options - Submission options
-     */
-    submit: async function(selector, options = {}) {
-        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
-        if (!form) return null;
-
-        const {
-            onSuccess,
-            onError,
-            onBefore,
-            onComplete,
-            loadingText = 'Processing...',
-            resetOnSuccess = false,
-            closeModalOnSuccess = true
-        } = options;
-
-        // Find submit button
-        const submitBtn = form.querySelector('button[type="submit"], .btn-primary');
-        const originalBtnHtml = submitBtn?.innerHTML;
-        const modal = form.closest('.modal');
-
-        // Before callback
-        if (onBefore && onBefore(form) === false) return null;
-
-        // Show loading state
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>${loadingText}`;
-        }
-
-        try {
-            const formData = new FormData(form);
-            const url = form.action || window.location.href;
-
-            const data = await ApiClient.post(url, formData);
-
-            // Restore button
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnHtml;
-            }
-
-            if (data.success) {
-                // Success handling
-                if (resetOnSuccess) form.reset();
-                
-                if (closeModalOnSuccess && modal) {
-                    const bsModal = bootstrap.Modal.getInstance(modal);
-                    if (bsModal) bsModal.hide();
-                }
-
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                    return data;
-                }
-
-                if (onSuccess) {
-                    onSuccess(data);
-                } else if (data.message && typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'success', title: data.message, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
-                }
-            } else {
-                // Error handling
-                if (onError) {
-                    onError(data);
-                } else if (data.errors) {
-                    this.showErrors(form, data.errors);
-                } else if (data.message && typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'error', title: window.i18n?.messages?.error || 'Error', text: data.message });
-                }
-            }
-
-            if (onComplete) onComplete(data);
-            return data;
-
-        } catch (error) {
-            // Restore button on error
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnHtml;
-            }
-
-            if (onError) {
-                onError({ success: false, message: error.message });
-            } else if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: window.i18n?.messages?.network_error || 'Network Error', text: window.i18n?.messages?.check_connection || 'Please check your connection' });
-            }
-
-            if (onComplete) onComplete({ success: false, error });
-            return null;
-        }
-    },
-
-    /**
-     * Show validation errors on form fields
-     */
-    showErrors: function(form, errors) {
-        this.clearErrors(form);
-        
-        Object.entries(errors).forEach(([field, messages]) => {
-            const input = form.querySelector(`[name="${field}"], [name="${field}[]"]`);
-            if (input) {
-                input.classList.add('is-invalid');
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'invalid-feedback d-block';
-                errorDiv.textContent = Array.isArray(messages) ? messages[0] : messages;
-                input.parentNode.appendChild(errorDiv);
-            }
-        });
-
-        // Focus first error
-        const firstError = form.querySelector('.is-invalid');
-        if (firstError) firstError.focus();
-    },
-
-    /**
-     * Clear all validation errors from form
-     */
-    clearErrors: function(form) {
-        if (!form) return;
-        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-        form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-    },
-
-    /**
-     * Get form data as object
-     */
-    getData: function(selector) {
-        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
-        if (!form) return {};
-        return Object.fromEntries(new FormData(form));
-    },
-
-    /**
-     * Set form values from object
-     */
-    setData: function(selector, data) {
-        const form = typeof selector === 'string' ? document.querySelector(selector) : selector;
-        if (!form || !data) return;
-        
-        Object.entries(data).forEach(([key, value]) => {
-            const input = form.querySelector(`[name="${key}"]`);
-            if (input) {
-                if (input.type === 'checkbox') {
-                    input.checked = !!value;
-                } else if (input.type === 'radio') {
-                    const radioInput = form.querySelector(`[name="${key}"][value="${value}"]`);
-                    if (radioInput) radioInput.checked = true;
-                } else {
-                    input.value = value;
-                }
-            }
-        });
-    },
-
-    /**
-     * Toggle favorite with animation (for lists)
-     * @param {HTMLElement} button - Button element with data-content-id
-     * @param {string} url - Toggle URL
-     * @param {Object} options - { onSuccess, removeCard }
-     */
-    toggleFavorite: async function(button, url, options = {}) {
-        const { removeCard = true, onSuccess, successMessage, errorMessage } = options;
-        const card = button.closest('.col-lg-6, .col-md-6, .card');
-        const icon = button.querySelector('i');
-        const originalClass = icon?.className;
-
-        // Loading state
-        if (icon) icon.className = 'bi bi-hourglass-split fs-5';
-        button.disabled = true;
-
-        try {
-            const data = await ApiClient.post(url);
-
-            if (data.success) {
-                if (removeCard && card) {
-                    card.style.transition = 'opacity 0.3s, transform 0.3s';
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        card.remove();
-                        if (document.querySelectorAll('.col-lg-6, .col-md-6').length === 0) {
-                            location.reload();
-                        }
-                    }, 300);
-                }
-
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'success', title: successMessage || data.message || window.i18n?.messages?.updated || 'Updated!', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
-                }
-
-                if (onSuccess) onSuccess(data);
-            } else {
-                if (icon) icon.className = originalClass;
-                button.disabled = false;
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'error', title: errorMessage || data.message || window.i18n?.messages?.error || 'Error', toast: true, position: 'top-end', timer: 3000 });
-                }
-            }
-        } catch (error) {
-            if (icon) icon.className = originalClass;
-            button.disabled = false;
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: window.i18n?.messages?.network_error || 'Network Error', toast: true, position: 'top-end', timer: 3000 });
-            }
-        }
-    },
-
-    /**
-     * Confirm and delete with AJAX
-     * @param {string} url - Delete URL
-     * @param {Object} options - { confirmTitle, confirmText, onSuccess }
-     */
-    confirmDelete: async function(url, options = {}) {
-        const {
-            confirmTitle = window.i18n?.messages?.are_you_sure || 'Are you sure?',
-            confirmText = window.i18n?.messages?.action_cannot_be_undone || 'This action cannot be undone.',
-            confirmButton = window.i18n?.messages?.yes_delete || 'Yes, Delete',
-            onSuccess
-        } = options;
-
-        if (typeof Swal === 'undefined') {
-            if (!confirm(confirmText)) return;
-        } else {
-            const result = await Swal.fire({
-                icon: 'warning',
-                title: confirmTitle,
-                text: confirmText,
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                confirmButtonText: confirmButton
-            });
-            if (!result.isConfirmed) return;
-        }
-
-        try {
-            const data = await ApiClient.delete(url);
-            
-            if (data.success) {
-                if (onSuccess) {
-                    onSuccess(data);
-                } else if (data.redirect) {
-                    window.location.href = data.redirect;
-                } else {
-                    location.reload();
-                }
-            } else if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: window.i18n?.messages?.error || 'Error', text: data.message });
-            }
-        } catch (error) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: window.i18n?.messages?.network_error || 'Network Error', text: window.i18n?.messages?.please_try_again || 'Please try again' });
-            }
-        }
-    }
+    bind: CRUDManager.bindForm.bind(CRUDManager),
+    submit: CRUDManager.submitForm.bind(CRUDManager),
+    showErrors: CRUDManager.showFormErrors.bind(CRUDManager),
+    clearErrors: CRUDManager.clearFormErrors.bind(CRUDManager),
+    getData: CRUDManager.getFormData.bind(CRUDManager),
+    setData: CRUDManager.setFormData.bind(CRUDManager),
+    toggleFavorite: CRUDManager.toggleFavorite.bind(CRUDManager),
+    confirmDelete: CRUDManager.confirmDeleteSwal.bind(CRUDManager)
 };
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-// Use Utils.formatDate and Utils.debounce - avoid duplicates
 window.formatDate = Utils.formatDate;
-
 
 // ============================================================================
 // CHOICES.JS AUTO-INITIALIZATION
@@ -2992,16 +2468,12 @@ window.formatDate = Utils.formatDate;
  * @param {Object} customOptions - Custom options to override defaults
  * @returns {Promise<Array>} Array of Choices instances
  */
-window.initChoicesSelect = async function(selector = '.choices-select', customOptions = {}) {
-    if (typeof window.loadChoices !== 'function') {
-        console.warn('Choices.js loader not available');
-        return [];
-    }
+window.initChoicesSelect = async function(selector = 'select.select2, select[data-choices], .choices-select', customOptions = {}) {
+    if (typeof window.loadChoices !== 'function') return [];
 
     const Choices = await window.loadChoices();
     const instances = [];
 
-    // Get elements based on selector type
     let elements;
     if (typeof selector === 'string') {
         elements = document.querySelectorAll(selector);
@@ -3014,10 +2486,12 @@ window.initChoicesSelect = async function(selector = '.choices-select', customOp
     }
 
     elements.forEach(element => {
-        // Skip if already initialized
-        if (element.dataset.choicesInitialized) return;
-        // Skip if element is hidden or not a select
         if (!element || element.tagName !== 'SELECT') return;
+        if (element._choices || element.dataset.choicesInitialized) return;
+
+        const i18nPlaceholder = window.i18n?.messages?.select_an_option;
+        const attrPlaceholder = element.getAttribute('data-placeholder') || element.getAttribute('placeholder');
+        const placeholder = i18nPlaceholder || attrPlaceholder || (document.documentElement.lang === 'ar' ? 'اختر خيارًا' : 'Select an option');
 
         const defaultOptions = {
             searchEnabled: element.options.length > 5,
@@ -3026,99 +2500,59 @@ window.initChoicesSelect = async function(selector = '.choices-select', customOp
             allowHTML: true,
             searchPlaceholderValue: window.i18n?.common?.search || 'Search...',
             noResultsText: window.i18n?.common?.no_results || 'No results found',
-            noChoicesText: window.i18n?.common?.no_choices || 'No choices available',
+            noChoicesText: window.i18n?.common?.no_results || 'No results found',
             removeItemButton: element.hasAttribute('multiple'),
             placeholder: true,
-            placeholderValue: element.getAttribute('placeholder') || ''
+            placeholderValue: placeholder,
         };
 
         try {
             const instance = new Choices(element, { ...defaultOptions, ...customOptions });
+            element._choices = instance;
             element.dataset.choicesInitialized = 'true';
             instances.push(instance);
         } catch (error) {
-            console.warn('Failed to initialize Choices on element:', element, error);
+            console.warn('Choices init failed:', error);
         }
     });
 
     return instances;
 };
 
-/**
- * Set a Choices.js-wrapped select element's value.
- * Handles tracked instances (passed via instanceMap) and auto-initialized selects.
- * @param {string} selectId - The ID of the select element
- * @param {*} value - The value to set
- * @param {Object} [instanceMap={}] - Map of selectId → Choices instance for tracked selects
- */
-window.setChoicesSelectValue = async function(selectId, value, instanceMap = {}) {
-    const selectEl = document.getElementById(selectId);
-    if (!selectEl) return;
-    const strValue = String(value);
+// ============================================================================
+// AUTO-INITIALIZATION (single DOMContentLoaded)
+// ============================================================================
 
-    // Check tracked instances first
-    if (instanceMap[selectId]) {
-        return instanceMap[selectId].setChoiceByValue(strValue);
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        UIManager.bindPasswordToggle();
+        UIManager.initializeDropdownBehavior();
 
-    // Auto-initialized selects: unwrap, set raw value, re-init
-    const wrapper = selectEl.closest('.choices');
-    if (wrapper) {
-        const parent = wrapper.parentNode;
-        selectEl.hidden = false;
-        selectEl.removeAttribute('tabindex');
-        selectEl.removeAttribute('data-choice');
-        selectEl.classList.remove('choices__input');
-        parent.insertBefore(selectEl, wrapper);
-        wrapper.remove();
-        delete selectEl.dataset.choicesInitialized;
-    }
-    selectEl.value = strValue;
-    if (window.initChoicesSelect) await window.initChoicesSelect(selectEl);
-};
-
-/**
- * Auto-initialize all .choices-select and .select2 elements on page load
- * Skips elements inside .modal (those get initialized automatically when the modal opens)
- */
-function autoInitChoices() {
-    const elements = document.querySelectorAll('.choices-select:not([data-choices-initialized]), .select2:not([data-choices-initialized])');
-    const filtered = Array.from(elements).filter(el => !el.closest('.modal'));
-    if (filtered.length > 0) {
-        window.initChoicesSelect(filtered);
-    }
-}
-
-/**
- * Auto-initialize Choices.js inside modals when they become visible.
- * Listens globally on document for Bootstrap 'shown.bs.modal' events.
- */
-function autoInitModalChoices() {
-    document.addEventListener('shown.bs.modal', function(e) {
-        const modal = e.target;
-        if (!modal || !window.initChoicesSelect) return;
-        const selects = modal.querySelectorAll('.choices-select:not([data-choices-initialized]), .select2:not([data-choices-initialized])');
-        if (selects.length > 0) {
-            window.initChoicesSelect(selects);
+        // Show stored toast from previous page redirect
+        const storedToast = sessionStorage.getItem('toastMessage');
+        if (storedToast) {
+            try {
+                const { message, type } = JSON.parse(storedToast);
+                if (message) ToastManager.show(message, type || 'info');
+            } catch (_) {}
+            sessionStorage.removeItem('toastMessage');
         }
-    });
-}
 
-// ============================================================================
-// AUTO-INITIALIZATION
-// ============================================================================
+        // Auto-initialize Choices.js
+        window.initChoicesSelect().catch(() => null);
+        // Retry once after i18n loads
+        setTimeout(() => { window.initChoicesSelect().catch(() => null); }, 400);
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Hakim Clinics - JavaScript Utilities Loaded');
-    console.log('📦 Available Managers:', {
-        SwalHelper: typeof window.SwalUtil !== 'undefined',
-        ApiClient: typeof window.ApiClient !== 'undefined',
-        FormHelper: typeof window.FormHelper !== 'undefined'
-    });
+        console.log('✅ JavaScript Utilities Loaded');
+    } catch (e) {
+        console.warn('Auto-initialization warning:', e);
+    }
+});
 
-    // Auto-initialize Choices.js on .choices-select and .select2 elements (outside modals)
-    autoInitChoices();
-
-    // Auto-initialize Choices.js inside modals when they open
-    autoInitModalChoices();
+// Handle modal close buttons via event delegation
+document.addEventListener('click', function(e) {
+    if (e.target.matches('[data-bs-dismiss="modal"]') || e.target.closest('[data-bs-dismiss="modal"]')) {
+        const modal = e.target.closest('.modal');
+        if (modal) hideModal(modal);
+    }
 });

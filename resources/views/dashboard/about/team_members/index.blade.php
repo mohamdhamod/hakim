@@ -241,7 +241,7 @@
             modal.querySelector('.modal-title')?.textContent = t.general.edit;
             modal.querySelector('#afm_btnSaveIt')?.textContent = t.general.update;
             if (window.clearErrors) window.clearErrors(modal);
-            if (typeof window._fill === 'function') window._fill(dataWrap, data);
+            if (typeof window.fillForm === 'function') window.fillForm(dataWrap, data);
 
             const imageEl = document.getElementById('image');
             if (imageEl) {
@@ -251,16 +251,6 @@
             if (window.showModal) window.showModal(modal);
         };
 
-        function stripHtml(html) {
-            var doc = new DOMParser().parseFromString(html, 'text/html');
-            return doc.body.textContent || "";
-        }
-
-        function removeHtmlTags(encodedText) {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(encodedText, 'text/html');
-            var decodedText = doc.body.textContent || "";
-            return decodedText;
-        }
+        // stripHtml and removeHtmlTags are provided globally by general.js
     </script>
 @endpush

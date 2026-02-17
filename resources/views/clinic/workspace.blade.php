@@ -85,8 +85,8 @@
                             <i class="fas fa-robot me-1"></i>{{ __('translation.ai_assistant.title') }}
                         </a>
                         <a href="{{ route('clinic.working-hours.index') }}" class="btn btn-outline-warning">
-                            <i class="bi bi-clock me-1"></i>{{ __('translation.working_hours.title') }}
-                        </a>
+                                <i class="bi bi-clock me-1"></i>{{ __('translation.working_hours.title') }}
+                            </a>
                     </div>
                 </div>
 
@@ -96,15 +96,53 @@
                         <i class="fas fa-calendar-day me-1"></i>{{ __('translation.clinic_chat.today') }} ({{ $todayAppointments->count() }})
                     </h6>
                     @forelse($todayAppointments->take(8) as $appointment)
-                        <a href="javascript:void(0)" 
-                           class="d-flex align-items-center p-2 rounded text-decoration-none mb-1 appointment-item sidebar-item"
-                           data-appointment-id="{{ $appointment->id }}">
-                            <i class="fas fa-user-circle text-{{ $appointment->status === 'confirmed' ? 'success' : 'warning' }} me-2"></i>
-                            <div class="flex-grow-1" style="min-width: 0;">
-                                <div class="text-dark small text-truncate">{{ $appointment->patient_display_name }}</div>
-                                <small class="text-muted">{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}</small>
+                        @php $statusColor = $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'completed' ? 'info' : ($appointment->status === 'cancelled' ? 'secondary' : 'warning')); @endphp
+                        <div class="d-flex align-items-start p-2 border-bottom list-item-hover" data-appointment-id="{{ $appointment->id }}">
+                            <div class="rounded-circle bg-{{ $statusColor }} bg-opacity-10 p-2 me-2 flex-shrink-0">
+                                <i class="fas fa-user text-{{ $statusColor }}"></i>
                             </div>
-                        </a>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    @if($appointment->clinic_patient_id && $appointment->clinicPatient)
+                                        <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="fw-medium text-dark small text-truncate text-decoration-none hover-primary">{{ $appointment->patient_display_name }}</a>
+                                    @else
+                                        <span class="fw-medium text-dark small text-truncate">{{ $appointment->patient_display_name }}</span>
+                                    @endif
+                                    <span class="badge bg-{{ $statusColor }} bg-opacity-10 text-{{ $statusColor }} flex-shrink-0" style="font-size: 10px;">
+                                        {{ __('translation.clinic_chat.status_' . $appointment->status) }}
+                                    </span>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}
+                                </small>
+                                <div class="d-flex gap-1 mt-1 flex-nowrap">
+                                    @if($appointment->status === 'pending')
+                                        <button class="btn btn-sm btn-success" onclick="confirmAppointment({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.confirm') }}">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    @endif
+                                    @if($appointment->status === 'confirmed')
+                                        <button class="btn btn-sm btn-info" onclick="completeAppointment({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.complete') }}">
+                                            <i class="fas fa-check-double"></i>
+                                        </button>
+                                    @endif
+                                    @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
+                                        <button class="btn btn-sm btn-danger" onclick="cancelAppointmentModal({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.cancel') }}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    @endif
+                                    @if(!$appointment->patient_id && !$appointment->clinic_patient_id && $appointment->status !== 'completed' && $appointment->status !== 'cancelled')
+                                        <button class="btn btn-sm btn-primary" onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.register_patient') }}">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                    @elseif($appointment->clinicPatient)
+                                        <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="{{ __('translation.clinic.view_patient') }}">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     @empty
                         <p class="text-muted small mb-0">{{ __('translation.clinic_chat.no_appointments_today') }}</p>
                     @endforelse
@@ -249,39 +287,52 @@
         <div class="p-3">
             <h6 class="text-muted small mb-2">{{ __('translation.clinic_chat.today_appointments') }}</h6>
             @forelse($todayAppointments->take(5) as $appointment)
-                <div class="appointment-mobile-row p-2 rounded mb-2 bg-light" data-appointment-id="{{ $appointment->id }}">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-user-circle text-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'completed' ? 'info' : 'warning') }} me-2"></i>
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <div class="text-dark small text-truncate">{{ $appointment->patient_display_name }}</div>
-                            <small class="text-muted">{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}</small>
+                @php $statusColor = $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'completed' ? 'info' : ($appointment->status === 'cancelled' ? 'secondary' : 'warning')); @endphp
+                <div class="d-flex align-items-start p-2 border-bottom list-item-hover" data-appointment-id="{{ $appointment->id }}">
+                    <div class="rounded-circle bg-{{ $statusColor }} bg-opacity-10 p-2 me-2 flex-shrink-0">
+                        <i class="fas fa-user text-{{ $statusColor }}"></i>
+                    </div>
+                    <div class="flex-grow-1" style="min-width: 0;">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            @if($appointment->clinic_patient_id && $appointment->clinicPatient)
+                                <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="fw-medium text-dark small text-truncate text-decoration-none hover-primary">{{ $appointment->patient_display_name }}</a>
+                            @else
+                                <span class="fw-medium text-dark small text-truncate">{{ $appointment->patient_display_name }}</span>
+                            @endif
+                            <span class="badge bg-{{ $statusColor }} bg-opacity-10 text-{{ $statusColor }} flex-shrink-0" style="font-size: 10px;">
+                                {{ __('translation.clinic_chat.status_' . $appointment->status) }}
+                            </span>
                         </div>
-                        <span class="badge bg-{{ $appointment->status === 'confirmed' ? 'success' : ($appointment->status === 'pending' ? 'warning' : 'secondary') }} bg-opacity-25 small">
-                            {{ __('translation.clinic_chat.status_' . $appointment->status) }}
-                        </span>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') }}
+                        </small>
+                        <div class="d-flex gap-1 mt-1 flex-nowrap">
+                            @if($appointment->status === 'pending')
+                                <button class="btn btn-sm btn-success" onclick="confirmAppointment({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.confirm') }}">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            @endif
+                            @if($appointment->status === 'confirmed')
+                                <button class="btn btn-sm btn-info" onclick="completeAppointment({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.complete') }}">
+                                    <i class="fas fa-check-double"></i>
+                                </button>
+                            @endif
+                            @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
+                                <button class="btn btn-sm btn-danger" onclick="cancelAppointmentModal({{ $appointment->id }})" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.cancel') }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            @endif
+                            @if(!$appointment->patient_id && !$appointment->clinic_patient_id && $appointment->status !== 'completed' && $appointment->status !== 'cancelled')
+                                <button class="btn btn-sm btn-primary" onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')" data-bs-toggle="tooltip" title="{{ __('translation.clinic_chat.register_patient') }}">
+                                    <i class="fas fa-user-plus"></i>
+                                </button>
+                            @elseif($appointment->clinicPatient)
+                                <a href="{{ route('clinic.patients.show', $appointment->clinicPatient) }}" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="{{ __('translation.clinic.view_patient') }}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                    @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
-                    <div class="d-flex gap-1 flex-wrap">
-                        @if($appointment->status === 'pending')
-                            <button class="btn btn-xs btn-outline-success py-0 px-2" onclick="confirmAppointment({{ $appointment->id }})" style="font-size: 11px;">
-                                <i class="fas fa-check"></i>
-                            </button>
-                        @endif
-                        @if($appointment->status === 'confirmed')
-                            <button class="btn btn-xs btn-outline-info py-0 px-2" onclick="completeAppointment({{ $appointment->id }})" style="font-size: 11px;">
-                                <i class="fas fa-check-double"></i>
-                            </button>
-                        @endif
-                        <button class="btn btn-xs btn-outline-danger py-0 px-2" onclick="cancelAppointmentModal({{ $appointment->id }})" style="font-size: 11px;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        @if(!$appointment->patient_id)
-                            <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="createPatientFromAppointment({{ $appointment->id }}, '{{ addslashes($appointment->patient_name ?? '') }}', '{{ $appointment->patient_phone ?? '' }}', '{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('Y-m-d H:i') }}')" style="font-size: 11px;">
-                                <i class="fas fa-user-plus"></i>
-                            </button>
-                        @endif
-                    </div>
-                    @endif
                 </div>
             @empty
                 <p class="text-muted small">{{ __('translation.clinic_chat.no_appointments_today') }}</p>
