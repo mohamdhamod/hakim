@@ -20,6 +20,13 @@ class PatientProblem extends Model
         'resolved_date' => 'date',
     ];
 
+    protected $appends = [
+        'status_label',
+        'status_badge_class',
+        'severity_label',
+        'severity_badge_class',
+    ];
+
     public function patient()
     {
         return $this->belongsTo(Patient::class);
