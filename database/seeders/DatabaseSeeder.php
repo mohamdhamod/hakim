@@ -29,11 +29,6 @@ class DatabaseSeeder extends Seeder
             ClinicPermissionsSeeder::class,
             LabTestTypeSeeder::class,
             VaccinationTypeSeeder::class,
-
-            
-            // Demo data (optional - comment out in production)
-            DemoUsersSeeder::class,
-            DemoPatientsSeeder::class,
         ]);
     }
 }
