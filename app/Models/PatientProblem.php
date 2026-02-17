@@ -53,9 +53,9 @@ class PatientProblem extends Model
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {
-            'active' => __('translation.problem.status_active'),
-            'resolved' => __('translation.problem.status_resolved'),
-            'inactive' => __('translation.problem.status_inactive'),
+            'active' => __('translation.problem_list.status_active'),
+            'resolved' => __('translation.problem_list.status_resolved'),
+            'inactive' => __('translation.problem_list.status_inactive'),
             default => $this->status,
         };
     }
@@ -73,9 +73,9 @@ class PatientProblem extends Model
     public function getSeverityLabelAttribute(): string
     {
         return match ($this->severity) {
-            'mild' => __('translation.problem.severity_mild'),
-            'moderate' => __('translation.problem.severity_moderate'),
-            'severe' => __('translation.problem.severity_severe'),
+            'mild' => __('translation.problem_list.severity_mild'),
+            'moderate' => __('translation.problem_list.severity_moderate'),
+            'severe' => __('translation.problem_list.severity_severe'),
             default => '-',
         };
     }
