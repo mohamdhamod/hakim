@@ -127,11 +127,12 @@
 </head>
 <body>
     <div class="container">
+        
         <div class="header">
-            <h1>{{ $examination->clinic->name }}</h1>
-            <p>{{ $examination->clinic->address }}</p>
-            @if($examination->clinic->phone)
-                <p>{{ __('translation.common.phone') }}: {{ $examination->clinic->phone }}</p>
+            <h1>{{ $clinic->display_name }}</h1>
+            <p>{{ $clinic->address }}</p>
+            @if($clinic->phone)
+                <p>{{ __('translation.common.phone') }}: {{ $clinic->phone }}</p>
             @endif
         </div>
 

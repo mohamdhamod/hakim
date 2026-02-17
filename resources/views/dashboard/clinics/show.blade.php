@@ -140,18 +140,6 @@
                                 <th class="text-muted">{{ __('translation.user.registered_at') }}</th>
                                 <td>{{ $clinic->doctor->created_at->format('Y-m-d H:i') }}</td>
                             </tr>
-                            <tr>
-                                <th class="text-muted">{{ __('translation.user.doctor_status') }}</th>
-                                <td>
-                                    @if($clinic->doctor->doctor_status === 'approved')
-                                        <span class="badge bg-success">{{ __('translation.user.status.approved') }}</span>
-                                    @elseif($clinic->doctor->doctor_status === 'pending')
-                                        <span class="badge bg-warning">{{ __('translation.user.status.pending') }}</span>
-                                    @else
-                                        <span class="badge bg-danger">{{ __('translation.user.status.rejected') }}</span>
-                                    @endif
-                                </td>
-                            </tr>
                         </table>
                     </div>
                 </div>
