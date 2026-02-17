@@ -78,6 +78,13 @@
             </li>
 
             <li class="side-nav-item">
+                <a href="{{ route('clinic.working-hours.index') }}" class="side-nav-link {{ request()->routeIs('clinic.working-hours.*') ? 'active' : '' }}">
+                    <i class="menu-icon bi bi-clock"></i>
+                    <span class="menu-text">{{ __('translation.working_hours.title') }}</span>
+                </a>
+            </li>
+
+            <li class="side-nav-item">
                 <a href="{{ route('profile.index') }}" class="side-nav-link">
                     <i class="menu-icon bi bi-person"></i>
                     <span class="menu-text">{{ __('translation.auth.profile') }}</span>
