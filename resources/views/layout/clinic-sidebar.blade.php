@@ -69,18 +69,18 @@
                     <span class="badge bg-info rounded-pill ms-auto">{{ __('translation.examination.coming_soon') }}</span>
                 </a>
             </li>
-            
-            <li class="side-nav-item">
-                <a href="{{ route('clinic.settings') }}" class="side-nav-link {{ request()->routeIs('clinic.settings') ? 'active' : '' }}">
-                    <i class="menu-icon bi bi-gear"></i>
-                    <span class="menu-text">{{ __('translation.clinic.settings') }}</span>
-                </a>
-            </li>
 
             <li class="side-nav-item">
                 <a href="{{ route('clinic.working-hours.index') }}" class="side-nav-link {{ request()->routeIs('clinic.working-hours.*') ? 'active' : '' }}">
                     <i class="menu-icon bi bi-clock"></i>
                     <span class="menu-text">{{ __('translation.working_hours.title') }}</span>
+                </a>
+            </li>
+            
+            <li class="side-nav-item">
+                <a href="{{ route('clinic.settings') }}" class="side-nav-link {{ request()->routeIs('clinic.settings') ? 'active' : '' }}">
+                    <i class="menu-icon bi bi-gear"></i>
+                    <span class="menu-text">{{ __('translation.clinic.settings') }}</span>
                 </a>
             </li>
 
