@@ -79,4 +79,14 @@ class PatientProblem extends Model
             default => '-',
         };
     }
+
+    public function getSeverityBadgeClassAttribute(): string
+    {
+        return match ($this->severity) {
+            'mild' => 'bg-success',
+            'moderate' => 'bg-warning text-dark',
+            'severe' => 'bg-danger',
+            default => 'bg-secondary',
+        };
+    }
 }
