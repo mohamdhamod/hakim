@@ -127,6 +127,12 @@
             @if($clinic->hasService('chronic_diseases'))
             @include('clinic.patients.partials.chronic-diseases')
             @endif
+
+            {{-- Surgical History Section --}}
+            @include('clinic.patients.partials.surgical-history')
+
+            {{-- Problem List Section --}}
+            @include('clinic.patients.partials.problem-list')
         </div>
 
         {{-- Sidebar --}}
@@ -152,6 +158,9 @@
                         </button>
                         <button type="button" class="btn btn-outline-info btn-sm text-start" data-bs-toggle="modal" data-bs-target="#notesModal">
                             <i class="fas fa-sticky-note me-2"></i>{{ __('translation.patient.edit_notes') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm text-start" data-bs-toggle="modal" data-bs-target="#socialHistoryModal">
+                            <i class="fas fa-users me-2"></i>{{ __('translation.social_history.edit') }}
                         </button>
                     </div>
                 </div>
@@ -235,6 +244,9 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Social History Card --}}
+            @include('clinic.patients.partials.social-history-card')
 
             {{-- Notes --}}
             <div class="card border-0 shadow-sm">
@@ -485,6 +497,15 @@
 {{-- Chronic Disease Modals --}}
 @include('clinic.patients.partials.chronic-disease-modals')
 
+{{-- Surgical History Modals --}}
+@include('clinic.patients.partials.surgical-history-modals')
+
+{{-- Problem List Modals --}}
+@include('clinic.patients.partials.problem-list-modals')
+
+{{-- Social History Modal --}}
+@include('clinic.patients.partials.social-history-modal')
+
 {{-- Confirm Delete Modal --}}
 @include('modules.confirm')
 
@@ -502,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 
     // Handle form submissions via AJAX for patient modals (handleFormSubmit)
-    ['editPatientForm', 'medicalHistoryForm', 'emergencyContactForm', 'notesForm'].forEach(formId => {
+    ['editPatientForm', 'medicalHistoryForm', 'emergencyContactForm', 'notesForm', 'socialHistoryForm'].forEach(formId => {
         const form = document.getElementById(formId);
         if (form && !form.__handleSubmitBound) {
             form.__handleSubmitBound = true;
@@ -522,5 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
 @include('clinic.patients.partials.examination-medical-scripts')
 @include('clinic.patients.partials.chronic-disease-medical-scripts')
 @include('clinic.patients.partials.growth-measurement-medical-scripts')
+@include('clinic.patients.partials.surgical-history-scripts')
+@include('clinic.patients.partials.problem-list-scripts')
 @endpush
 

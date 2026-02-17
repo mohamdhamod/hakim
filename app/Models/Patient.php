@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Patient extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     /**
      * Get the route key for the model.
@@ -34,6 +35,11 @@ class Patient extends Model
         'emergency_contact_name',
         'emergency_contact_phone',
         'notes',
+        'smoking_status',
+        'alcohol_status',
+        'occupation',
+        'marital_status',
+        'lifestyle_notes',
     ];
 
     protected $casts = [
@@ -235,6 +241,21 @@ class Patient extends Model
     public function chronicDiseases()
     {
         return $this->hasMany(PatientChronicDisease::class);
+    }
+
+    public function surgicalHistories()
+    {
+        return $this->hasMany(SurgicalHistory::class);
+    }
+
+    public function problems()
+    {
+        return $this->hasMany(PatientProblem::class);
+    }
+
+    public function activeProblems()
+    {
+        return $this->hasMany(PatientProblem::class)->where('status', 'active');
     }
 
     /**

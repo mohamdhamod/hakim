@@ -24,6 +24,9 @@ Route::get('/', [Controllers\HomeController::class, 'index'])->name('home');
 // Browse Clinics page (public)
 Route::get('/clinics', [Controllers\ClinicHomeController::class, 'index'])->name('home.clinics');
 
+// Available time slots for a clinic (public AJAX)
+Route::get('/clinics/{clinic}/available-slots', [Clinic\WorkingHoursController::class, 'availableSlots'])->name('clinics.available-slots');
+
 // Appointments (requires auth)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/appointments', [Controllers\AppointmentController::class, 'store'])->name('appointments.store');
@@ -71,6 +74,10 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/settings', [Clinic\DashboardController::class, 'settings'])->name('clinic.settings');
         Route::put('/settings', [Clinic\DashboardController::class, 'updateSettings'])->name('clinic.settings.update');
 
+        // Working Hours Management
+        Route::get('/working-hours', [Clinic\WorkingHoursController::class, 'index'])->name('clinic.working-hours.index');
+        Route::post('/working-hours', [Clinic\WorkingHoursController::class, 'store'])->name('clinic.working-hours.store');
+
         // Team Management (doctor only) - actions redirect to profile
         Route::post('/team/invite', [Clinic\ClinicTeamController::class, 'invite'])->name('clinic.team.invite');
         Route::patch('/team/{clinicUser}/toggle-status', [Clinic\ClinicTeamController::class, 'toggleStatus'])->name('clinic.team.toggle-status');
@@ -85,6 +92,7 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::patch('/patients/{patient}/medical-history', [Clinic\PatientController::class, 'updateMedicalHistory'])->name('clinic.patients.update-medical-history');
         Route::patch('/patients/{patient}/emergency-contact', [Clinic\PatientController::class, 'updateEmergencyContact'])->name('clinic.patients.update-emergency-contact');
         Route::patch('/patients/{patient}/notes', [Clinic\PatientController::class, 'updateNotes'])->name('clinic.patients.update-notes');
+        Route::patch('/patients/{patient}/social-history', [Clinic\PatientController::class, 'updateSocialHistory'])->name('clinic.patients.update-social-history');
         
         // Patient All Records Pages
         Route::get('/patients/{patient}/all-examinations', [Clinic\PatientController::class, 'allExaminations'])->name('clinic.patients.all-examinations');
@@ -94,6 +102,16 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/patients/{patient}/all-growth-measurements', [Clinic\PatientController::class, 'allGrowthMeasurements'])->name('clinic.patients.all-growth-measurements');
         
         Route::resource('patients', Clinic\PatientController::class)->except(['edit'])->names('clinic.patients');
+
+        // Surgical History Management
+        Route::post('/patients/{patient}/surgeries', [Clinic\SurgicalHistoryController::class, 'store'])->name('patients.surgeries.store');
+        Route::put('/patients/{patient}/surgeries/{surgery}', [Clinic\SurgicalHistoryController::class, 'update'])->name('patients.surgeries.update');
+        Route::delete('/patients/{patient}/surgeries/{surgery}', [Clinic\SurgicalHistoryController::class, 'destroy'])->name('patients.surgeries.destroy');
+
+        // Problem List Management
+        Route::post('/patients/{patient}/problems', [Clinic\ProblemListController::class, 'store'])->name('patients.problems.store');
+        Route::put('/patients/{patient}/problems/{problem}', [Clinic\ProblemListController::class, 'update'])->name('patients.problems.update');
+        Route::delete('/patients/{patient}/problems/{problem}', [Clinic\ProblemListController::class, 'destroy'])->name('patients.problems.destroy');
 
         // Lab Tests Management
         Route::post('/patients/{patient}/lab-tests', [Clinic\LabTestController::class, 'store'])->name('patients.lab-tests.store');

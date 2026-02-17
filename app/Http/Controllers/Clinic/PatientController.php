@@ -206,7 +206,14 @@ class PatientController extends Controller
                 $query->with(['chronicDiseaseType.translations', 'monitoringRecords' => function ($q) {
                     $q->latest('monitoring_date')->limit(20);
                 }])->where('status', '!=', 'resolved');
-            }
+            },
+            'surgicalHistories' => function ($query) {
+                $query->orderBy('procedure_date', 'desc');
+            },
+            'problems' => function ($query) {
+                $query->orderByRaw("FIELD(status, 'active', 'inactive', 'resolved')");
+            },
+            'activeProblems',
         ]);
 
         // Generate examination number for the modal form
@@ -409,6 +416,35 @@ class PatientController extends Controller
 
         return redirect()->route('clinic.patients.show', $patient->file_number)
             ->with('success', __('translation.patient.notes_updated'));
+    }
+
+    /**
+     * Update social history.
+     */
+    public function updateSocialHistory(Request $request, $lang, Patient $patient)
+    {
+        $this->authorizePatientAccess($patient, true);
+
+        $validated = $request->validate([
+            'smoking_status'  => 'nullable|in:never,former,current',
+            'alcohol_status'  => 'nullable|in:never,occasional,regular',
+            'occupation'      => 'nullable|string|max:255',
+            'marital_status'  => 'nullable|in:single,married,divorced,widowed',
+            'lifestyle_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $patient->update($validated);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('translation.social_history.updated'),
+                'redirect' => route('clinic.patients.show', $patient->file_number),
+            ]);
+        }
+
+        return redirect()->route('clinic.patients.show', $patient->file_number)
+            ->with('success', __('translation.social_history.updated'));
     }
 
     /**

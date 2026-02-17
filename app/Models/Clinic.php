@@ -97,6 +97,29 @@ class Clinic extends Model
     }
 
     /**
+     * Get the working hours of this clinic.
+     */
+    public function workingHours()
+    {
+        return $this->hasMany(ClinicWorkingHour::class)->orderBy('day_of_week');
+    }
+
+    /**
+     * Get available slots for a specific date.
+     */
+    public function getAvailableSlots(string $date): array
+    {
+        $dayOfWeek = \Carbon\Carbon::parse($date)->dayOfWeek;
+        $workingHour = $this->workingHours()->where('day_of_week', $dayOfWeek)->active()->first();
+
+        if (!$workingHour) {
+            return [];
+        }
+
+        return $workingHour->getAvailableSlots($date);
+    }
+
+    /**
      * Get the services enabled for this clinic.
      */
     public function services()

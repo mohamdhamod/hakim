@@ -158,6 +158,21 @@
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-transparent border-0 pt-4 pb-0">
                     <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        {{ __('translation.working_hours.title') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">{{ __('translation.working_hours.description') }}</p>
+                    <a href="{{ route('clinic.working-hours.index') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-cog me-1"></i>{{ __('translation.working_hours.schedule') }}
+                    </a>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0">
+                    <h5 class="mb-0">
                         <i class="bi bi-person me-2"></i>
                         {{ __('translation.clinic.doctor_info') }}
                     </h5>

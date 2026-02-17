@@ -2579,4 +2579,112 @@ return [
         'feature_voice' => 'Voice Input',
         'feature_voice_desc' => 'Record your voice and let AI enter the data',
     ],
+
+    // ========================================
+    // Days of the week
+    // ========================================
+    'days' => [
+        'sunday'    => 'Sunday',
+        'monday'    => 'Monday',
+        'tuesday'   => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday'  => 'Thursday',
+        'friday'    => 'Friday',
+        'saturday'  => 'Saturday',
+    ],
+
+    // ========================================
+    // Working Hours
+    // ========================================
+    'working_hours' => [
+        'title'                 => 'Working Hours',
+        'schedule'              => 'Weekly Schedule',
+        'description'           => 'Set your clinic working hours for each day. Patients will only be able to book during active hours.',
+        'start_time'            => 'Start Time',
+        'end_time'              => 'End Time',
+        'slot_duration'         => 'Slot Duration',
+        'default_slot_duration' => 'Default Slot Duration',
+        'minutes'               => 'minutes',
+        'min'                   => 'min',
+        'open'                  => 'Open',
+        'closed'                => 'Closed',
+        'saved'                 => 'Working hours saved successfully.',
+        'no_available_slots'    => 'No available slots for this date.',
+    ],
+
+    // ========================================
+    // Social History
+    // ========================================
+    'social_history' => [
+        'title'                     => 'Social History',
+        'edit'                      => 'Edit Social History',
+        'updated'                   => 'Social history updated successfully.',
+        'no_data'                   => 'No social history recorded.',
+        'smoking_status'            => 'Smoking Status',
+        'smoking_never'             => 'Never',
+        'smoking_former'            => 'Former',
+        'smoking_current'           => 'Current',
+        'alcohol_status'            => 'Alcohol Status',
+        'alcohol_never'             => 'Never',
+        'alcohol_occasional'        => 'Occasional',
+        'alcohol_regular'           => 'Regular',
+        'occupation'                => 'Occupation',
+        'marital_status'            => 'Marital Status',
+        'marital_single'            => 'Single',
+        'marital_married'           => 'Married',
+        'marital_divorced'          => 'Divorced',
+        'marital_widowed'           => 'Widowed',
+        'lifestyle_notes'           => 'Lifestyle Notes',
+        'lifestyle_notes_placeholder' => 'Diet, exercise, sleep habits, etc.',
+    ],
+
+    // ========================================
+    // Surgical History
+    // ========================================
+    'surgical_history' => [
+        'title'          => 'Surgical History',
+        'add'            => 'Add Surgery',
+        'edit'           => 'Edit Surgery',
+        'details'        => 'Surgery Details',
+        'procedure_name' => 'Procedure Name',
+        'procedure_date' => 'Procedure Date',
+        'hospital'       => 'Hospital',
+        'surgeon'        => 'Surgeon',
+        'indication'     => 'Indication',
+        'complications'  => 'Complications',
+        'notes'          => 'Notes',
+        'none'           => 'None',
+        'no_records'     => 'No surgical history recorded.',
+        'created'        => 'Surgical record added successfully.',
+        'updated'        => 'Surgical record updated successfully.',
+        'deleted'        => 'Surgical record deleted successfully.',
+    ],
+
+    // ========================================
+    // Problem List
+    // ========================================
+    'problem_list' => [
+        'title'             => 'Problem List',
+        'add'               => 'Add Problem',
+        'edit'              => 'Edit Problem',
+        'details'           => 'Problem Details',
+        'problem'           => 'Problem',
+        'icd_code'          => 'ICD Code',
+        'onset_date'        => 'Onset Date',
+        'resolved_date'     => 'Resolved Date',
+        'status'            => 'Status',
+        'severity'          => 'Severity',
+        'notes'             => 'Notes',
+        'active'            => 'Active',
+        'status_active'     => 'Active',
+        'status_resolved'   => 'Resolved',
+        'status_inactive'   => 'Inactive',
+        'severity_mild'     => 'Mild',
+        'severity_moderate'  => 'Moderate',
+        'severity_severe'   => 'Severe',
+        'no_records'        => 'No problems recorded.',
+        'created'           => 'Problem added successfully.',
+        'updated'           => 'Problem updated successfully.',
+        'deleted'           => 'Problem deleted successfully.',
+    ],
 ];
