@@ -4,20 +4,19 @@ namespace App\Http\Controllers\Clinic;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClinicWorkingHour;
+use App\Traits\ClinicAuthorization;
 use Illuminate\Http\Request;
 
 class WorkingHoursController extends Controller
 {
+    use ClinicAuthorization;
+
     /**
      * Show working hours settings page.
      */
     public function index()
     {
-        $clinic = auth()->user()->clinic;
-
-        if (!$clinic) {
-            return redirect()->route('clinic.workspace');
-        }
+        $clinic = $this->authorizeClinicAccess();
 
         $workingHours = $clinic->workingHours()->get();
         $defaultSlotDuration = $workingHours->first()?->slot_duration ?? 30;
@@ -30,11 +29,7 @@ class WorkingHoursController extends Controller
      */
     public function store(Request $request)
     {
-        $clinic = auth()->user()->clinic;
-
-        if (!$clinic) {
-            return response()->json(['success' => false, 'message' => __('translation.clinic.not_found')], 404);
-        }
+        $clinic = $this->authorizeClinicAccess(true);
 
         $days = $request->input('days', []);
 
