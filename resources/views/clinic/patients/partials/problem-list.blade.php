@@ -114,6 +114,14 @@
                     </div>
                 @endforeach
             </div>
+            @if($patient->problems->count() > 5)
+                <div class="p-3 text-center border-top">
+                    <a href="{{ route('clinic.patients.all-problems', $patient->file_number) }}" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-list me-2"></i>
+                        {{ __('translation.view_all') }} ({{ $patient->problems->count() }})
+                    </a>
+                </div>
+            @endif
         @else
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-clipboard-list mb-3" style="font-size: 3rem; opacity: 0.2;"></i>

@@ -100,6 +100,8 @@ Route::middleware(['auth', 'verified'])->prefix('clinic')->group(function () {
         Route::get('/patients/{patient}/all-vaccinations', [Clinic\PatientController::class, 'allVaccinations'])->name('clinic.patients.all-vaccinations');
         Route::get('/patients/{patient}/all-chronic-diseases', [Clinic\PatientController::class, 'allChronicDiseases'])->name('clinic.patients.all-chronic-diseases');
         Route::get('/patients/{patient}/all-growth-measurements', [Clinic\PatientController::class, 'allGrowthMeasurements'])->name('clinic.patients.all-growth-measurements');
+        Route::get('/patients/{patient}/all-surgical-history', [Clinic\PatientController::class, 'allSurgicalHistory'])->name('clinic.patients.all-surgical-history');
+        Route::get('/patients/{patient}/all-problems', [Clinic\PatientController::class, 'allProblems'])->name('clinic.patients.all-problems');
         
         Route::resource('patients', Clinic\PatientController::class)->except(['edit'])->names('clinic.patients');
 

@@ -519,4 +519,32 @@ class PatientController extends Controller
 
         return view('clinic.patients.partials.all-growth-measurements', compact('patient', 'measurements', 'clinic'));
     }
+
+    /**
+     * Display all surgical history for a patient.
+     */
+    public function allSurgicalHistory($lang, Patient $patient)
+    {
+        $clinic = $this->authorizePatientAccess($patient);
+
+        $surgeries = $patient->surgicalHistories()
+            ->orderBy('procedure_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-surgical-history', compact('patient', 'surgeries', 'clinic'));
+    }
+
+    /**
+     * Display all problems for a patient.
+     */
+    public function allProblems($lang, Patient $patient)
+    {
+        $clinic = $this->authorizePatientAccess($patient);
+
+        $problems = $patient->problems()
+            ->orderBy('onset_date', 'desc')
+            ->paginate(15);
+
+        return view('clinic.patients.partials.all-problems', compact('patient', 'problems', 'clinic'));
+    }
 }

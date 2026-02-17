@@ -2378,6 +2378,8 @@ return [
     // Chronic Diseases
     'chronic_diseases' => 'Chronic Diseases',
     'all_chronic_diseases' => 'All Chronic Diseases',
+    'all_surgical_history' => 'All Surgical History',
+    'all_problems' => 'All Health Problems',
     'chronic_disease' => [
         'name' => 'Disease Name',
         'diagnosed_at' => 'Diagnosed Date',

@@ -3388,6 +3388,8 @@ return [
     // Chronic Diseases
     'chronic_diseases' => 'الأمراض المزمنة',
     'all_chronic_diseases' => 'جميع الأمراض المزمنة',
+    'all_surgical_history' => 'جميع العمليات الجراحية',
+    'all_problems' => 'جميع المشاكل الصحية',
     'chronic_disease' => [
         'name' => 'اسم المرض',
         'diagnosed_at' => 'تاريخ التشخيص',

@@ -99,6 +99,14 @@
                     </div>
                 @endforeach
             </div>
+            @if($patient->surgicalHistories->count() > 5)
+                <div class="p-3 text-center border-top">
+                    <a href="{{ route('clinic.patients.all-surgical-history', $patient->file_number) }}" class="btn btn-sm btn-outline-primary" style="border-color: #6f42c1; color: #6f42c1;">
+                        <i class="fas fa-list me-2"></i>
+                        {{ __('translation.view_all') }} ({{ $patient->surgicalHistories->count() }})
+                    </a>
+                </div>
+            @endif
         @else
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-procedures mb-3" style="font-size: 3rem; opacity: 0.2;"></i>
