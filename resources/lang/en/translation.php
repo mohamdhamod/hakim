@@ -657,6 +657,9 @@ return [
         'table' => [
             'id' => 'ID',
             'user' => 'User',
+            'patient' => 'Patient',
+            'clinic' => 'Clinic',
+            'status' => 'Status',
             'content_type' => 'Content Type',
             'specialty' => 'Specialty',
             'date' => 'Date',
