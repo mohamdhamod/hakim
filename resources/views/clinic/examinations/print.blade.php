@@ -135,13 +135,6 @@
             @endif
         </div>
         
-        <div class="header">
-            <h1>{{ $clinic->display_name }}</h1>
-            <p>{{ $clinic->address }}</p>
-            @if($clinic->phone)
-                <p>{{ __('translation.common.phone') }}: {{ $clinic->phone }}</p>
-            @endif
-        </div>
 
         <div class="info-grid">
             <div class="info-box">
