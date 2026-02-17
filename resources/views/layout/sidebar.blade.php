@@ -5,7 +5,7 @@
         <div class="sidenav-user text-nowrap border border-dashed rounded-3">
             <a href="#" class="sidenav-user-name d-flex align-items-center text-decoration-none">
                 @if(auth()->user()->hasRole(\App\Enums\RoleEnum::ADMIN))
-                    <img src="{{auth()->user()->full_path}}"
+                    <img src="{{auth()->user()->profile_photo_url }}"
                          width="36" alt="{{ __('translation.layout.sidebar.user_image_alt') }}"
                          class="rounded-circle me-2 d-flex">
                 @endif

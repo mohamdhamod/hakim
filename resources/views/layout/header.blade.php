@@ -173,7 +173,7 @@
             <div class="topbar-item nav-user">
                 <div class="dropdown">
                     <button class="dropdown-toggle topbar-link drop-arrow-none px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="{{auth()->user()->full_path}}" width="32" alt="{{ __('translation.layout.header.user_image_alt') }}" class="rounded-circle d-flex">
+                        <img src="{{auth()->user()->profile_photo_url }}" width="32" alt="{{ __('translation.layout.header.user_image_alt') }}" class="rounded-circle d-flex">
                     </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">{{ __('translation.layout.header.welcome_back') }}</h6></li>

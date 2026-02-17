@@ -145,12 +145,12 @@ class User extends Authenticatable
     /**
      * Get profile photo URL
      */
-    public function getProfilePhotoUrlAttribute(): ?string
+    public function getProfilePhotoUrlAttribute(): string
     {
         if ($this->profile_photo) {
             return asset('storage/' . $this->profile_photo);
         }
-        return null;
+        return asset('images/img.png');
     }
 
     /**
