@@ -516,6 +516,84 @@
         </div>
         @endif
 
+        {{-- Surgical History Section --}}
+        @if($clinic->hasService('surgical_history'))
+        <div class="section">
+            <div class="section-title">{{ __('translation.surgical_history.title') }} ({{ $patient->surgicalHistories->count() }})</div>
+            @if($patient->surgicalHistories->count() > 0)
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ __('translation.surgical_history.procedure_name') }}</th>
+                        <th>{{ __('translation.surgical_history.procedure_date') }}</th>
+                        <th>{{ __('translation.surgical_history.hospital') }}</th>
+                        <th>{{ __('translation.surgical_history.surgeon') }}</th>
+                        <th>{{ __('translation.surgical_history.indication') }}</th>
+                        <th>{{ __('translation.surgical_history.complications') }}</th>
+                        <th>{{ __('translation.surgical_history.notes') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($patient->surgicalHistories as $surgery)
+                    <tr>
+                        <td><strong>{{ $surgery->procedure_name }}</strong></td>
+                        <td>{{ $surgery->procedure_date ? $surgery->procedure_date->format('Y-m-d') : '-' }}</td>
+                        <td>{{ $surgery->hospital ?? '-' }}</td>
+                        <td>{{ $surgery->surgeon ?? '-' }}</td>
+                        <td>{{ $surgery->indication ?? '-' }}</td>
+                        <td>{{ $surgery->complications ?? __('translation.surgical_history.none') }}</td>
+                        <td>{{ $surgery->notes ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <div class="no-data">{{ __('translation.surgical_history.no_records') }}</div>
+            @endif
+        </div>
+        @endif
+
+        {{-- Problem List Section --}}
+        @if($clinic->hasService('problem_list'))
+        <div class="section">
+            <div class="section-title">{{ __('translation.problem_list.title') }} ({{ $patient->problems->count() }})</div>
+            @if($patient->problems->count() > 0)
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ __('translation.problem_list.problem') }}</th>
+                        <th>{{ __('translation.problem_list.icd_code') }}</th>
+                        <th>{{ __('translation.problem_list.onset_date') }}</th>
+                        <th>{{ __('translation.problem_list.resolved_date') }}</th>
+                        <th>{{ __('translation.problem_list.status') }}</th>
+                        <th>{{ __('translation.problem_list.severity') }}</th>
+                        <th>{{ __('translation.problem_list.notes') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($patient->problems as $problem)
+                    <tr>
+                        <td><strong>{{ $problem->title }}</strong></td>
+                        <td>{{ $problem->icd_code ?? '-' }}</td>
+                        <td>{{ $problem->onset_date ? $problem->onset_date->format('Y-m-d') : '-' }}</td>
+                        <td>{{ $problem->resolved_date ? $problem->resolved_date->format('Y-m-d') : '-' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ $problem->status }}">
+                                {{ $problem->status_label }}
+                            </span>
+                        </td>
+                        <td>{{ $problem->severity ? $problem->severity_label : '-' }}</td>
+                        <td>{{ $problem->notes ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <div class="no-data">{{ __('translation.problem_list.no_records') }}</div>
+            @endif
+        </div>
+        @endif
+
         {{-- All Examinations Section --}}
         <div class="section">
             <div class="section-title">{{ __('translation.examination.all_examinations') }} ({{ $patient->examinations->count() }})</div>

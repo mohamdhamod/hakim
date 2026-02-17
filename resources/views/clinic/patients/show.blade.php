@@ -129,10 +129,14 @@
             @endif
 
             {{-- Surgical History Section --}}
+            @if($clinic->hasService('surgical_history'))
             @include('clinic.patients.partials.surgical-history')
+            @endif
 
             {{-- Problem List Section --}}
+            @if($clinic->hasService('problem_list'))
             @include('clinic.patients.partials.problem-list')
+            @endif
         </div>
 
         {{-- Sidebar --}}
@@ -498,10 +502,14 @@
 @include('clinic.patients.partials.chronic-disease-modals')
 
 {{-- Surgical History Modals --}}
+@if($clinic->hasService('surgical_history'))
 @include('clinic.patients.partials.surgical-history-modals')
+@endif
 
 {{-- Problem List Modals --}}
+@if($clinic->hasService('problem_list'))
 @include('clinic.patients.partials.problem-list-modals')
+@endif
 
 {{-- Social History Modal --}}
 @include('clinic.patients.partials.social-history-modal')
@@ -543,7 +551,11 @@ document.addEventListener('DOMContentLoaded', function() {
 @include('clinic.patients.partials.examination-medical-scripts')
 @include('clinic.patients.partials.chronic-disease-medical-scripts')
 @include('clinic.patients.partials.growth-measurement-medical-scripts')
+@if($clinic->hasService('surgical_history'))
 @include('clinic.patients.partials.surgical-history-scripts')
+@endif
+@if($clinic->hasService('problem_list'))
 @include('clinic.patients.partials.problem-list-scripts')
+@endif
 @endpush
 

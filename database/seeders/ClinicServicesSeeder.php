@@ -74,6 +74,38 @@ class ClinicServicesSeeder extends Seeder
                     ],
                 ],
             ],
+            [
+                'key' => 'surgical_history',
+                'icon' => 'fas fa-procedures',
+                'color' => '#6f42c1',
+                'sort_order' => 5,
+                'translations' => [
+                    'en' => [
+                        'name' => 'Surgical History',
+                        'description' => 'Surgical procedures and operations records',
+                    ],
+                    'ar' => [
+                        'name' => 'التاريخ الجراحي',
+                        'description' => 'سجلات العمليات الجراحية والإجراءات',
+                    ],
+                ],
+            ],
+            [
+                'key' => 'problem_list',
+                'icon' => 'fas fa-list-check',
+                'color' => '#e83e8c',
+                'sort_order' => 6,
+                'translations' => [
+                    'en' => [
+                        'name' => 'Problem List',
+                        'description' => 'Patient problems with ICD codes tracking',
+                    ],
+                    'ar' => [
+                        'name' => 'قائمة المشاكل الصحية',
+                        'description' => 'تتبع مشاكل المريض مع رموز ICD',
+                    ],
+                ],
+            ],
         ];
 
         foreach ($services as $serviceData) {

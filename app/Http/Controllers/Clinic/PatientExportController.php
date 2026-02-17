@@ -36,6 +36,12 @@ class PatientExportController extends Controller
                 $query->where('clinic_id', $clinic->id)->with(['chronicDiseaseType', 'monitoringRecords' => function($q) use ($clinic) {
                     $q->where('clinic_id', $clinic->id)->latest('monitoring_date');
                 }]);
+            },
+            'surgicalHistories' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with('recordedBy')->latest('procedure_date');
+            },
+            'problems' => function ($query) use ($clinic) {
+                $query->where('clinic_id', $clinic->id)->with('recordedBy')->latest('onset_date');
             }
         ]);
 
