@@ -219,7 +219,10 @@
                                         </div>
                                         <div class="flex-grow-1 min-width-0">
                                             <p class="mb-1 small">{{ $activity['message'] }}</p>
-                                            <small class="text-muted">{{ $activity['time']->diffForHumans() }}</small>
+                                            <small class="text-muted">
+    {{ $activity['time']?->diffForHumans() ?? 'No time available' }}
+</small>
+                                            
                                         </div>
                                     </div>
                                 @endforeach

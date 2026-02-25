@@ -81,6 +81,13 @@ class Examination extends Model
     {
         return $this->hasMany(ExaminationAttachment::class);
     }
+    /**
+     * Get examination invoice.
+     */
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
 
     /**
      * Calculate BMI.
