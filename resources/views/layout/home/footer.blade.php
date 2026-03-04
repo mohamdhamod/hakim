@@ -77,10 +77,18 @@
 				<div class="col-md-4">
 					@php
 						$infoEmail = $links[\App\Enums\ConfigEnum::INFO_EMAIL]->name ?? null;
+						$infoPhone = $links[\App\Enums\ConfigEnum::INFO_PHONE]->name ?? null;
 					@endphp
 					<h6 class="fw-bold small mb-2">{{ __('translation.layout.home.footer.contact') }}</h6>
 					<ul class="list-unstyled mb-2 small">
 					
+						@if($infoPhone)
+						<li>
+							<a class="text-decoration-none text-muted d-inline-flex align-items-center gap-2" href="tel:{{ $infoPhone }}">
+								<i class="bi bi-telephone text-primary"></i>{{ $infoPhone }}
+							</a>
+						</li>
+						@endif
 						@if($infoEmail)
 						<li>
 							<a class="text-decoration-none text-muted d-inline-flex align-items-center gap-2" href="mailto:{{ $infoEmail }}">
