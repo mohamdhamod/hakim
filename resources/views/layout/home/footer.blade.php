@@ -9,20 +9,31 @@
 				</a>
 				<p class="text-muted small mb-0 px-3">{{ __('translation.layout.home.footer.about_description') }}</p>
 			</div>
-			
+
 			<!-- Contact Info -->
 			@php
 				$infoEmail = $links[\App\Enums\ConfigEnum::INFO_EMAIL]->name ?? null;
+                $infoPhone = $links[\App\Enums\ConfigEnum::INFO_PHONE]->name ?? null;
 			@endphp
 			<div class="d-flex justify-content-center flex-wrap gap-3 mb-3 small">
-				
+                @if($infoPhone)
+                    @php
+                        $cleanPhone = preg_replace('/[^0-9]/', '', $infoPhone);
+                    @endphp
+
+                    <a class="text-decoration-none text-success d-flex align-items-center gap-1"
+                       href="https://wa.me/{{ $cleanPhone }}"
+                       target="_blank">
+                        <i class="bi bi-whatsapp"></i> {{ $infoPhone }}
+                    </a>
+                @endif
 				@if($infoEmail)
 				<a class="text-decoration-none text-primary d-flex align-items-center gap-1" href="mailto:{{ $infoEmail }}">
 					<i class="bi bi-envelope"></i>{{ $infoEmail }}
 				</a>
 				@endif
 			</div>
-			
+
 			<!-- Social Links -->
 			@php
 				$socialLinks = [
@@ -42,7 +53,7 @@
 					@endif
 				@endforeach
 			</div>
-			
+
 			<!-- Quick Links -->
 			<div class="d-flex justify-content-center flex-wrap gap-3 mb-2 px-2">
 				<a class="text-decoration-none text-muted" href="{{ route('home') }}">{{ __('translation.layout.home.nav_home') }}</a>
@@ -50,7 +61,7 @@
 				<a class="text-decoration-none text-muted" href="{{ route('privacy-policy.index') }}">{{ __('translation.layout.home.footer.privacy_policy') }}</a>
 			</div>
 		</div>
-		
+
 		<!-- Desktop Layout -->
 		<div class="d-none d-md-block">
 			<div class="row g-3 align-items-start">
@@ -81,10 +92,15 @@
 					@endphp
 					<h6 class="fw-bold small mb-2">{{ __('translation.layout.home.footer.contact') }}</h6>
 					<ul class="list-unstyled mb-2 small">
-					
+
 						@if($infoPhone)
+                            @php
+                                $cleanPhone = preg_replace('/[^0-9]/', '', $infoPhone);
+                            @endphp
 						<li>
-							<a class="text-decoration-none text-muted d-inline-flex align-items-center gap-2" href="tel:{{ $infoPhone }}">
+							<a class="text-decoration-none text-muted d-inline-flex align-items-center gap-2"
+                               href="https://wa.me/{{ $cleanPhone }}"
+                               target="_blank" >
 								<i class="bi bi-telephone text-primary"></i>{{ $infoPhone }}
 							</a>
 						</li>
@@ -118,7 +134,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<hr class="my-2 opacity-25">
 		<div class="d-flex justify-content-center text-muted small">
 			<span>{{ __('translation.layout.home.footer.rights', ['year' => date('Y')]) }}</span>
